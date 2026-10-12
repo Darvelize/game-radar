@@ -1,6 +1,6 @@
 GameRadar — Conditions d'utilisation / Terms of use
 Copyright (c) 2026 Darvelize. Tous droits réservés. All rights reserved.
-Version du 7 octobre 2026 / Version of October 7, 2026
+Version du 9 octobre 2026 / Version of October 9, 2026
 
 English below.
 
@@ -25,15 +25,16 @@ En téléchargeant ou en utilisant GameRadar, tu acceptes ces conditions.
    loi l'autorise expressément malgré cette clause.
 
 4. Services de tiers
-   GameRadar utilise tes propres comptes Microsoft (Xbox), Steam, PlayStation et
-   EA, ton profil GOG public, et des services de Microsoft Corporation, de Valve
-   Corporation, de Sony Interactive Entertainment, de GOG sp. z o.o. et
-   d'Electronic Arts Inc., dont certains ne sont pas documentés. Tu restes
-   soumis à leurs conditions d'utilisation.
+   GameRadar utilise tes propres comptes Microsoft (Xbox), Steam, PlayStation, EA
+   et Epic Games, ton profil GOG public, et des services de Microsoft
+   Corporation, de Valve Corporation, de Sony Interactive Entertainment, de GOG
+   sp. z o.o., d'Electronic Arts Inc. et d'Epic Games, Inc., dont certains ne
+   sont pas documentés. Tu restes soumis à leurs conditions d'utilisation.
    Ces services peuvent changer, limiter ou couper l'accès de GameRadar à tout
    moment, sans préavis : GameRadar peut alors cesser de fonctionner, en tout ou
    partie. GameRadar est un projet indépendant, affilié ni à Microsoft, ni à
-   Valve, ni à Sony, ni à GOG, ni à EA, et approuvé par aucun d'eux.
+   Valve, ni à Sony, ni à GOG, ni à EA, ni à Epic Games, et approuvé par aucun
+   d'eux.
 
 5. Absence de garantie
    GameRadar est fourni « tel quel », sans garantie d'aucune sorte, expresse ou
@@ -62,7 +63,8 @@ En téléchargeant ou en utilisant GameRadar, tu acceptes ces conditions.
    Xbox et Game Pass sont des marques de Microsoft Corporation ; Steam est une
    marque de Valve Corporation ; PlayStation et PlayStation Plus sont des
    marques de Sony Interactive Entertainment ; GOG et GOG.com sont des marques
-   de GOG sp. z o.o. ; EA et EA Play sont des marques d'Electronic Arts Inc.
+   de GOG sp. z o.o. ; EA et EA Play sont des marques d'Electronic Arts Inc. ;
+   Epic Games et Epic Games Store sont des marques d'Epic Games, Inc.
    Les jaquettes et noms des jeux appartiennent à leurs éditeurs.
 
 10. Droit applicable
@@ -89,14 +91,14 @@ By downloading or using GameRadar, you accept these terms.
    expressly allows it notwithstanding this clause.
 
 4. Third-party services
-   GameRadar uses your own Microsoft (Xbox), Steam, PlayStation and EA accounts,
-   your public GOG profile, and services of Microsoft Corporation, Valve
-   Corporation, Sony Interactive Entertainment, GOG sp. z o.o. and Electronic
-   Arts Inc., some of them undocumented. You remain bound by their terms of
+   GameRadar uses your own Microsoft (Xbox), Steam, PlayStation, EA and Epic
+   Games accounts, your public GOG profile, and services of Microsoft
+   Corporation, Valve Corporation, Sony Interactive Entertainment, GOG sp. z
+   o.o., Electronic Arts Inc. and Epic Games, Inc., some of them undocumented. You remain bound by their terms of
    use. These services may change, limit or cut off GameRadar's access at any
    time, without notice: GameRadar may then stop working, in whole or in part.
    GameRadar is an independent project, not affiliated with nor endorsed by
-   Microsoft, Valve, Sony, GOG or EA.
+   Microsoft, Valve, Sony, GOG, EA or Epic Games.
 
 5. No warranty
    GameRadar is provided "as is", without warranty of any kind, express or
@@ -123,7 +125,8 @@ By downloading or using GameRadar, you accept these terms.
    Xbox and Game Pass are trademarks of Microsoft Corporation; Steam is a
    trademark of Valve Corporation; PlayStation and PlayStation Plus are
    trademarks of Sony Interactive Entertainment; GOG and GOG.com are trademarks
-   of GOG sp. z o.o.; EA and EA Play are trademarks of Electronic Arts Inc.
+   of GOG sp. z o.o.; EA and EA Play are trademarks of Electronic Arts Inc.;
+   Epic Games and Epic Games Store are trademarks of Epic Games, Inc.
    Game covers and names belong to their publishers.
 
 10. Governing law
