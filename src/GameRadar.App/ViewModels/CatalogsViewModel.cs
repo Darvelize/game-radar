@@ -208,8 +208,9 @@ public sealed partial class CatalogsViewModel : ObservableObject
     public async Task RefreshAsync(IEnumerable<CatalogLine> lines)
     {
         var chosen = lines.ToList();
-        // Each recomputation cancels the one before; all are awaited at the end,
-        // after the button came back (a recomputation may look up tags for minutes).
+        // Each recomputation cancels the one before; all are awaited at the end, once
+        // IsRefreshing is off (a recomputation may look up tags for minutes). The button's
+        // command awaits them too: it comes back with the cards, as before.
         var recomputations = new List<Task>();
         bool[] fetched;
 
@@ -290,9 +291,9 @@ public sealed partial class CatalogsViewModel : ObservableObject
     /// </summary>
     public void UpdateGamePassStatus(int playedGames, int inGamePass)
     {
-        // A failed download keeps its error readable: another catalog's success
-        // rebuilds the history, which must not write the old catalog over it.
-        if (GamePass.Catalog is not { } catalog || GamePass.Failed)
+        // A failed download keeps its error readable, and a running one says so: another
+        // catalog's success rebuilds the history, which must not write the old catalog over it.
+        if (GamePass.Catalog is not { } catalog || GamePass.Failed || GamePass.IsFetching)
             return;
 
         // The player's plan first: that is what the recommendations use.

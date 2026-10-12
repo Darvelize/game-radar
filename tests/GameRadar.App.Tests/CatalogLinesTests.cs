@@ -215,6 +215,26 @@ public sealed class CatalogLinesTests : AppTest
     }
 
     [AvaloniaFact]
+    public async Task The_Game_Pass_line_says_it_downloads_while_another_catalog_rebuilds_the_history()
+    {
+        var network = new CatalogNetwork { HoldGamePass = true };
+        var vm = SampleData.Empty(TempFolder, network: network);
+        vm.Catalogs.GamePass.Catalog = new GameCatalog([SteamRpg], DateTimeOffset.UtcNow.AddDays(-8));
+        int rebuilt = 0;
+        vm.History.Rebuilt += () => rebuilt++;
+
+        var refreshing = vm.Catalogs.RefreshAsync([vm.Catalogs.GamePass, Line(rebuildsHistory: true)]);
+        await network.GamePassReached.Task;
+
+        // The quick catalog rebuilt the history: the Game Pass line still downloads, and says so.
+        Assert.True(await BecomesTrueAsync(() => rebuilt == 1, 2000));
+        Assert.Equal(vm.Catalogs.GamePass.FetchingStatus, vm.Catalogs.GamePass.Status);
+
+        network.Release();
+        await refreshing;
+    }
+
+    [AvaloniaFact]
     public async Task The_PS_Plus_catalog_loaded_for_a_search_shows_on_its_line()
     {
         var cache = new CacheStore(Path.Combine(TempFolder, "cache"));

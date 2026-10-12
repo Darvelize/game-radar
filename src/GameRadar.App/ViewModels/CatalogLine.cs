@@ -59,9 +59,11 @@ public sealed partial class CatalogLine : ObservableObject
     /// <summary>Its last download failed: the error stays on its line until the next one.</summary>
     public bool Failed { get; private set; }
 
-    // Being downloaded: asked again meanwhile (the button during the startup
-    // refresh), it is not downloaded twice at once.
-    private bool _fetching;
+    /// <summary>
+    /// Being downloaded: asked again meanwhile (the button during the startup
+    /// refresh), it is not downloaded twice at once; its line says so until it ends.
+    /// </summary>
+    public bool IsFetching { get; private set; }
 
     /// <summary>None yet, or older than a week (every catalog: <see cref="CompactCatalogCache"/>).</summary>
     public bool NeedsDownload(DateTimeOffset now) => Catalog is null || CompactCatalogCache.IsStale(Catalog, now);
@@ -80,9 +82,9 @@ public sealed partial class CatalogLine : ObservableObject
     /// </summary>
     public async Task<bool> FetchAsync(NoticeCenter notices)
     {
-        if (_fetching)
+        if (IsFetching)
             return false;
-        _fetching = true;
+        IsFetching = true;
         Status = FetchingStatus;
         try
         {
@@ -98,7 +100,7 @@ public sealed partial class CatalogLine : ObservableObject
         }
         finally
         {
-            _fetching = false;
+            IsFetching = false;
         }
         Failed = false;
         ShowLoaded();
