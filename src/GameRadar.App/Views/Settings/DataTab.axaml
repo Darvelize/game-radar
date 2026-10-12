@@ -1,0 +1,90 @@
+<ContentPage xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GameRadar.App.ViewModels"
+             xmlns:res="using:GameRadar.App.Resources"
+             x:Class="GameRadar.App.Views.Settings.DataTab"
+             x:DataType="vm:MainWindowViewModel">
+
+    <!-- Settings › Data: what is loaded and when, the data folder and the portable mode -->
+    <!-- A ContentPage does not scroll by itself. Same column for every tab: up
+         to 720 px (1000*: nearly all the room), else the cards would change
+         width from one tab to the next. -->
+    <ScrollViewer>
+        <Grid Margin="32,20,32,32">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1000*" MaxWidth="720" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Spacing="20">
+
+                <Border Classes="card">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Path Classes="icon accent" Data="{StaticResource IconSync}" />
+                            <TextBlock Classes="subtitle" Text="{x:Static res:Strings.Settings_Data_Title}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <ItemsControl ItemsSource="{Binding Accounts.SyncedPlatforms}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Spacing="12" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:SyncedPlatform">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                                        <TextBlock Classes="secondary" Text="{Binding Status}" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <!-- The note sits right under the last catalog, as part of the list. -->
+                        <StackPanel Spacing="2">
+                            <ItemsControl ItemsSource="{Binding Catalogs.ShownLines}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Spacing="12" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:CatalogLine">
+                                        <StackPanel Spacing="2">
+                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                                            <TextBlock Classes="secondary" Text="{Binding Status}" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock Classes="caption" TextWrapping="Wrap"
+                                       Text="{x:Static res:Strings.Settings_Data_CatalogsNote}" />
+                        </StackPanel>
+                        <Button Content="{x:Static res:Strings.Settings_Data_RefreshCatalogs}" Command="{Binding Catalogs.RefreshAllCommand}"
+                                HorizontalAlignment="Left" />
+                        <ProgressBar Classes="thin" IsIndeterminate="True"
+                                     IsVisible="{Binding Catalogs.IsRefreshing}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="card">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Path Classes="icon accent" Data="{StaticResource IconDownload}" />
+                            <TextBlock Classes="subtitle" Text="{x:Static res:Strings.Settings_Data_Folder_Title}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="{Binding DataLocation.Summary}" TextWrapping="Wrap" />
+                        <Button Content="{x:Static res:Strings.Settings_Data_OpenFolder}" Command="{Binding DataLocation.OpenFolderCommand}"
+                                ToolTip.Tip="{x:Static res:Strings.Settings_Data_OpenFolder_Tip}" HorizontalAlignment="Left" />
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{x:Static res:Strings.Settings_Data_Portable_Title}" FontWeight="SemiBold" />
+                            <TextBlock Classes="secondary" TextWrapping="Wrap" Text="{x:Static res:Strings.Settings_Data_Portable_Step1}" />
+                            <TextBlock Classes="secondary" TextWrapping="Wrap" Text="{x:Static res:Strings.Settings_Data_Portable_Step2}" />
+                            <TextBlock Classes="secondary" TextWrapping="Wrap" Text="{x:Static res:Strings.Settings_Data_Portable_Step3}" />
+                            <TextBlock Classes="secondary" TextWrapping="Wrap" Text="{x:Static res:Strings.Settings_Data_Portable_Step4}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</ContentPage>

@@ -1,0 +1,89 @@
+<ContentPage xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GameRadar.App.ViewModels"
+             xmlns:res="using:GameRadar.App.Resources"
+             xmlns:app="using:GameRadar.App"
+             x:Class="GameRadar.App.Views.Settings.PreferencesTab"
+             x:DataType="vm:MainWindowViewModel">
+
+    <!-- Settings › Preferences: how GameRadar behaves (later: country, update check, theme) -->
+    <!-- A ContentPage does not scroll by itself. Same column for every tab: up
+         to 720 px (1000*: nearly all the room), else the cards would change
+         width from one tab to the next. -->
+    <ScrollViewer>
+        <Grid Margin="32,20,32,32">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1000*" MaxWidth="720" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Spacing="20">
+
+                <!-- Language: applied at the next start (see Localization) -->
+                <Border Classes="card">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Path Classes="icon accent" Data="{StaticResource IconGlobe}" />
+                            <TextBlock Classes="subtitle" Text="{x:Static res:Strings.Settings_Language_Title}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Classes="secondary" TextWrapping="Wrap" Text="{x:Static res:Strings.Settings_Language_Description}" />
+                        <ComboBox ItemsSource="{Binding Language.LanguageOptions}" SelectedItem="{Binding Language.SelectedLanguage, Converter={x:Static app:KeepChoice.Instance}}" MinWidth="260">
+                            <ComboBox.ItemTemplate>
+                                <!-- Also used for the closed list: the flag shows there too.
+                                     Same 21 px column for every symbol, so the names line up. -->
+                                <DataTemplate x:DataType="vm:LanguageViewModel+LanguageOption">
+                                    <Grid ColumnDefinitions="21,*" ColumnSpacing="10">
+                                        <Path Classes="icon secondary small" Data="{StaticResource IconGlobe}"
+                                              HorizontalAlignment="Center" IsVisible="{Binding IsAutomatic}" />
+                                        <Border Classes="flag" IsVisible="{Binding IsFrench}">
+                                            <Image Source="{StaticResource FlagFrance}" />
+                                        </Border>
+                                        <Border Classes="flag" IsVisible="{Binding IsEnglish}">
+                                            <Image Source="{StaticResource FlagUnitedKingdom}" />
+                                        </Border>
+                                        <TextBlock Grid.Column="1" Text="{Binding Label}" VerticalAlignment="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <StackPanel Orientation="Horizontal" Spacing="12" IsVisible="{Binding Language.NeedsRestart}">
+                            <TextBlock Classes="secondary" Text="{x:Static res:Strings.Settings_Language_RestartNeeded}"
+                                       TextWrapping="Wrap" VerticalAlignment="Center" />
+                            <Button Classes="accent" Content="{x:Static res:Strings.Settings_Language_Restart}"
+                                    Command="{Binding Language.RestartCommand}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Games refused with "Pas intéressé" on a card, to give them back a chance -->
+                <Border Classes="card">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Path Classes="icon accent" Data="{StaticResource IconNotInterested}" />
+                            <TextBlock Classes="subtitle" Text="{x:Static res:Strings.Settings_NotInterested_Title}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Classes="secondary" TextWrapping="Wrap" Text="{x:Static res:Strings.Settings_NotInterested_Description}" />
+                        <TextBlock Classes="caption" Text="{x:Static res:Strings.Settings_NotInterested_Empty}"
+                                   IsVisible="{Binding !NotInterested.HasGames}" />
+                        <ItemsControl ItemsSource="{Binding NotInterested.Games}" IsVisible="{Binding NotInterested.HasGames}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:NotInterestedRow">
+                                    <Border Classes="subrow">
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                            <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                            <!-- The command is the page's (the row's DataContext is the game) -->
+                                            <Button Grid.Column="1" Content="{x:Static res:Strings.Settings_NotInterested_Restore}"
+                                                    Command="{Binding $parent[ContentPage].((vm:MainWindowViewModel)DataContext).NotInterested.RestoreCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    ToolTip.Tip="{x:Static res:Strings.Settings_NotInterested_Restore_Tip}" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</ContentPage>

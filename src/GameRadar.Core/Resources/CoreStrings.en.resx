@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Messages of the Core: French in CoreStrings.resx (neutral language), English
+  in CoreStrings.en.resx, same keys (checked by LocalizationTests of the App).
+  A text with {0} is a format: CoreText.Format(CoreStrings.X, value).
+-->
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+
+  <!-- Errors explained to the user, sign-in page -->
+  <data name="GamePass_EmptyCatalog" xml:space="preserve"><value>The Game Pass catalog received is empty (its format may have changed).</value></data>
+  <data name="GamePass_MissingPlan" xml:space="preserve"><value>The Game Pass catalog received is incomplete: one plan has no game left (its format may have changed). The previous catalog is kept.</value></data>
+  <data name="GamePass_EmptyAnswer" xml:space="preserve"><value>Empty answer from the Microsoft catalog.</value></data>
+  <data name="GamePass_HttpError" xml:space="preserve"><value>The Microsoft catalog answered with an error ({0} {1}).</value></data>
+  <data name="Steam_PasteKey" xml:space="preserve"><value>Paste your Steam API key (steamcommunity.com/dev/apikey).</value></data>
+  <data name="Steam_NotConnected" xml:space="preserve"><value>Connect your Steam account in Settings.</value></data>
+  <data name="Steam_PasteProfile" xml:space="preserve"><value>Paste your Steam profile address, for example https://steamcommunity.com/id/yourname.</value></data>
+  <data name="Steam_NoSuchProfile" xml:space="preserve"><value>No Steam profile is called “{0}”. Check your profile address.</value></data>
+  <data name="Steam_NoSuchSteamId" xml:space="preserve"><value>No Steam profile has the number {0}. Check your profile address.</value></data>
+  <data name="Steam_PrivateLibrary" xml:space="preserve"><value>Your Steam library is private. On your Steam profile: Edit Profile › Privacy Settings › “Game details”: Public.</value></data>
+  <data name="Steam_KeyRefused" xml:space="preserve"><value>Steam API key refused. Check it on steamcommunity.com/dev/apikey.</value></data>
+  <data name="Steam_RateLimited" xml:space="preserve"><value>Steam is limiting requests right now. Try again in a few minutes.</value></data>
+  <data name="Steam_HttpError" xml:space="preserve"><value>Steam answered with an error ({0} {1}).</value></data>
+  <data name="Steam_StoreDown" xml:space="preserve"><value>The Steam catalog is not answering right now. Recommendations stick to the Game Pass.</value></data>
+  <data name="Steam_EmptyTagList" xml:space="preserve"><value>The Steam tag list received is empty (its format may have changed).</value></data>
+  <data name="Steam_StoreFormat" xml:space="preserve"><value>The Steam catalog answered in an unexpected format (its API may have changed).</value></data>
+  <data name="Steam_EmptyCatalog" xml:space="preserve"><value>The Steam catalog received is empty (its format may have changed).</value></data>
+  <data name="Steam_StoreRateLimitedGenres" xml:space="preserve"><value>Steam is limiting requests right now. The missing genres will be looked up later.</value></data>
+  <data name="Steam_StoreDownGenres" xml:space="preserve"><value>Steam is not answering at the moment. The missing genres will be looked up later.</value></data>
+  <data name="Steam_StoreRateLimitedTags" xml:space="preserve"><value>Steam is limiting requests right now. The missing tags will be looked up later.</value></data>
+  <data name="Steam_StoreDownTags" xml:space="preserve"><value>Steam is not answering right now. The missing tags will be looked up later.</value></data>
+  <data name="Xbox_LoopbackFailed" xml:space="preserve"><value>GameRadar could not open on this computer the page the sign-in comes back to ({0}). Try again, or restart the computer if it goes on.</value></data>
+  <data name="Xbox_AccessDenied" xml:space="preserve"><value>Sign-in cancelled: access to your Xbox account was not allowed.</value></data>
+  <data name="Xbox_SignInFailed" xml:space="preserve"><value>Microsoft sign-in failed ({0}).</value></data>
+  <data name="Xbox_ErrorCode" xml:space="preserve"><value>error {0}</value></data>
+  <data name="Xbox_BrowserSuccess" xml:space="preserve"><value>All set! You can close this tab and go back to GameRadar.</value></data>
+  <data name="Xbox_BrowserFailure" xml:space="preserve"><value>Sign-in did not go through. You can close this tab: GameRadar explains why.</value></data>
+  <data name="Xbox_SignInTimeout" xml:space="preserve"><value>Signing in took too long. Try again.</value></data>
+  <data name="Xbox_NoOfflineAccess" xml:space="preserve"><value>Microsoft did not grant the lasting access requested. Try again.</value></data>
+  <data name="Xbox_SignInToLoad" xml:space="preserve"><value>Sign in to your Xbox account to load your history.</value></data>
+  <data name="Xbox_SessionExpired" xml:space="preserve"><value>Your Microsoft sign-in has expired: sign in again.</value></data>
+  <data name="Xbox_AppBlocked" xml:space="preserve"><value>Microsoft has disabled GameRadar's access to Xbox Live: the Xbox sync no longer works for anyone, it has nothing to do with your account. Your games already synced stay in GameRadar, and Steam still works. A new version of GameRadar will be announced here if a fix is found.</value></data>
+  <data name="Xbox_UserAuthRefused" xml:space="preserve"><value>Xbox Live refused the sign-in (error {0}).</value></data>
+  <data name="Xbox_Format" xml:space="preserve"><value>Xbox Live answered in an unexpected format (its API may have changed).</value></data>
+  <data name="Xbox_NoProfile" xml:space="preserve"><value>This Microsoft account has no Xbox profile. Sign in once on xbox.com to create one, or choose another account.</value></data>
+  <data name="Xbox_CountryUnavailable" xml:space="preserve"><value>Xbox Live is not available in this account's country.</value></data>
+  <data name="Xbox_AgeCheck" xml:space="preserve"><value>This account must first confirm its age on xbox.com.</value></data>
+  <data name="Xbox_ChildAccount" xml:space="preserve"><value>Child account: an adult of the family must allow it on account.microsoft.com/family.</value></data>
+  <data name="Xbox_Refused" xml:space="preserve"><value>Xbox Live refused access (error {0}).</value></data>
+  <data name="Xbox_RefusedCode" xml:space="preserve"><value>Xbox Live refused access (code {0}).</value></data>
+  <data name="Xbox_HistoryRefused" xml:space="preserve"><value>Xbox Live refused access to your history. Try again; if it goes on, sign in again.</value></data>
+  <data name="Xbox_RateLimited" xml:space="preserve"><value>Xbox Live is limiting requests right now. Try again in a few minutes.</value></data>
+  <data name="Xbox_HttpError" xml:space="preserve"><value>Xbox Live answered with an error ({0} {1}).</value></data>
+  <data name="PlayStation_PasteNpsso" xml:space="preserve"><value>Paste your NPSSO token: sign in on playstation.com, then open ca.account.sony.com/api/v1/ssocookie and copy the value of "npsso".</value></data>
+  <data name="PlayStation_NotConnected" xml:space="preserve"><value>Connect your PlayStation account in the Settings.</value></data>
+  <data name="PlayStation_NpssoRefused" xml:space="preserve"><value>Sony refused your NPSSO token: it has expired, or you signed out of all your devices. Sign in again on playstation.com, then paste a new token (ca.account.sony.com/api/v1/ssocookie).</value></data>
+  <data name="PlayStation_AppBlocked" xml:space="preserve"><value>Sony blocked the sign-in GameRadar uses: PlayStation syncing no longer works for anyone, and it has nothing to do with your account. Your games already synced stay in GameRadar. A new version of GameRadar will be announced here if a fix is found.</value></data>
+  <data name="PlayStation_SignInFailed" xml:space="preserve"><value>PlayStation sign-in failed ({0}).</value></data>
+  <data name="PlayStation_ErrorCode" xml:space="preserve"><value>error {0}</value></data>
+  <data name="PlayStation_RateLimited" xml:space="preserve"><value>PlayStation Network is limiting requests for now. Try again in a few minutes.</value></data>
+  <data name="PlayStation_HttpError" xml:space="preserve"><value>PlayStation Network answered with an error ({0} {1}).</value></data>
+  <data name="PlayStation_Format" xml:space="preserve"><value>PlayStation Network answered in an unexpected format (its API may have changed).</value></data>
+  <data name="PlayStation_StoreRefused" xml:space="preserve"><value>The PlayStation Store refused the request (the site has probably changed).</value></data>
+  <data name="PsPlus_EmptyCatalog" xml:space="preserve"><value>The PS Plus catalog received is empty (the format may have changed).</value></data>
+  <data name="PsStore_EmptyCatalog" xml:space="preserve"><value>The PlayStation Store catalog received is empty (the site may have changed).</value></data>
+  <data name="PsPlus_MissingPlan" xml:space="preserve"><value>The PS Plus catalog received is incomplete: a plan no longer has any game in it (the format may have changed). The previous catalog is kept.</value></data>
+  <data name="Gog_CatalogFormat" xml:space="preserve"><value>The GOG catalog answered in an unexpected format (its API may have changed).</value></data>
+  <data name="Gog_CatalogDown" xml:space="preserve"><value>The GOG catalog is not answering right now. Recommendations go on without it.</value></data>
+  <data name="Gog_EmptyCatalog" xml:space="preserve"><value>The GOG catalog received is empty (its format may have changed).</value></data>
+  <data name="Gog_PasteProfile" xml:space="preserve"><value>Paste your GOG profile name, or the address of your profile page (gog.com/u/…).</value></data>
+  <data name="Gog_NoSuchProfile" xml:space="preserve"><value>No GOG profile is named "{0}". Check the name: it is the one after "/u/" in the address of your profile page.</value></data>
+  <data name="Gog_PrivateProfile" xml:space="preserve"><value>The GOG profile "{0}" is not public. In the privacy settings of your GOG account, make your profile visible to everyone, then try again.</value></data>
+  <data name="Gog_RateLimited" xml:space="preserve"><value>GOG is limiting requests right now. Try again in a few minutes.</value></data>
+  <data name="Gog_ProfileDown" xml:space="preserve"><value>GOG is not answering right now. Try again later.</value></data>
+  <data name="Gog_ProfileFormat" xml:space="preserve"><value>The GOG profile page answered in an unexpected format (the site may have changed).</value></data>
+  <data name="Ea_PasteToken" xml:space="preserve"><value>Paste all the text of the EA page (it starts with {"access_token": …): open it with "Open the EA page", then Ctrl+A and Ctrl+C.</value></data>
+  <data name="Ea_SignInFirst" xml:space="preserve"><value>The EA page says you are not signed in: sign in to ea.com in your browser, then open the EA page again and copy it again.</value></data>
+  <data name="Ea_Format" xml:space="preserve"><value>EA answered in an unexpected format (its API may have changed).</value></data>
+  <data name="Ea_TokenExpired" xml:space="preserve"><value>EA refused the token: it has probably expired (it lasts 4 hours). Open the EA page again, copy it and paste it again.</value></data>
+  <data name="Ea_RateLimited" xml:space="preserve"><value>EA is limiting requests right now. Try again in a few minutes.</value></data>
+  <data name="Ea_Down" xml:space="preserve"><value>EA is not answering right now. Try again later.</value></data>
+  <data name="Epic_PasteCode" xml:space="preserve"><value>Paste all the text of the Epic page (it contains "authorizationCode"): open it with the link "the page of your code", then Ctrl+A and Ctrl+C.</value></data>
+  <data name="Epic_SignInFirst" xml:space="preserve"><value>The Epic page has no code: sign in to epicgames.com in your browser, then open the Epic page again and copy it again.</value></data>
+  <data name="Epic_Format" xml:space="preserve"><value>Epic answered in an unexpected format (its API may have changed).</value></data>
+  <data name="Epic_CodeRefused" xml:space="preserve"><value>Epic refused this code: it works only once and expires quickly. Open the Epic page again, copy it and paste it right away.</value></data>
+  <data name="Epic_SessionExpired" xml:space="preserve"><value>Your Epic sign-in expired or was removed: open the Epic page again and paste a new code.</value></data>
+  <data name="Epic_RateLimited" xml:space="preserve"><value>Epic is limiting requests for now. Try again in a few minutes.</value></data>
+  <data name="Epic_Down" xml:space="preserve"><value>Epic is not answering for now. Try again later.</value></data>
+  <data name="Epic_StoreDown" xml:space="preserve"><value>The Epic catalog is not answering right now. Recommendations go on without it.</value></data>
+  <data name="Epic_EmptyCatalog" xml:space="preserve"><value>The Epic catalog received is empty (the format may have changed).</value></data>
+</root>

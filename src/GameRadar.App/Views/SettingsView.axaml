@@ -1,0 +1,26 @@
+<ContentPage xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GameRadar.App.ViewModels"
+             xmlns:res="using:GameRadar.App.Resources"
+             xmlns:settings="using:GameRadar.App.Views.Settings"
+             x:Class="GameRadar.App.Views.SettingsView"
+             x:DataType="vm:MainWindowViewModel">
+
+    <DockPanel>
+        <TextBlock DockPanel.Dock="Top" Classes="display" Margin="32,28,32,0"
+                   Text="{x:Static res:Strings.Nav_Settings}" />
+
+        <!-- One category at a time instead of an endless page (Views\Settings:
+             one ContentPage per tab, its Header = the tab's label). The pills
+             come from Themes/Pages.axaml. The tab strip stays on top while a
+             tab scrolls; Padding = margin of the strip only.
+             Mode=TwoWay written out: SelectedIndex is one-way by default. -->
+        <TabbedPage Padding="32,20,32,0" SelectedIndex="{Binding SettingsTabIndex, Mode=TwoWay}">
+            <settings:AccountsTab Header="{x:Static res:Strings.Settings_Tab_Accounts}" />
+            <settings:PreferencesTab Header="{x:Static res:Strings.Settings_Tab_Preferences}" />
+            <settings:DataTab Header="{x:Static res:Strings.Settings_Data_Title}" />
+            <settings:PrivacyTab Header="{x:Static res:Strings.Privacy_Title}" />
+            <settings:AboutTab Header="{x:Static res:Strings.About_Title}" />
+        </TabbedPage>
+    </DockPanel>
+</ContentPage>

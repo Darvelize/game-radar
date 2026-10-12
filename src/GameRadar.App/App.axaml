@@ -1,0 +1,30 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="GameRadar.App.App"
+             RequestedThemeVariant="Default">
+    <!-- "Default" follows the Windows light/dark setting. -->
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="/Themes/Tokens.axaml" />
+                <ResourceInclude Source="/Themes/Icons.axaml" />
+                <ResourceInclude Source="/Themes/Pages.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+
+    <Application.Styles>
+        <FluentTheme>
+            <!-- Brand colors fed to Fluent: every standard control (buttons,
+                 check boxes, text boxes, selection) follows them. Values
+                 mirror Themes/Tokens.axaml (a palette needs plain colors). -->
+            <FluentTheme.Palettes>
+                <ColorPaletteResources x:Key="Light" Accent="#6B4EFF" RegionColor="#F6F5FA" />
+                <ColorPaletteResources x:Key="Dark" Accent="#A08CFF" RegionColor="#121118" />
+            </FluentTheme.Palettes>
+        </FluentTheme>
+        <!-- After Fluent: our component styles win over its defaults. -->
+        <StyleInclude Source="/Themes/Components.axaml" />
+    </Application.Styles>
+</Application>

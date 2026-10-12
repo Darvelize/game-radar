@@ -1,0 +1,70 @@
+<ContentPage xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GameRadar.App.ViewModels"
+             xmlns:res="using:GameRadar.App.Resources"
+             x:Class="GameRadar.App.Views.Settings.PrivacyTab"
+             x:DataType="vm:MainWindowViewModel">
+
+    <!-- Settings › Privacy: GameRadar's privacy statement (required by the Microsoft APIs
+         Terms of Use, section 5), where to revoke its access, and erasing everything. -->
+    <!-- A ContentPage does not scroll by itself. Same column for every tab: up
+         to 720 px (1000*: nearly all the room), else the cards would change
+         width from one tab to the next. -->
+    <ScrollViewer>
+        <Grid Margin="32,20,32,32">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1000*" MaxWidth="720" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Spacing="20">
+
+                <Border Classes="card">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Path Classes="icon accent" Data="{StaticResource IconShield}" />
+                            <TextBlock Classes="subtitle" Text="{x:Static res:Strings.Privacy_Title}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Classes="secondary" TextWrapping="Wrap"
+                                   Text="{x:Static res:Strings.Privacy_Statement}" />
+                        <TextBlock Classes="secondary" TextWrapping="Wrap"
+                                   Text="{x:Static res:Strings.Privacy_Services}" />
+
+                        <!-- Revoking: signing out only forgets the session on this computer -->
+                        <Border Classes="subrow">
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="{x:Static res:Strings.Privacy_Revoke_Title}" FontWeight="SemiBold" />
+                                <TextBlock Classes="secondary" TextWrapping="Wrap"
+                                           Text="{x:Static res:Strings.Privacy_Revoke_Description}" />
+                                <WrapPanel Orientation="Horizontal" ItemSpacing="12" LineSpacing="8">
+                                    <Button Content="{x:Static res:Strings.Privacy_Revoke_Microsoft}" Command="{Binding Privacy.OpenMicrosoftConsentsCommand}"
+                                            ToolTip.Tip="{x:Static res:Strings.Privacy_Revoke_Microsoft_Tip}" />
+                                    <Button Content="{x:Static res:Strings.Privacy_Revoke_Steam}" Command="{Binding Privacy.OpenSteamApiKeyPageCommand}"
+                                            ToolTip.Tip="{x:Static res:Strings.Privacy_Revoke_Steam_Tip}" />
+                                    <Button Content="{x:Static res:Strings.Privacy_Revoke_PlayStation}" Command="{Binding Privacy.OpenPlayStationAccountPageCommand}"
+                                            ToolTip.Tip="{x:Static res:Strings.Privacy_Revoke_PlayStation_Tip}" />
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Erasing: a two-step button, since it cannot be undone -->
+                        <Border Classes="subrow">
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="{x:Static res:Strings.Privacy_Erase_Title}" FontWeight="SemiBold" />
+                                <TextBlock Classes="secondary" TextWrapping="Wrap"
+                                           Text="{x:Static res:Strings.Privacy_Erase_Description}" />
+                                <Button Content="{x:Static res:Strings.Privacy_Erase_Ask}" Command="{Binding Privacy.AskEraseAllDataCommand}"
+                                        IsVisible="{Binding !Privacy.IsConfirmingErase}" />
+                                <StackPanel Orientation="Horizontal" Spacing="12" IsVisible="{Binding Privacy.IsConfirmingErase}">
+                                    <Button Classes="danger" Content="{x:Static res:Strings.Privacy_Erase_Confirm}" Command="{Binding Privacy.EraseAllDataCommand}" />
+                                    <Button Content="{x:Static res:Strings.Common_Cancel}" Command="{Binding Privacy.CancelEraseAllDataCommand}" />
+                                    <TextBlock Classes="secondary" Text="{x:Static res:Strings.Privacy_Erase_Final}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</ContentPage>

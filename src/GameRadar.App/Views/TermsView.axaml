@@ -1,0 +1,63 @@
+<ContentPage xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GameRadar.App.ViewModels"
+             xmlns:res="using:GameRadar.App.Resources"
+             x:Class="GameRadar.App.Views.TermsView"
+             x:DataType="vm:MainWindowViewModel">
+
+    <!-- Terms of use (LICENSE.txt, bilingual), from "À propos": one tab per
+         language, opened on the language of the app. -->
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Margin="32,28,32,0" Spacing="20">
+            <!-- Back to "À propos"; Escape does the same (key binding on the MainWindow) -->
+            <Button Classes="icon" Command="{Binding GoBackCommand}" HorizontalAlignment="Left"
+                    ToolTip.Tip="{x:Static res:Strings.Common_Back_Tip}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Path Classes="icon secondary" Data="{StaticResource IconArrowLeft}" />
+                    <TextBlock Classes="secondary" Text="{x:Static res:Strings.Common_Back}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <StackPanel Spacing="8">
+                <TextBlock Classes="display" Text="{x:Static res:Strings.About_Terms}" />
+                <!-- Title, copyright and version: the same in both languages -->
+                <TextBlock Classes="caption" Text="{Binding Legal.TermsHeader}" TextWrapping="Wrap" />
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Pills of Themes/Pages.axaml, like the settings. The language names
+             are written in their own language: never translated (like the
+             language list of the preferences). -->
+        <TabbedPage Padding="32,20,32,0" SelectedIndex="{Binding Legal.TermsTabIndex, Mode=TwoWay}">
+            <ContentPage>
+                <ContentPage.Header>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Border Classes="flag">
+                            <Image Source="{StaticResource FlagFrance}" />
+                        </Border>
+                        <TextBlock Text="Français" VerticalAlignment="Center" />
+                    </StackPanel>
+                </ContentPage.Header>
+                <ScrollViewer>
+                    <ItemsControl Margin="32,20,32,32" MaxWidth="720" HorizontalAlignment="Left"
+                                  ItemsSource="{Binding Legal.TermsFrench}"
+                                  ItemTemplate="{StaticResource LegalParagraphTemplate}" />
+                </ScrollViewer>
+            </ContentPage>
+            <ContentPage>
+                <ContentPage.Header>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Border Classes="flag">
+                            <Image Source="{StaticResource FlagUnitedKingdom}" />
+                        </Border>
+                        <TextBlock Text="English" VerticalAlignment="Center" />
+                    </StackPanel>
+                </ContentPage.Header>
+                <ScrollViewer>
+                    <ItemsControl Margin="32,20,32,32" MaxWidth="720" HorizontalAlignment="Left"
+                                  ItemsSource="{Binding Legal.TermsEnglish}"
+                                  ItemTemplate="{StaticResource LegalParagraphTemplate}" />
+                </ScrollViewer>
+            </ContentPage>
+        </TabbedPage>
+    </DockPanel>
+</ContentPage>

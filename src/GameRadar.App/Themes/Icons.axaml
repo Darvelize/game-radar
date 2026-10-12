@@ -1,0 +1,75 @@
+<!--
+  Line icons drawn on a 24x24 grid, content kept within 3..21.
+  Rendered by <Path Classes="icon" Data="{StaticResource IconX}" />:
+  stroked (not filled), round caps, color from the component styles.
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- App logo: radar screen with a sweep -->
+    <StreamGeometry x:Key="IconRadar">M12 21a9 9 0 1 1 0-18a9 9 0 0 1 0 18z M12 16.5a4.5 4.5 0 1 1 0-9 M12 12l6-6 M12 12h0.01</StreamGeometry>
+
+    <!-- Navigation -->
+    <StreamGeometry x:Key="IconSparkle">M12 3l2 5.5l5.5 2l-5.5 2l-2 5.5l-2-5.5l-5.5-2l5.5-2z M19 16v4 M17 18h4</StreamGeometry>
+    <StreamGeometry x:Key="IconHistory">M3.5 12a8.5 8.5 0 1 0 2.5-6 M3.5 4v4h4 M12 8v4.5l3 2</StreamGeometry>
+    <StreamGeometry x:Key="IconSettings">M4 7h9 M17 7h3 M15 5v4 M4 17h3 M11 17h9 M9 15v4 M4 12h14 M20 12h0.01</StreamGeometry>
+
+    <!-- Actions -->
+    <StreamGeometry x:Key="IconSync">M20 12a8 8 0 0 1-14 5.3 M4 12a8 8 0 0 1 14-5.3 M18 3v3.7h-3.7 M6 21v-3.7h3.7</StreamGeometry>
+    <StreamGeometry x:Key="IconSearch">M10.5 17.5a7 7 0 1 1 0-14a7 7 0 0 1 0 14z M15.5 15.5l5 5</StreamGeometry>
+    <StreamGeometry x:Key="IconClose">M7 7l10 10 M17 7L7 17</StreamGeometry>
+    <StreamGeometry x:Key="IconUser">M12 12a4 4 0 1 1 0-8a4 4 0 0 1 0 8z M4.5 20.5a7.5 7.5 0 0 1 15 0</StreamGeometry>
+    <StreamGeometry x:Key="IconShield">M12 3l7.5 3v5.5c0 4.5-3.2 8-7.5 9.5c-4.3-1.5-7.5-5-7.5-9.5V6z M9 12l2 2l4-4</StreamGeometry>
+    <StreamGeometry x:Key="IconDownload">M12 4v11 M7 10.5l5 5l5-5 M5 20h14</StreamGeometry>
+    <StreamGeometry x:Key="IconAlert">M12 21a9 9 0 1 1 0-18a9 9 0 0 1 0 18z M12 7.5v5.5 M12 16.5h0.01</StreamGeometry>
+    <StreamGeometry x:Key="IconKey">M8 16a4 4 0 1 1 0-8a4 4 0 0 1 0 8z M12 12h9 M18 12v3 M21 12v2</StreamGeometry>
+
+    <!-- History row toggles -->
+    <StreamGeometry x:Key="IconFlag">M5 21V4 M5 4h12l-2.5 4l2.5 4H5</StreamGeometry>
+    <StreamGeometry x:Key="IconHeart">M12 19.5s-7.5-4.5-7.5-10a4 4 0 0 1 7.5-2a4 4 0 0 1 7.5 2c0 5.5-7.5 10-7.5 10z</StreamGeometry>
+
+    <!-- Section headers and details -->
+    <StreamGeometry x:Key="IconHourglass">M6 3h12 M6 21h12 M7 3c0 5 10 5 10 9s-10 4-10 9 M17 3c0 5-10 5-10 9s10 4 10 9</StreamGeometry>
+    <StreamGeometry x:Key="IconHeartSmall">M12 19.5s-7.5-4.5-7.5-10a4 4 0 0 1 7.5-2a4 4 0 0 1 7.5 2c0 5.5-7.5 10-7.5 10z</StreamGeometry>
+    <StreamGeometry x:Key="IconTag">M3.5 12.5v-8h8l9 9l-8 8z M8 8h0.01</StreamGeometry>
+    <StreamGeometry x:Key="IconGlobe">M12 21a9 9 0 1 1 0-18a9 9 0 0 1 0 18z M3 12h18 M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9 M12 3c-2.5 2.6-3.8 5.6-3.8 9s1.3 6.4 3.8 9</StreamGeometry>
+    <StreamGeometry x:Key="IconArrowLeft">M19 12H5 M11 6l-6 6l6 6</StreamGeometry>
+    <StreamGeometry x:Key="IconChevronDown">M6 9l6 6l6-6</StreamGeometry>
+    <StreamGeometry x:Key="IconStar">M12 3.5l2.6 5.3l5.9 0.9l-4.2 4.1l1 5.8l-5.3-2.8l-5.3 2.8l1-5.8l-4.2-4.1l5.9-0.9z</StreamGeometry>
+    <!-- "Pas intéressé": a circle crossed out -->
+    <StreamGeometry x:Key="IconNotInterested">M12 21a9 9 0 1 1 0-18a9 9 0 0 1 0 18z M5.6 5.6l12.8 12.8</StreamGeometry>
+
+    <!--
+      Flags of the language list, drawn here because Windows shows no flag
+      emoji (its emoji font has none: "FR" letters instead). Fixed colors,
+      not themed: a flag is the same in light and dark. English = United
+      Kingdom (the app formats English the British way, en-GB). The Union
+      Jack is simplified (no offset of the red diagonals): invisible at 14 px.
+      Shown by <Border Classes="flag"><Image Source="{StaticResource FlagX}" /></Border>.
+    -->
+    <DrawingImage x:Key="FlagFrance">
+        <DrawingGroup>
+            <GeometryDrawing Brush="#002395" Geometry="M0,0 H1 V2 H0 Z" />
+            <GeometryDrawing Brush="#FFFFFF" Geometry="M1,0 H2 V2 H1 Z" />
+            <GeometryDrawing Brush="#ED2939" Geometry="M2,0 H3 V2 H2 Z" />
+        </DrawingGroup>
+    </DrawingImage>
+    <DrawingImage x:Key="FlagUnitedKingdom">
+        <DrawingGroup ClipGeometry="M0,0 H60 V30 H0 Z">
+            <GeometryDrawing Brush="#012169" Geometry="M0,0 H60 V30 H0 Z" />
+            <GeometryDrawing Geometry="M0,0 L60,30 M60,0 L0,30">
+                <GeometryDrawing.Pen><Pen Brush="#FFFFFF" Thickness="6" /></GeometryDrawing.Pen>
+            </GeometryDrawing>
+            <GeometryDrawing Geometry="M0,0 L60,30 M60,0 L0,30">
+                <GeometryDrawing.Pen><Pen Brush="#C8102E" Thickness="2" /></GeometryDrawing.Pen>
+            </GeometryDrawing>
+            <GeometryDrawing Geometry="M30,0 V30 M0,15 H60">
+                <GeometryDrawing.Pen><Pen Brush="#FFFFFF" Thickness="10" /></GeometryDrawing.Pen>
+            </GeometryDrawing>
+            <GeometryDrawing Geometry="M30,0 V30 M0,15 H60">
+                <GeometryDrawing.Pen><Pen Brush="#C8102E" Thickness="6" /></GeometryDrawing.Pen>
+            </GeometryDrawing>
+        </DrawingGroup>
+    </DrawingImage>
+
+</ResourceDictionary>

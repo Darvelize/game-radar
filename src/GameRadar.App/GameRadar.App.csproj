@@ -1,0 +1,89 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- WinExe: a GUI app, no console window opens behind it. -->
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!-- Since Avalonia 12, compiled bindings are the default: no flag needed. -->
+
+    <!-- The file people run: GameRadar.exe (the namespaces keep GameRadar.App). -->
+    <AssemblyName>GameRadar</AssemblyName>
+    <RootNamespace>GameRadar.App</RootNamespace>
+    <ApplicationIcon>Assets\GameRadar.ico</ApplicationIcon>
+
+    <!-- Shown in the file's properties (Windows Explorer > Details). -->
+    <Version>1.6.1</Version>
+    <Product>GameRadar</Product>
+    <Description>Recommandations de jeux d'après ce que tu as vraiment joué (Xbox, Steam, Game Pass).</Description>
+    <Copyright>© 2026 Darvelize</Copyright>
+
+    <!-- French texts are the neutral ones (Strings.resx); English is a
+         satellite assembly. Only these languages are kept from the NuGet
+         packages too (no Avalonia or .NET messages in 14 other languages). -->
+    <NeutralLanguage>fr</NeutralLanguage>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+
+    <!-- All JSON goes through generated contexts (Core: *JsonContext): no reflection, which lets the exe be trimmed. A type missing from a context throws at its first use. -->
+    <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Window icon, read at run time (avares://). -->
+    <AvaloniaResource Include="Assets\**" />
+    <!-- Release notes of the "Nouveautés" page: the repository's CHANGELOG.md,
+         the single source also used for the GitHub releases. WithCulture=false:
+         MSBuild reads a culture in a file name (".en.") and moves such a file
+         to the en\ satellite assembly, where the app does not look for it
+         (the English page stayed empty). -->
+    <EmbeddedResource Include="..\..\CHANGELOG.md" LogicalName="CHANGELOG.md" />
+    <EmbeddedResource Include="..\..\CHANGELOG.en.md" LogicalName="CHANGELOG.en.md" WithCulture="false" />
+    <!-- Legal texts of Settings › About (LegalDocuments): the terms of use, and
+         the licenses of the open-source components the exe contains. -->
+    <EmbeddedResource Include="..\..\legal\LICENSE.txt" LogicalName="LICENSE.txt" />
+    <EmbeddedResource Include="..\..\legal\THIRD-PARTY-NOTICES.txt" LogicalName="THIRD-PARTY-NOTICES.txt" />
+  </ItemGroup>
+
+  <!--
+    Texts of the interface: Resources\Strings.resx (French, neutral) and
+    Strings.en.resx (English). MSBuild generates the Strings class at build
+    time (Strings.Settings_Language_Title...): no Visual Studio designer
+    tool, no extra package.
+  -->
+  <ItemGroup>
+    <!-- Strings.X everywhere in the app, without a using in each file. -->
+    <Using Include="GameRadar.App.Resources" />
+    <EmbeddedResource Update="Resources\Strings.resx">
+      <Generator>MSBuild:Compile</Generator>
+      <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+      <StronglyTypedFileName>$(IntermediateOutputPath)Strings.Designer.cs</StronglyTypedFileName>
+      <StronglyTypedNamespace>GameRadar.App.Resources</StronglyTypedNamespace>
+      <StronglyTypedClassName>Strings</StronglyTypedClassName>
+      <PublicClass>true</PublicClass>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GameRadar.Core\GameRadar.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="12.1.3" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.3" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.3" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+  </ItemGroup>
+
+  <!--
+    The SkiaSharp and HarfBuzz packages ship the debug symbols of their
+    native libraries (~105 MB of .pdb): useless to the people running the
+    app, and published next to the single-file exe otherwise.
+  -->
+  <Target Name="RemoveNativeSymbolsFromPublish" AfterTargets="ComputeResolvedFilesToPublishList">
+    <ItemGroup>
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(Extension)' == '.pdb'" />
+    </ItemGroup>
+  </Target>
+
+</Project>

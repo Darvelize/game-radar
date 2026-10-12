@@ -1,0 +1,83 @@
+<ContentPage xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GameRadar.App.ViewModels"
+             xmlns:res="using:GameRadar.App.Resources"
+             x:Class="GameRadar.App.Views.WhatsNewView"
+             x:DataType="vm:MainWindowViewModel">
+
+    <ScrollViewer>
+        <StackPanel Margin="32,28,32,32" Spacing="20" MaxWidth="720" HorizontalAlignment="Left">
+
+            <!-- Back to the page it was opened from (Settings or "Pour toi");
+                 Escape does the same (key binding on the MainWindow). -->
+            <Button Classes="icon" Command="{Binding GoBackCommand}" HorizontalAlignment="Left"
+                    ToolTip.Tip="{x:Static res:Strings.Common_Back_Tip}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Path Classes="icon secondary" Data="{StaticResource IconArrowLeft}" />
+                    <TextBlock Classes="secondary" Text="{x:Static res:Strings.Common_Back}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+
+            <TextBlock Classes="display" Text="{x:Static res:Strings.News_Title}" />
+
+            <!-- Empty state: never a blank page -->
+            <TextBlock Classes="secondary" Text="{Binding WhatsNew.NoReleaseNotesLabel}" TextWrapping="Wrap"
+                       IsVisible="{Binding !WhatsNew.HasReleaseNotes}" />
+
+            <!-- One card per version, newest first -->
+            <ItemsControl ItemsSource="{Binding WhatsNew.ReleaseNotes}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="16" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ReleaseNotesRow">
+                        <Border Classes="card">
+                            <StackPanel Spacing="12">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <TextBlock Classes="subtitle" Text="{Binding Title}" VerticalAlignment="Center" />
+                                    <Border Classes="badge accent" IsVisible="{Binding IsNew}" VerticalAlignment="Center">
+                                        <TextBlock Text="{x:Static res:Strings.News_NewBadge}" />
+                                    </Border>
+                                </StackPanel>
+                                <TextBlock Classes="caption" Text="{Binding DateLabel}" />
+                                <!-- The parts of the version ("Évolutions", "Corrections"), then their items -->
+                                <ItemsControl ItemsSource="{Binding Sections}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Spacing="14" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:ReleaseNotesSectionRow">
+                                            <StackPanel Spacing="8">
+                                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" IsVisible="{Binding HasTitle}" />
+                                                <ItemsControl ItemsSource="{Binding Items}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <StackPanel Spacing="8" />
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate x:DataType="x:String">
+                                                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                                                <TextBlock Classes="accent" Text="•" />
+                                                                <TextBlock Grid.Column="1" Text="{Binding}" TextWrapping="Wrap" />
+                                                            </Grid>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+        </StackPanel>
+    </ScrollViewer>
+</ContentPage>

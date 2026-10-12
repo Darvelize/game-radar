@@ -1,0 +1,137 @@
+GameRadar — Conditions d'utilisation / Terms of use
+Copyright (c) 2026 Darvelize. Code sous licence MIT. Code under the MIT license.
+Version du 12 octobre 2026 / Version of October 12, 2026
+
+English below.
+
+=============================================================================
+FRANÇAIS
+=============================================================================
+
+En téléchargeant ou en utilisant GameRadar, tu acceptes ces conditions.
+
+1. Code open source
+   Le code de GameRadar est publié sous licence MIT (fichier LICENSE du
+   projet) : tu peux l'utiliser, le copier, le modifier et le redistribuer,
+   gratuitement ou non, à condition de garder la mention de copyright et le
+   texte de la licence.
+
+2. Version officielle
+   La version officielle se télécharge sur la page du projet
+   (https://github.com/Darvelize/game-radar). Chaque fichier y est construit
+   par GitHub à partir du code publié, avec une attestation qui permet de le
+   vérifier. Une copie obtenue ailleurs a pu être modifiée.
+
+3. Problèmes et propositions
+   Un problème ou une idée se signale sur la page du projet (onglet
+   « Issues »).
+
+4. Services de tiers
+   GameRadar utilise tes propres comptes Microsoft (Xbox), Steam, PlayStation, EA
+   et Epic Games, ton profil GOG public, et des services de Microsoft
+   Corporation, de Valve Corporation, de Sony Interactive Entertainment, de GOG
+   sp. z o.o., d'Electronic Arts Inc. et d'Epic Games, Inc., dont certains ne
+   sont pas documentés. Tu restes soumis à leurs conditions d'utilisation.
+   Ces services peuvent changer, limiter ou couper l'accès de GameRadar à tout
+   moment, sans préavis : GameRadar peut alors cesser de fonctionner, en tout ou
+   partie. GameRadar est un projet indépendant, affilié ni à Microsoft, ni à
+   Valve, ni à Sony, ni à GOG, ni à EA, ni à Epic Games, et approuvé par aucun
+   d'eux.
+
+5. Absence de garantie
+   GameRadar est fourni « tel quel », sans garantie d'aucune sorte, expresse ou
+   implicite, notamment de bon fonctionnement, de disponibilité, d'exactitude
+   des recommandations ou d'adéquation à un usage particulier.
+
+6. Responsabilité
+   Dans toute la mesure permise par la loi applicable, l'auteur ne pourra être
+   tenu responsable d'aucun dommage résultant de l'utilisation de GameRadar ou
+   de l'impossibilité de l'utiliser, y compris la perte de données ou la
+   suspension d'un compte par un service tiers.
+   Rien dans ces conditions ne limite les droits que la loi t'accorde et
+   auxquels il ne peut être dérogé par contrat, notamment en tant que
+   consommateur.
+
+7. Données personnelles
+   GameRadar n'a aucun serveur : tes données restent sur ton ordinateur. Le
+   détail est dans l'application, Réglages › Confidentialité.
+
+8. Composants tiers
+   GameRadar contient des composants open source, régis par leurs propres
+   licences : voir le fichier THIRD-PARTY-NOTICES.txt (aussi dans
+   l'application, Réglages › À propos).
+
+9. Marques
+   Xbox et Game Pass sont des marques de Microsoft Corporation ; Steam est une
+   marque de Valve Corporation ; PlayStation et PlayStation Plus sont des
+   marques de Sony Interactive Entertainment ; GOG et GOG.com sont des marques
+   de GOG sp. z o.o. ; EA et EA Play sont des marques d'Electronic Arts Inc. ;
+   Epic Games et Epic Games Store sont des marques d'Epic Games, Inc.
+   Les jaquettes et noms des jeux appartiennent à leurs éditeurs.
+
+10. Droit applicable
+    Ces conditions sont régies par le droit français, sous réserve des
+    dispositions impératives de la loi du pays où tu résides.
+
+=============================================================================
+ENGLISH
+=============================================================================
+
+By downloading or using GameRadar, you accept these terms.
+
+1. Open-source code
+   The code of GameRadar is published under the MIT license (LICENSE file of
+   the project): you may use, copy, modify and redistribute it, free of charge
+   or not, as long as you keep the copyright notice and the license text.
+
+2. Official version
+   The official version is downloaded from the project page
+   (https://github.com/Darvelize/game-radar). Each file there is built by
+   GitHub from the published code, with an attestation that lets you check
+   it. A copy obtained elsewhere may have been modified.
+
+3. Issues and suggestions
+   A problem or an idea is reported on the project page ("Issues" tab).
+
+4. Third-party services
+   GameRadar uses your own Microsoft (Xbox), Steam, PlayStation, EA and Epic
+   Games accounts, your public GOG profile, and services of Microsoft
+   Corporation, Valve Corporation, Sony Interactive Entertainment, GOG sp. z
+   o.o., Electronic Arts Inc. and Epic Games, Inc., some of them undocumented. You remain bound by their terms of
+   use. These services may change, limit or cut off GameRadar's access at any
+   time, without notice: GameRadar may then stop working, in whole or in part.
+   GameRadar is an independent project, not affiliated with nor endorsed by
+   Microsoft, Valve, Sony, GOG, EA or Epic Games.
+
+5. No warranty
+   GameRadar is provided "as is", without warranty of any kind, express or
+   implied, including of proper operation, availability, accuracy of the
+   recommendations or fitness for a particular purpose.
+
+6. Liability
+   To the fullest extent permitted by applicable law, the author shall not be
+   liable for any damage resulting from the use of, or inability to use,
+   GameRadar, including loss of data or the suspension of an account by a
+   third-party service.
+   Nothing in these terms limits the rights the law grants you and that cannot
+   be waived by contract, in particular as a consumer.
+
+7. Personal data
+   GameRadar has no server: your data stays on your computer. Details are in
+   the app, Settings › Privacy.
+
+8. Third-party components
+   GameRadar contains open-source components, governed by their own licenses:
+   see the THIRD-PARTY-NOTICES.txt file (also in the app, Settings › About).
+
+9. Trademarks
+   Xbox and Game Pass are trademarks of Microsoft Corporation; Steam is a
+   trademark of Valve Corporation; PlayStation and PlayStation Plus are
+   trademarks of Sony Interactive Entertainment; GOG and GOG.com are trademarks
+   of GOG sp. z o.o.; EA and EA Play are trademarks of Electronic Arts Inc.;
+   Epic Games and Epic Games Store are trademarks of Epic Games, Inc.
+   Game covers and names belong to their publishers.
+
+10. Governing law
+    These terms are governed by French law, subject to the mandatory
+    provisions of the law of the country where you live.

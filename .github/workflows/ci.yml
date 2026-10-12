@@ -1,0 +1,36 @@
+# Build and test at every push and pull request. Releases have their own
+# workflow (release.yml), started by a "v*" tag: tags are left out here.
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+permissions:
+  contents: read
+
+# A newer push of the same branch makes the running check useless.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    # Windows: GameRadar is Windows-only (DPAPI) and its tests run the real UI stack.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The exact SDK of the developer's machine: the third-party notices test
+      # compares the notices with the packages of this SDK (see
+      # tools/Update-ThirdPartyNotices.ps1). Raise it together with them.
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.401
+
+      - name: Build
+        run: dotnet build --configuration Release --nologo
+
+      - name: Test
+        run: dotnet test --configuration Release --no-build --nologo

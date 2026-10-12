@@ -1,0 +1,134 @@
+<ContentPage xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GameRadar.App.ViewModels"
+             xmlns:res="using:GameRadar.App.Resources"
+             x:Class="GameRadar.App.Views.Settings.AboutTab"
+             x:DataType="vm:MainWindowViewModel">
+
+    <!-- Settings › About: version, release notes, error log, where the data comes
+         from. Names only, no logos: the Xbox and Steam logos are trademarks
+         reserved to licensees. -->
+    <!-- A ContentPage does not scroll by itself. Same column for every tab: up
+         to 720 px (1000*: nearly all the room), else the cards would change
+         width from one tab to the next. -->
+    <ScrollViewer>
+        <Grid Margin="32,20,32,32">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1000*" MaxWidth="720" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Spacing="20">
+
+                <Border Classes="card">
+                    <StackPanel Spacing="16">
+                        <TextBlock Classes="subtitle" Text="{x:Static res:Strings.About_Title}" />
+
+                        <!-- Version first: what a friend is asked when something goes wrong -->
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <TextBlock Classes="caption" Text="{x:Static vm:MainWindowViewModel.AppVersionLabel}"
+                                       VerticalAlignment="Center" />
+                            <Button Content="{x:Static res:Strings.News_Title}" Command="{Binding NavigateCommand}"
+                                    CommandParameter="{x:Static vm:AppPage.WhatsNew}"
+                                    ToolTip.Tip="{x:Static res:Strings.About_News_Tip}" />
+                            <Button Content="{x:Static res:Strings.About_ErrorLog}" Command="{Binding OpenLogsFolderCommand}"
+                                    ToolTip.Tip="{x:Static res:Strings.About_ErrorLog_Tip}" />
+                        </StackPanel>
+
+                        <TextBlock Classes="secondary" TextWrapping="Wrap"
+                                   Text="{x:Static res:Strings.About_Intro}" />
+
+                        <!-- Microsoft -->
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Microsoft" FontWeight="SemiBold" />
+                            <TextBlock Classes="secondary" TextWrapping="Wrap">
+                                <Run Text="Xbox Live" FontWeight="SemiBold" />
+                                <Run Text="{x:Static res:Strings.About_XboxLive}" />
+                            </TextBlock>
+                            <TextBlock Classes="secondary" TextWrapping="Wrap">
+                                <Run Text="{x:Static res:Strings.About_Catalog_Name}" FontWeight="SemiBold" />
+                                <Run Text="{x:Static res:Strings.About_Catalog}" />
+                            </TextBlock>
+                        </StackPanel>
+
+                        <!-- Steam -->
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Steam (Valve)" FontWeight="SemiBold" />
+                            <TextBlock Classes="secondary" TextWrapping="Wrap">
+                                <Run Text="Steam Web API" FontWeight="SemiBold" />
+                                <Run Text="{x:Static res:Strings.About_SteamWebApi}" />
+                            </TextBlock>
+                            <TextBlock Classes="secondary" TextWrapping="Wrap">
+                                <Run Text="{x:Static res:Strings.Common_SteamCatalog}" FontWeight="SemiBold" />
+                                <Run Text="{x:Static res:Strings.About_SteamStore}" />
+                            </TextBlock>
+                        </StackPanel>
+
+                        <!-- PlayStation -->
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="PlayStation (Sony Interactive Entertainment)" FontWeight="SemiBold" />
+                            <TextBlock Classes="secondary" TextWrapping="Wrap">
+                                <Run Text="PlayStation Network" FontWeight="SemiBold" />
+                                <Run Text="{x:Static res:Strings.About_PlayStationNetwork}" />
+                            </TextBlock>
+                            <TextBlock Classes="secondary" TextWrapping="Wrap">
+                                <Run Text="{x:Static res:Strings.Common_PsPlusCatalog}" FontWeight="SemiBold" />
+                                <Run Text="{x:Static res:Strings.About_PsPlusCatalog}" />
+                            </TextBlock>
+                            <TextBlock Classes="secondary" TextWrapping="Wrap">
+                                <Run Text="{x:Static res:Strings.Common_PsStoreCatalog}" FontWeight="SemiBold" />
+                                <Run Text="{x:Static res:Strings.About_PsStoreCatalog}" />
+                            </TextBlock>
+                        </StackPanel>
+
+                        <!-- EA -->
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="EA (Electronic Arts Inc.)" FontWeight="SemiBold" />
+                            <TextBlock Classes="secondary" TextWrapping="Wrap">
+                                <Run Text="{x:Static res:Strings.Common_EaHistory}" FontWeight="SemiBold" />
+                                <Run Text="{x:Static res:Strings.About_EaHistory}" />
+                            </TextBlock>
+                        </StackPanel>
+
+                        <!-- Epic Games -->
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Epic Games (Epic Games, Inc.)" FontWeight="SemiBold" />
+                            <TextBlock Classes="secondary" TextWrapping="Wrap">
+                                <Run Text="{x:Static res:Strings.Common_EpicHistory}" FontWeight="SemiBold" />
+                                <Run Text="{x:Static res:Strings.About_EpicHistory}" />
+                            </TextBlock>
+                            <TextBlock Classes="secondary" TextWrapping="Wrap">
+                                <Run Text="{x:Static res:Strings.Common_EpicCatalog}" FontWeight="SemiBold" />
+                                <Run Text="{x:Static res:Strings.About_EpicCatalog}" />
+                            </TextBlock>
+                        </StackPanel>
+
+                        <!-- GOG -->
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="GOG (GOG sp. z o.o.)" FontWeight="SemiBold" />
+                            <TextBlock Classes="secondary" TextWrapping="Wrap">
+                                <Run Text="{x:Static res:Strings.Settings_Gog_Title}" FontWeight="SemiBold" />
+                                <Run Text="{x:Static res:Strings.About_GogProfile}" />
+                            </TextBlock>
+                            <TextBlock Classes="secondary" TextWrapping="Wrap">
+                                <Run Text="{x:Static res:Strings.Common_GogCatalog}" FontWeight="SemiBold" />
+                                <Run Text="{x:Static res:Strings.About_GogCatalog}" />
+                            </TextBlock>
+                        </StackPanel>
+
+                        <TextBlock Classes="caption" TextWrapping="Wrap"
+                                   Text="{x:Static res:Strings.About_Trademarks}" />
+
+                        <!-- Legal texts shipped inside the app (LegalDocuments), opened in the text editor -->
+                        <WrapPanel Orientation="Horizontal" ItemSpacing="12" LineSpacing="8">
+                            <Button Content="{x:Static res:Strings.About_Terms}" Command="{Binding Legal.OpenTermsCommand}"
+                                    ToolTip.Tip="{x:Static res:Strings.About_Terms_Tip}" />
+                            <Button Content="{x:Static res:Strings.About_Licenses}" Command="{Binding Legal.OpenThirdPartyNoticesCommand}"
+                                    ToolTip.Tip="{x:Static res:Strings.About_Licenses_Tip}" />
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</ContentPage>

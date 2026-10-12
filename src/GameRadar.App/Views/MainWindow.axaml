@@ -1,0 +1,193 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:GameRadar.App.ViewModels"
+             xmlns:res="using:GameRadar.App.Resources"
+        xmlns:views="using:GameRadar.App.Views"
+        x:Class="GameRadar.App.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="GameRadar"
+        Icon="/Assets/GameRadar.ico"
+        Width="1200" Height="800"
+        MinWidth="880" MinHeight="560"
+        Background="{DynamicResource BackgroundBrush}"
+        Foreground="{DynamicResource TextPrimaryBrush}">
+
+    <!-- Escape leaves a side page ("Nouveautés", legal texts). On the window,
+         not the page: focus may still be on the hidden page it was opened
+         from. Only active on a side page. -->
+    <Window.KeyBindings>
+        <KeyBinding Gesture="Escape" Command="{Binding GoBackCommand}" />
+    </Window.KeyBindings>
+
+    <!-- Sidebar + content: a DrawerPage (Avalonia's page with a side drawer),
+         locked open. Its look: Components.axaml (DrawerPage).
+         ContentTemplate cleared: by default the content goes through a data
+         template, and a ContentPresenter with a template makes the content
+         its own DataContext. The page would lose the window's view model
+         (one view model per page is what DrawerPage expects; we have one). -->
+    <DrawerPage DrawerBehavior="Locked" DrawerLength="232" ContentTemplate="{x:Null}">
+
+        <!-- ============ Sidebar ============ -->
+
+        <!-- Logo -->
+        <DrawerPage.DrawerHeader>
+            <StackPanel Orientation="Horizontal" Spacing="10" Margin="20,20,12,28">
+                <Path Classes="icon accent" Data="{StaticResource IconRadar}" StrokeThickness="2" />
+                <TextBlock Classes="subtitle" Text="GameRadar" VerticalAlignment="Center" />
+            </StackPanel>
+        </DrawerPage.DrawerHeader>
+
+        <!-- Main navigation -->
+        <DrawerPage.Drawer>
+            <StackPanel Spacing="4" Margin="12,0">
+                <Button Classes="nav" Classes.selected="{Binding IsRecommendationsPage}"
+                        Command="{Binding NavigateCommand}"
+                        CommandParameter="{x:Static vm:AppPage.Recommendations}">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Path Classes="icon" Data="{StaticResource IconSparkle}" />
+                        <TextBlock Text="{x:Static res:Strings.Nav_ForYou}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Classes="nav" Classes.selected="{Binding IsHistoryPage}"
+                        Command="{Binding NavigateCommand}"
+                        CommandParameter="{x:Static vm:AppPage.History}">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Path Classes="icon" Data="{StaticResource IconHistory}" />
+                        <TextBlock Text="{x:Static res:Strings.Nav_History}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </DrawerPage.Drawer>
+
+        <!-- Bottom: sync state, then settings -->
+        <DrawerPage.DrawerFooter>
+            <StackPanel Spacing="8" Margin="12,8,12,16">
+                <Border Classes="card flat" Padding="12,10">
+                    <StackPanel Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <!-- Platform name + age of the data. A Grid rather than a
+                                 horizontal StackPanel, which would give the text an
+                                 infinite width and never trim it. -->
+                            <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
+                                <ItemsControl ItemsSource="{Binding Accounts.SyncedPlatforms}">
+                                    <ItemsControl.Styles>
+                                        <!-- The container itself hidden, not only its content: a
+                                             hidden line (no history, no account) leaves no gap. -->
+                                        <Style Selector="ContentPresenter" x:DataType="vm:SyncedPlatform">
+                                            <Setter Property="IsVisible" Value="{Binding ShowSync}" />
+                                        </Style>
+                                    </ItemsControl.Styles>
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Spacing="4" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:SyncedPlatform">
+                                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" ToolTip.Tip="{Binding Title}">
+                                                <TextBlock Classes="caption" Text="{Binding Platform}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="1" Classes="caption" Text="{Binding SyncLabel}"
+                                                           TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock Classes="caption" Text="{Binding CatalogSyncLabel}" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                            <Button Grid.Column="1" Classes="icon"
+                                    Command="{Binding Accounts.RefreshHistoryCommand}"
+                                    ToolTip.Tip="{x:Static res:Strings.Sidebar_Sync_Tip}">
+                                <!-- The Decorator spins, not the Path (see Components.axaml) -->
+                                <Decorator Classes.spinning="{Binding Accounts.RefreshHistoryCommand.IsRunning}">
+                                    <Path Classes="icon" Data="{StaticResource IconSync}" />
+                                </Decorator>
+                            </Button>
+                        </Grid>
+                        <ProgressBar Classes="thin" IsIndeterminate="True"
+                                     IsVisible="{Binding Catalogs.IsRefreshing}"
+                                     ToolTip.Tip="{x:Static res:Strings.Sidebar_CatalogUpdate_Tip}" />
+                    </StackPanel>
+                </Border>
+
+                <Button Classes="nav" Classes.selected="{Binding IsSettingsPage}"
+                        Command="{Binding NavigateCommand}"
+                        CommandParameter="{x:Static vm:AppPage.Settings}">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Path Classes="icon" Data="{StaticResource IconSettings}" />
+                        <TextBlock Text="{x:Static res:Strings.Nav_Settings}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </DrawerPage.DrawerFooter>
+
+        <!-- ============ Content ============ -->
+
+        <!-- Its left border is the line between the sidebar and the page. -->
+        <ContentPage Classes="main">
+            <DockPanel>
+
+                <!-- Error banner, visible from any page until dismissed -->
+                <Border DockPanel.Dock="Top" Classes="notice" Margin="32,16,32,0"
+                        IsVisible="{Binding Notices.HasMessage}">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                        <Path Grid.Column="0" Classes="icon alert" Data="{StaticResource IconAlert}" />
+                        <TextBlock Grid.Column="1" Text="{Binding Notices.Message}"
+                                   TextWrapping="Wrap" VerticalAlignment="Center" />
+                        <Button Grid.Column="2" Classes="icon"
+                                Command="{Binding Notices.DismissCommand}" ToolTip.Tip="{x:Static res:Strings.Common_Close}">
+                            <Path Classes="icon secondary" Data="{StaticResource IconClose}" />
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!-- New version banner, found on GitHub at startup -->
+                <Border DockPanel.Dock="Top" Classes="notice info" Margin="32,16,32,0"
+                        IsVisible="{Binding HasUpdate}">
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+                        <Path Grid.Column="0" Classes="icon accent" Data="{StaticResource IconDownload}" />
+                        <TextBlock Grid.Column="1" Text="{Binding UpdateLabel}"
+                                   TextWrapping="Wrap" VerticalAlignment="Center" />
+                        <Button Grid.Column="2" Classes="accent" Content="{x:Static res:Strings.Update_Download}"
+                                Command="{Binding OpenUpdatePageCommand}"
+                                ToolTip.Tip="{x:Static res:Strings.Update_Download_Tip}" />
+                        <Button Grid.Column="3" Classes="icon"
+                                Command="{Binding DismissUpdateCommand}" ToolTip.Tip="{x:Static res:Strings.Update_Later}">
+                            <Path Classes="icon secondary" Data="{StaticResource IconClose}" />
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!-- News banner, once after an update -->
+                <Border DockPanel.Dock="Top" Classes="notice info" Margin="32,16,32,0"
+                        IsVisible="{Binding WhatsNew.HasWhatsNew}">
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+                        <Path Grid.Column="0" Classes="icon accent" Data="{StaticResource IconSparkle}" />
+                        <TextBlock Grid.Column="1" Text="{Binding WhatsNew.WhatsNewLabel}"
+                                   TextWrapping="Wrap" VerticalAlignment="Center" />
+                        <Button Grid.Column="2" Classes="accent" Content="{x:Static res:Strings.News_Banner_Open}"
+                                Command="{Binding WhatsNew.OpenCommand}" />
+                        <Button Grid.Column="3" Classes="icon"
+                                Command="{Binding WhatsNew.DismissCommand}" ToolTip.Tip="{x:Static res:Strings.Common_Close}">
+                            <Path Classes="icon secondary" Data="{StaticResource IconClose}" />
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!-- The pages, one ContentPage each, in the order of AppPage. A
+                     TabbedPage without its tabs (class "hiddenTabs", Pages.axaml):
+                     the sidebar buttons navigate. Each page is built once and keeps
+                     its scroll position; the switch cross-fades (PageTransition). -->
+                <TabbedPage Classes="hiddenTabs" SelectedIndex="{Binding CurrentPageIndex, Mode=TwoWay}">
+                    <views:RecommendationsView />
+                    <views:HistoryView />
+                    <views:SettingsView />
+                    <views:WhatsNewView />
+                    <views:TermsView />
+                    <views:LicensesView />
+                    <views:AddGameView />
+                </TabbedPage>
+
+            </DockPanel>
+        </ContentPage>
+    </DrawerPage>
+</Window>

@@ -1,0 +1,120 @@
+<ContentPage xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GameRadar.App.ViewModels"
+             xmlns:res="using:GameRadar.App.Resources"
+             xmlns:app="using:GameRadar.App"
+             x:Class="GameRadar.App.Views.AddGameView"
+             x:DataType="vm:MainWindowViewModel">
+
+    <!-- Add a game played elsewhere (PlayStation, Switch...), from the history
+         or the welcome screen. Several games in a row: the page clears after
+         each one, keeping the platform and the level. -->
+    <ScrollViewer>
+        <Grid Margin="32,28,32,32">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1000*" MaxWidth="720" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+        <StackPanel Spacing="20">
+
+            <!-- Back to where it was opened from; Escape does the same (key binding on the MainWindow) -->
+            <Button Classes="icon" Command="{Binding GoBackCommand}" HorizontalAlignment="Left"
+                    ToolTip.Tip="{x:Static res:Strings.Common_Back_Tip}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Path Classes="icon secondary" Data="{StaticResource IconArrowLeft}" />
+                    <TextBlock Classes="secondary" Text="{x:Static res:Strings.Common_Back}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+
+            <StackPanel Spacing="8">
+                <TextBlock Classes="display" Text="{x:Static res:Strings.AddGame_Title}" />
+                <TextBlock Classes="secondary" TextWrapping="Wrap" Text="{x:Static res:Strings.AddGame_Intro}" />
+            </StackPanel>
+
+            <!-- The game just added -->
+            <Border Classes="notice info" IsVisible="{Binding AddGame.HasConfirmation}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                    <Path Classes="icon accent" Data="{StaticResource IconHistory}" />
+                    <TextBlock Grid.Column="1" Text="{Binding AddGame.Confirmation}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+
+            <Border Classes="card">
+                <StackPanel Spacing="16">
+                    <!-- 1. Which game: typed, then picked among what was found -->
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                        <TextBox Text="{Binding AddGame.Text}" PlaceholderText="{x:Static res:Strings.AddGame_Search_Placeholder}">
+                            <TextBox.KeyBindings>
+                                <KeyBinding Gesture="Enter" Command="{Binding AddGame.SearchCommand}" />
+                            </TextBox.KeyBindings>
+                            <TextBox.InnerLeftContent>
+                                <Path Classes="icon secondary small" Data="{StaticResource IconSearch}" Margin="4,0,0,0" />
+                            </TextBox.InnerLeftContent>
+                        </TextBox>
+                        <Button Grid.Column="1" Content="{x:Static res:Strings.AddGame_Search}" Command="{Binding AddGame.SearchCommand}" />
+                    </Grid>
+                    <ProgressBar Classes="thin" IsIndeterminate="True" IsVisible="{Binding AddGame.SearchCommand.IsRunning}" />
+                    <TextBlock Classes="caption" Text="{Binding AddGame.Status}" TextWrapping="Wrap"
+                               IsVisible="{Binding AddGame.Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+                    <ListBox ItemsSource="{Binding AddGame.Results}" SelectedItem="{Binding AddGame.SelectedResult}"
+                             IsVisible="{Binding AddGame.HasResults}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:AddGameResultRow">
+                                <StackPanel Spacing="2">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="{Binding Label}" VerticalAlignment="Center" />
+                                        <Border Classes="badge gamepass" IsVisible="{Binding InGamePass}">
+                                            <TextBlock Text="Game Pass" />
+                                        </Border>
+                                        <Border Classes="badge platform steam" IsVisible="{Binding OnSteam}">
+                                            <TextBlock Text="Steam" />
+                                        </Border>
+                                        <Border Classes="badge platform xbox" IsVisible="{Binding ShowXboxBadge}">
+                                            <TextBlock Text="Xbox" />
+                                        </Border>
+                                        <Border Classes="badge platform playstation" IsVisible="{Binding ShowPlayStationBadge}">
+                                            <TextBlock Text="PlayStation" />
+                                        </Border>
+                                    </StackPanel>
+                                    <TextBlock Classes="caption" TextWrapping="Wrap" IsVisible="{Binding IsAsTyped}"
+                                               Text="{x:Static res:Strings.AddGame_AsTyped_Hint}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <!-- 2. Where it was played, how far -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+                        <StackPanel Spacing="6">
+                            <TextBlock Classes="caption" Text="{x:Static res:Strings.AddGame_Platform}" />
+                            <ComboBox ItemsSource="{Binding AddGame.Platforms}" SelectedItem="{Binding AddGame.Platform, Converter={x:Static app:KeepChoice.Instance}}" HorizontalAlignment="Stretch">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ManualPlatformOption">
+                                        <TextBlock Text="{Binding Label}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Spacing="6">
+                            <TextBlock Classes="caption" Text="{x:Static res:Strings.AddGame_Level}" />
+                            <ComboBox ItemsSource="{Binding AddGame.Levels}" SelectedItem="{Binding AddGame.Level, Converter={x:Static app:KeepChoice.Instance}}" HorizontalAlignment="Stretch"
+                                      ToolTip.Tip="{x:Static res:Strings.History_ManualLevel_Tip}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ManualLevelOption">
+                                        <TextBlock Text="{Binding Label}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                    </Grid>
+
+                    <Button Classes="accent" Content="{x:Static res:Strings.AddGame_Add}" Command="{Binding AddGame.AddCommand}"
+                            HorizontalAlignment="Left" />
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</ContentPage>

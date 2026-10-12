@@ -1,0 +1,120 @@
+<!--
+  Control themes of Avalonia's page controls (TabbedPage...), redrawn in the
+  GameRadar style. A ControlTheme replaces a control's whole template (a
+  Style only sets properties): needed here because Fluent draws tabs of
+  equal width, spread over the whole row, underlined in accent color.
+
+  Resources, not styles: a control finds its theme by looking up its type
+  (x:Key="{x:Type TabbedPage}") in the resources, ours before Fluent's.
+  Tokens are read with DynamicResource: they live in another dictionary.
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:app="using:GameRadar.App">
+
+    <!-- A paragraph of a legal text (LegalDocuments), shared by the terms and
+         licenses pages: headings larger, text selectable to copy a passage. -->
+    <DataTemplate x:Key="LegalParagraphTemplate" x:DataType="app:LegalParagraph">
+        <SelectableTextBlock Text="{Binding Text}" TextWrapping="Wrap" Margin="0,0,0,12"
+                             Classes.subtitle="{Binding IsHeading}"
+                             Classes.secondary="{Binding !IsHeading}" />
+    </DataTemplate>
+
+    <!-- One tab: a pill, like Button.nav in the sidebar. The border is always
+         there (transparent), so the keyboard focus ring does not move the text. -->
+    <ControlTheme x:Key="PillTabItemTheme" TargetType="TabItem">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="2" />
+        <Setter Property="Padding" Value="12,5" />
+        <Setter Property="CornerRadius" Value="{DynamicResource RadiusMedium}" />
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeBody}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_LayoutRoot"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Padding="{TemplateBinding Padding}">
+                    <ContentPresenter Name="PART_ContentPresenter"
+                                      Content="{TemplateBinding Header}"
+                                      ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                      FontWeight="{TemplateBinding FontWeight}" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <Style Selector="^:pointerover">
+            <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        </Style>
+        <!-- After :pointerover, so the selected tab keeps its look under the mouse -->
+        <Style Selector="^:selected">
+            <Setter Property="Background" Value="{DynamicResource AccentSubtleBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <!-- Reached with the keyboard (Tab key), not with the mouse -->
+        <Style Selector="^:focus-visible">
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+    </ControlTheme>
+
+    <!-- The TabControl inside a TabbedPage: pills side by side, left-aligned,
+         wrapping to a new line if the window is too narrow. The strip is always
+         on top (TabPlacement is not used). Padding = margin of the strip only:
+         the pages below keep the full width (their scroll bar on the edge). -->
+    <ControlTheme x:Key="PillTabControlTheme" TargetType="TabControl">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <DockPanel>
+                    <ItemsPresenter Name="PART_ItemsPresenter"
+                                    DockPanel.Dock="Top"
+                                    Margin="{TemplateBinding Padding}">
+                        <ItemsPresenter.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" ItemSpacing="4" LineSpacing="4" />
+                            </ItemsPanelTemplate>
+                        </ItemsPresenter.ItemsPanel>
+                    </ItemsPresenter>
+                    <!-- Two hosts: the TabControl moves the pages between them to
+                         run a PageTransition; the second one stays hidden otherwise. -->
+                    <Panel ClipToBounds="True">
+                        <ContentPresenter Name="PART_SelectedContentHost2"
+                                          HorizontalContentAlignment="Stretch"
+                                          VerticalContentAlignment="Stretch"
+                                          IsVisible="False" />
+                        <ContentPresenter Name="PART_SelectedContentHost"
+                                          HorizontalContentAlignment="Stretch"
+                                          VerticalContentAlignment="Stretch" />
+                    </Panel>
+                </DockPanel>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- TabbedPage: a page made of pages, one tab each (TabbedPage builds the
+         tabs from each page's Header). Its code needs a TabControl named
+         PART_TabControl in the template. -->
+    <ControlTheme x:Key="{x:Type TabbedPage}" TargetType="TabbedPage">
+        <Setter Property="Background" Value="Transparent" />
+        <!-- Swiping between tabs is for touch screens -->
+        <Setter Property="IsGestureEnabled" Value="False" />
+        <!-- TabbedPage reads the arrow keys from anywhere in the page: with the
+             focus on a button of a tab, → jumped to the next tab. The arrows
+             still move between the tabs when a tab has the focus (TabControl). -->
+        <Setter Property="IsKeyboardNavigationEnabled" Value="False" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <TabControl Name="PART_TabControl"
+                            Theme="{StaticResource PillTabControlTheme}"
+                            ItemContainerTheme="{StaticResource PillTabItemTheme}"
+                            Background="{TemplateBinding Background}"
+                            Padding="{TemplateBinding Padding}" />
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

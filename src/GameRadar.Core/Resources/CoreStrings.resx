@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Messages of the Core: French in CoreStrings.resx (neutral language), English
+  in CoreStrings.en.resx, same keys (checked by LocalizationTests of the App).
+  A text with {0} is a format: CoreText.Format(CoreStrings.X, value).
+-->
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+
+  <!-- Errors explained to the user, sign-in page -->
+  <data name="GamePass_EmptyCatalog" xml:space="preserve"><value>Le catalogue Game Pass reçu est vide (le format a peut-être changé).</value></data>
+  <data name="GamePass_MissingPlan" xml:space="preserve"><value>Le catalogue Game Pass reçu est incomplet : un abonnement n'y a plus aucun jeu (le format a peut-être changé). L'ancien catalogue est gardé.</value></data>
+  <data name="GamePass_EmptyAnswer" xml:space="preserve"><value>Réponse vide du catalogue Microsoft.</value></data>
+  <data name="GamePass_HttpError" xml:space="preserve"><value>Le catalogue Microsoft a répondu avec une erreur ({0} {1}).</value></data>
+  <data name="Steam_PasteKey" xml:space="preserve"><value>Colle ta clé API Steam (steamcommunity.com/dev/apikey).</value></data>
+  <data name="Steam_NotConnected" xml:space="preserve"><value>Connecte ton compte Steam dans les Réglages.</value></data>
+  <data name="Steam_PasteProfile" xml:space="preserve"><value>Colle l'adresse de ton profil Steam, par exemple https://steamcommunity.com/id/tonpseudo.</value></data>
+  <data name="Steam_NoSuchProfile" xml:space="preserve"><value>Aucun profil Steam ne s'appelle « {0} ». Vérifie l'adresse de ton profil.</value></data>
+  <data name="Steam_NoSuchSteamId" xml:space="preserve"><value>Aucun profil Steam ne porte le numéro {0}. Vérifie l'adresse de ton profil.</value></data>
+  <data name="Steam_PrivateLibrary" xml:space="preserve"><value>Ta bibliothèque Steam est privée. Sur ton profil Steam : Modifier le profil › Confidentialité › « Détails des jeux » : Public.</value></data>
+  <data name="Steam_KeyRefused" xml:space="preserve"><value>Clé API Steam refusée. Vérifie-la sur steamcommunity.com/dev/apikey.</value></data>
+  <data name="Steam_RateLimited" xml:space="preserve"><value>Steam limite les requêtes pour le moment. Réessaie dans quelques minutes.</value></data>
+  <data name="Steam_HttpError" xml:space="preserve"><value>Steam a répondu avec une erreur ({0} {1}).</value></data>
+  <data name="Steam_StoreDown" xml:space="preserve"><value>Le catalogue Steam ne répond pas pour le moment. Les recommandations se limitent au Game Pass.</value></data>
+  <data name="Steam_EmptyTagList" xml:space="preserve"><value>La liste des tags Steam reçue est vide (le format a peut-être changé).</value></data>
+  <data name="Steam_StoreFormat" xml:space="preserve"><value>Le catalogue Steam a un format inattendu (l'API a peut-être changé).</value></data>
+  <data name="Steam_EmptyCatalog" xml:space="preserve"><value>Le catalogue Steam reçu est vide (le format a peut-être changé).</value></data>
+  <data name="Steam_StoreRateLimitedGenres" xml:space="preserve"><value>Steam limite les requêtes pour le moment. Les genres manquants seront cherchés plus tard.</value></data>
+  <data name="Steam_StoreDownGenres" xml:space="preserve"><value>Steam ne répond pas pour le moment. Les genres manquants seront cherchés plus tard.</value></data>
+  <data name="Steam_StoreRateLimitedTags" xml:space="preserve"><value>Steam limite les requêtes pour le moment. Les tags manquants seront cherchés plus tard.</value></data>
+  <data name="Steam_StoreDownTags" xml:space="preserve"><value>Steam ne répond pas pour le moment. Les tags manquants seront cherchés plus tard.</value></data>
+  <data name="Xbox_LoopbackFailed" xml:space="preserve"><value>GameRadar n'a pas pu ouvrir sur cet ordinateur la page où revient la connexion ({0}). Réessaie, ou redémarre l'ordinateur si ça continue.</value></data>
+  <data name="Xbox_AccessDenied" xml:space="preserve"><value>Connexion annulée : l'accès à ton compte Xbox n'a pas été autorisé.</value></data>
+  <data name="Xbox_SignInFailed" xml:space="preserve"><value>La connexion Microsoft a échoué ({0}).</value></data>
+  <data name="Xbox_ErrorCode" xml:space="preserve"><value>erreur {0}</value></data>
+  <data name="Xbox_BrowserSuccess" xml:space="preserve"><value>C'est bon ! Tu peux fermer cet onglet et revenir dans GameRadar.</value></data>
+  <data name="Xbox_BrowserFailure" xml:space="preserve"><value>La connexion n'a pas abouti. Tu peux fermer cet onglet : GameRadar t'explique pourquoi.</value></data>
+  <data name="Xbox_SignInTimeout" xml:space="preserve"><value>La connexion a pris trop de temps. Réessaie.</value></data>
+  <data name="Xbox_NoOfflineAccess" xml:space="preserve"><value>Microsoft n'a pas accordé l'accès durable demandé. Réessaie.</value></data>
+  <data name="Xbox_SignInToLoad" xml:space="preserve"><value>Connecte-toi à ton compte Xbox pour charger ton historique.</value></data>
+  <data name="Xbox_SessionExpired" xml:space="preserve"><value>Ta connexion Microsoft a expiré : reconnecte-toi.</value></data>
+  <data name="Xbox_AppBlocked" xml:space="preserve"><value>Microsoft a désactivé l'accès de GameRadar à Xbox Live : la synchronisation Xbox ne fonctionne plus pour personne, ton compte n'y est pour rien. Tes jeux déjà synchronisés restent dans GameRadar, et Steam fonctionne toujours. Une nouvelle version de GameRadar sera annoncée ici si une solution est trouvée.</value></data>
+  <data name="Xbox_UserAuthRefused" xml:space="preserve"><value>Xbox Live a refusé la connexion (erreur {0}).</value></data>
+  <data name="Xbox_Format" xml:space="preserve"><value>La réponse de Xbox Live a un format inattendu (l'API a peut-être changé).</value></data>
+  <data name="Xbox_NoProfile" xml:space="preserve"><value>Ce compte Microsoft n'a pas de profil Xbox. Connecte-toi une fois sur xbox.com pour en créer un, ou choisis un autre compte.</value></data>
+  <data name="Xbox_CountryUnavailable" xml:space="preserve"><value>Xbox Live n'est pas disponible dans le pays de ce compte.</value></data>
+  <data name="Xbox_AgeCheck" xml:space="preserve"><value>Ce compte doit d'abord confirmer son âge sur xbox.com.</value></data>
+  <data name="Xbox_ChildAccount" xml:space="preserve"><value>Compte enfant : un adulte de la famille doit l'autoriser sur account.microsoft.com/family.</value></data>
+  <data name="Xbox_Refused" xml:space="preserve"><value>Xbox Live a refusé l'accès (erreur {0}).</value></data>
+  <data name="Xbox_RefusedCode" xml:space="preserve"><value>Xbox Live a refusé l'accès (code {0}).</value></data>
+  <data name="Xbox_HistoryRefused" xml:space="preserve"><value>Xbox Live a refusé l'accès à ton historique. Réessaie ; si ça persiste, reconnecte-toi.</value></data>
+  <data name="Xbox_RateLimited" xml:space="preserve"><value>Xbox Live limite les requêtes pour le moment. Réessaie dans quelques minutes.</value></data>
+  <data name="Xbox_HttpError" xml:space="preserve"><value>Xbox Live a répondu avec une erreur ({0} {1}).</value></data>
+  <data name="PlayStation_PasteNpsso" xml:space="preserve"><value>Colle ton jeton NPSSO : connecte-toi sur playstation.com, puis ouvre ca.account.sony.com/api/v1/ssocookie et copie la valeur de « npsso ».</value></data>
+  <data name="PlayStation_NotConnected" xml:space="preserve"><value>Connecte ton compte PlayStation dans les Réglages.</value></data>
+  <data name="PlayStation_NpssoRefused" xml:space="preserve"><value>Sony a refusé ton jeton NPSSO : il a expiré, ou tu t'es déconnecté de tous tes appareils. Reconnecte-toi sur playstation.com, puis colle un nouveau jeton (ca.account.sony.com/api/v1/ssocookie).</value></data>
+  <data name="PlayStation_AppBlocked" xml:space="preserve"><value>Sony a bloqué la connexion utilisée par GameRadar : la synchronisation PlayStation ne fonctionne plus pour personne, ton compte n'y est pour rien. Tes jeux déjà synchronisés restent dans GameRadar. Une nouvelle version de GameRadar sera annoncée ici si une solution est trouvée.</value></data>
+  <data name="PlayStation_SignInFailed" xml:space="preserve"><value>La connexion PlayStation a échoué ({0}).</value></data>
+  <data name="PlayStation_ErrorCode" xml:space="preserve"><value>erreur {0}</value></data>
+  <data name="PlayStation_RateLimited" xml:space="preserve"><value>PlayStation Network limite les requêtes pour le moment. Réessaie dans quelques minutes.</value></data>
+  <data name="PlayStation_HttpError" xml:space="preserve"><value>PlayStation Network a répondu avec une erreur ({0} {1}).</value></data>
+  <data name="PlayStation_Format" xml:space="preserve"><value>La réponse de PlayStation Network a un format inattendu (l'API a peut-être changé).</value></data>
+  <data name="PlayStation_StoreRefused" xml:space="preserve"><value>Le PlayStation Store a refusé la requête (le site a sans doute changé).</value></data>
+  <data name="PsPlus_EmptyCatalog" xml:space="preserve"><value>Le catalogue PS Plus reçu est vide (le format a peut-être changé).</value></data>
+  <data name="PsStore_EmptyCatalog" xml:space="preserve"><value>Le catalogue PlayStation Store reçu est vide (le site a peut-être changé).</value></data>
+  <data name="PsPlus_MissingPlan" xml:space="preserve"><value>Le catalogue PS Plus reçu est incomplet : un abonnement n'y a plus aucun jeu (le format a peut-être changé). L'ancien catalogue est gardé.</value></data>
+  <data name="Gog_CatalogFormat" xml:space="preserve"><value>Le catalogue GOG a un format inattendu (l'API a peut-être changé).</value></data>
+  <data name="Gog_CatalogDown" xml:space="preserve"><value>Le catalogue GOG ne répond pas pour le moment. Les recommandations se passent de lui.</value></data>
+  <data name="Gog_EmptyCatalog" xml:space="preserve"><value>Le catalogue GOG reçu est vide (le format a peut-être changé).</value></data>
+  <data name="Gog_PasteProfile" xml:space="preserve"><value>Colle ton nom de profil GOG, ou l'adresse de ta page de profil (gog.com/u/…).</value></data>
+  <data name="Gog_NoSuchProfile" xml:space="preserve"><value>Aucun profil GOG ne s'appelle « {0} ». Vérifie le nom : c'est celui qui suit « /u/ » dans l'adresse de ta page de profil.</value></data>
+  <data name="Gog_PrivateProfile" xml:space="preserve"><value>Le profil GOG « {0} » n'est pas public. Dans les réglages de confidentialité de ton compte GOG, rends ton profil visible par tout le monde, puis réessaie.</value></data>
+  <data name="Gog_RateLimited" xml:space="preserve"><value>GOG limite les requêtes pour le moment. Réessaie dans quelques minutes.</value></data>
+  <data name="Gog_ProfileDown" xml:space="preserve"><value>GOG ne répond pas pour le moment. Réessaie plus tard.</value></data>
+  <data name="Gog_ProfileFormat" xml:space="preserve"><value>La page de profil GOG a un format inattendu (le site a peut-être changé).</value></data>
+  <data name="Ea_PasteToken" xml:space="preserve"><value>Colle tout le texte de la page EA (il commence par {"access_token": …) : ouvre-la avec « Ouvrir la page EA », puis Ctrl+A et Ctrl+C.</value></data>
+  <data name="Ea_SignInFirst" xml:space="preserve"><value>La page EA dit que tu n'es pas connecté : connecte-toi sur ea.com dans ton navigateur, puis rouvre la page EA et copie-la à nouveau.</value></data>
+  <data name="Ea_Format" xml:space="preserve"><value>La réponse d'EA a un format inattendu (l'API a peut-être changé).</value></data>
+  <data name="Ea_TokenExpired" xml:space="preserve"><value>EA a refusé le jeton : il a sans doute expiré (il vaut 4 heures). Rouvre la page EA, copie-la et colle-la à nouveau.</value></data>
+  <data name="Ea_RateLimited" xml:space="preserve"><value>EA limite les requêtes pour le moment. Réessaie dans quelques minutes.</value></data>
+  <data name="Ea_Down" xml:space="preserve"><value>EA ne répond pas pour le moment. Réessaie plus tard.</value></data>
+  <data name="Epic_PasteCode" xml:space="preserve"><value>Colle tout le texte de la page Epic (il contient "authorizationCode") : ouvre-la avec le lien « la page de ton code », puis Ctrl+A et Ctrl+C.</value></data>
+  <data name="Epic_SignInFirst" xml:space="preserve"><value>La page Epic ne contient pas de code : connecte-toi sur epicgames.com dans ton navigateur, puis rouvre la page Epic et copie-la à nouveau.</value></data>
+  <data name="Epic_Format" xml:space="preserve"><value>La réponse d'Epic a un format inattendu (l'API a peut-être changé).</value></data>
+  <data name="Epic_CodeRefused" xml:space="preserve"><value>Epic a refusé ce code : il ne sert qu'une fois et expire vite. Rouvre la page Epic, copie-la et colle-la tout de suite.</value></data>
+  <data name="Epic_SessionExpired" xml:space="preserve"><value>Ta connexion Epic a expiré ou a été retirée : rouvre la page Epic et colle un nouveau code.</value></data>
+  <data name="Epic_RateLimited" xml:space="preserve"><value>Epic limite les requêtes pour le moment. Réessaie dans quelques minutes.</value></data>
+  <data name="Epic_Down" xml:space="preserve"><value>Epic ne répond pas pour le moment. Réessaie plus tard.</value></data>
+  <data name="Epic_StoreDown" xml:space="preserve"><value>Le catalogue Epic ne répond pas pour le moment. Les recommandations se passent de lui.</value></data>
+  <data name="Epic_EmptyCatalog" xml:space="preserve"><value>Le catalogue Epic reçu est vide (le format a peut-être changé).</value></data>
+</root>

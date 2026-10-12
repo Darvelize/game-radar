@@ -1,0 +1,273 @@
+<ContentPage xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GameRadar.App.ViewModels"
+             xmlns:res="using:GameRadar.App.Resources"
+             xmlns:app="using:GameRadar.App"
+             x:Class="GameRadar.App.Views.Settings.AccountsTab"
+             x:DataType="vm:MainWindowViewModel">
+
+    <!-- Settings › Accounts: one card per platform -->
+    <!-- A ContentPage does not scroll by itself. Same column for every tab: up
+         to 720 px (1000*: nearly all the room), else the cards would change
+         width from one tab to the next. -->
+    <ScrollViewer>
+        <Grid Margin="32,20,32,32">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1000*" MaxWidth="720" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Spacing="20">
+
+                <!-- Xbox account -->
+                <Border Classes="card">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Path Classes="icon accent" Data="{StaticResource IconUser}" />
+                            <TextBlock Classes="subtitle" Text="{x:Static res:Strings.Settings_Xbox_Title}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Classes="secondary" TextWrapping="Wrap"
+                                   Text="{x:Static res:Strings.Settings_Xbox_Description}" />
+                        <TextBlock Text="{Binding Accounts.AccountLabel}" FontWeight="SemiBold" />
+
+                        <!-- Signed in -->
+                        <StackPanel Orientation="Horizontal" Spacing="12" IsVisible="{Binding Accounts.XboxSync.IsConnected}">
+                            <Button Classes="accent" Content="{x:Static res:Strings.Account_Sync}" Command="{Binding Accounts.RefreshHistoryCommand}" />
+                            <Button Content="{x:Static res:Strings.Account_SignOut}" Command="{Binding Accounts.SignOutCommand}" />
+                        </StackPanel>
+
+                        <!-- Signed out -->
+                        <StackPanel Orientation="Horizontal" Spacing="12" IsVisible="{Binding !Accounts.XboxSync.IsConnected}">
+                            <Button Classes="accent" Content="{x:Static res:Strings.Account_SignInMicrosoft}" Command="{Binding Accounts.SignInCommand}" />
+                            <Button Content="{x:Static res:Strings.Common_Cancel}" Command="{Binding Accounts.SignInCancelCommand}"
+                                    IsVisible="{Binding Accounts.SignInCommand.IsRunning}" />
+                        </StackPanel>
+
+                        <!-- Game Pass plan: part of the Xbox account (subrow = thin line above) -->
+                        <Border Classes="subrow">
+                            <StackPanel Spacing="10">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="{x:Static res:Strings.Settings_Plan_Title}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    <Border Classes="badge gamepass" VerticalAlignment="Center">
+                                        <TextBlock Text="Game Pass" />
+                                    </Border>
+                                </StackPanel>
+                                <TextBlock Classes="secondary" TextWrapping="Wrap"
+                                           Text="{x:Static res:Strings.Settings_Plan_Description}" />
+                                <ComboBox ItemsSource="{Binding SourceFilter.GamePassPlans}" SelectedItem="{Binding SourceFilter.SelectedGamePassPlan, Converter={x:Static app:KeepChoice.Instance}}"
+                                          MinWidth="260">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:SourceFilterViewModel+GamePassPlanOption">
+                                            <TextBlock Text="{Binding Label}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Steam account -->
+                <Border Classes="card">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Path Classes="icon accent" Data="{StaticResource IconUser}" />
+                            <TextBlock Classes="subtitle" Text="{x:Static res:Strings.Settings_Steam_Title}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Classes="secondary" TextWrapping="Wrap"
+                                   Text="{x:Static res:Strings.Settings_Steam_Description}" />
+                        <TextBlock Text="{Binding Accounts.SteamAccountLabel}" FontWeight="SemiBold" />
+
+                        <!-- Connected -->
+                        <StackPanel Orientation="Horizontal" Spacing="12" IsVisible="{Binding Accounts.SteamSync.IsConnected}">
+                            <Button Classes="accent" Content="{x:Static res:Strings.Account_Sync}" Command="{Binding Accounts.RefreshHistoryCommand}" />
+                            <Button Content="{x:Static res:Strings.Account_SignOut}" Command="{Binding Accounts.DisconnectSteamCommand}" />
+                        </StackPanel>
+
+                        <!-- Not connected: profile + key -->
+                        <StackPanel Spacing="10" IsVisible="{Binding !Accounts.SteamSync.IsConnected}">
+                            <TextBlock Classes="caption" TextWrapping="Wrap"
+                                       Text="{x:Static res:Strings.Settings_Steam_PublicProfile}" />
+                            <TextBox Text="{Binding Accounts.SteamProfileInput}"
+                                     PlaceholderText="{x:Static res:Strings.Settings_Steam_ProfilePlaceholder}" />
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Classes="caption" Text="{x:Static res:Strings.Settings_Steam_KeyLabel}" VerticalAlignment="Center" />
+                                <HyperlinkButton Content="{x:Static res:Strings.Settings_Steam_GetKey}"
+                                                 NavigateUri="https://steamcommunity.com/dev/apikey" Padding="2,0" />
+                                <TextBlock Classes="caption" Text="{x:Static res:Strings.Settings_Steam_Domain}" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBox Text="{Binding Accounts.SteamKeyInput}" PasswordChar="•" PlaceholderText="{x:Static res:Strings.Settings_Steam_KeyPlaceholder}" />
+                            <Button Classes="accent" Content="{x:Static res:Strings.Settings_Steam_Connect}" Command="{Binding Accounts.ConnectSteamCommand}"
+                                    HorizontalAlignment="Left" />
+                        </StackPanel>
+                        <ProgressBar Classes="thin" IsIndeterminate="True"
+                                     IsVisible="{Binding Accounts.ConnectSteamCommand.IsRunning}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- PlayStation account (Sony's own app identity) -->
+                <Border Classes="card">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Path Classes="icon accent" Data="{StaticResource IconUser}" />
+                            <TextBlock Classes="subtitle" Text="{x:Static res:Strings.Settings_PlayStation_Title}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Classes="secondary" TextWrapping="Wrap"
+                                   Text="{x:Static res:Strings.Settings_PlayStation_Description}" />
+                        <TextBlock Text="{Binding Accounts.PlayStationAccountLabel}" FontWeight="SemiBold" />
+
+                        <!-- Connected -->
+                        <StackPanel Orientation="Horizontal" Spacing="12" IsVisible="{Binding Accounts.PlayStationSync.IsConnected}">
+                            <Button Classes="accent" Content="{x:Static res:Strings.Account_Sync}" Command="{Binding Accounts.RefreshHistoryCommand}" />
+                            <Button Content="{x:Static res:Strings.Account_SignOut}" Command="{Binding Accounts.DisconnectPlayStationCommand}" />
+                        </StackPanel>
+
+                        <!-- Not connected: three steps to the NPSSO -->
+                        <StackPanel Spacing="10" IsVisible="{Binding !Accounts.PlayStationSync.IsConnected}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Classes="caption" Text="{x:Static res:Strings.Settings_PlayStation_Step1}" VerticalAlignment="Center" />
+                                <HyperlinkButton Content="playstation.com" Command="{Binding Accounts.OpenPlayStationSignInCommand}" Padding="2,0" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Classes="caption" Text="{x:Static res:Strings.Settings_PlayStation_Step2}" VerticalAlignment="Center" />
+                                <HyperlinkButton Content="{x:Static res:Strings.Settings_PlayStation_OpenNpsso}" Command="{Binding Accounts.OpenNpssoPageCommand}" Padding="2,0" />
+                            </StackPanel>
+                            <TextBlock Classes="caption" TextWrapping="Wrap" Text="{x:Static res:Strings.Settings_PlayStation_Step3}" />
+                            <TextBox Text="{Binding Accounts.NpssoInput}" PasswordChar="•"
+                                     PlaceholderText="{x:Static res:Strings.Settings_PlayStation_NpssoPlaceholder}" />
+                            <Button Classes="accent" Content="{x:Static res:Strings.Settings_PlayStation_Connect}" Command="{Binding Accounts.ConnectPlayStationCommand}"
+                                    HorizontalAlignment="Left" />
+                        </StackPanel>
+                        <ProgressBar Classes="thin" IsIndeterminate="True"
+                                     IsVisible="{Binding Accounts.ConnectPlayStationCommand.IsRunning}" />
+
+                        <!-- PS Plus plan: part of the PlayStation account (subrow = thin line above) -->
+                        <Border Classes="subrow">
+                            <StackPanel Spacing="10">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="{x:Static res:Strings.Settings_PsPlus_Title}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    <Border Classes="badge platform playstation" VerticalAlignment="Center">
+                                        <TextBlock Text="PS Plus" />
+                                    </Border>
+                                </StackPanel>
+                                <TextBlock Classes="secondary" TextWrapping="Wrap"
+                                           Text="{x:Static res:Strings.Settings_PsPlus_Description}" />
+                                <ComboBox ItemsSource="{Binding SourceFilter.PsPlusPlans}" SelectedItem="{Binding SourceFilter.SelectedPsPlusPlan, Converter={x:Static app:KeepChoice.Instance}}"
+                                          MinWidth="260">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:SourceFilterViewModel+PsPlusPlanOption">
+                                            <TextBlock Text="{Binding Label}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- EA app: a token pasted from EA's page at each update (EA's own client id), never saved -->
+                <Border Classes="card">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Path Classes="icon accent" Data="{StaticResource IconUser}" />
+                            <TextBlock Classes="subtitle" Text="{x:Static res:Strings.Settings_Ea_Title}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Classes="secondary" TextWrapping="Wrap"
+                                   Text="{x:Static res:Strings.Settings_Ea_Description}" />
+                        <TextBlock Text="{Binding Accounts.EaAccountLabel}" FontWeight="SemiBold" />
+
+                        <!-- Three steps to EA's page, whether a token is in memory or not: it lasts 4 h -->
+                        <StackPanel Spacing="10">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Classes="caption" Text="{x:Static res:Strings.Settings_Ea_Step1}" VerticalAlignment="Center" />
+                                <HyperlinkButton Content="ea.com" Command="{Binding Accounts.OpenEaSignInCommand}" Padding="2,0" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Classes="caption" Text="{x:Static res:Strings.Settings_Ea_Step2}" VerticalAlignment="Center" />
+                                <HyperlinkButton Content="{x:Static res:Strings.Settings_Ea_OpenPage}" Command="{Binding Accounts.OpenEaPageCommand}" Padding="2,0" />
+                            </StackPanel>
+                            <TextBlock Classes="caption" TextWrapping="Wrap" Text="{x:Static res:Strings.Settings_Ea_Step3}" />
+                            <TextBox Text="{Binding Accounts.EaTokenInput}" PasswordChar="•"
+                                     PlaceholderText="{x:Static res:Strings.Settings_Ea_TokenPlaceholder}" />
+                            <Button Classes="accent" Content="{x:Static res:Strings.Settings_Ea_Update}" Command="{Binding Accounts.UpdateEaCommand}"
+                                    HorizontalAlignment="Left" />
+                        </StackPanel>
+                        <ProgressBar Classes="thin" IsIndeterminate="True"
+                                     IsVisible="{Binding Accounts.UpdateEaCommand.IsRunning}" />
+                        <TextBlock Classes="caption" TextWrapping="Wrap" Text="{Binding Accounts.EaSync.Status}"
+                                   IsVisible="{Binding Accounts.UpdateEaCommand.IsRunning}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Epic Games account: a code pasted once (the Epic launcher's identity), the session kept encrypted -->
+                <Border Classes="card">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Path Classes="icon accent" Data="{StaticResource IconUser}" />
+                            <TextBlock Classes="subtitle" Text="{x:Static res:Strings.Settings_Epic_Title}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Classes="secondary" TextWrapping="Wrap"
+                                   Text="{x:Static res:Strings.Settings_Epic_Description}" />
+                        <TextBlock Text="{Binding Accounts.EpicAccountLabel}" FontWeight="SemiBold" />
+
+                        <!-- Connected -->
+                        <StackPanel Orientation="Horizontal" Spacing="12" IsVisible="{Binding Accounts.EpicSync.IsConnected}">
+                            <Button Classes="accent" Content="{x:Static res:Strings.Account_Sync}" Command="{Binding Accounts.RefreshHistoryCommand}" />
+                            <Button Content="{x:Static res:Strings.Account_SignOut}" Command="{Binding Accounts.DisconnectEpicCommand}" />
+                        </StackPanel>
+
+                        <!-- Not connected: three steps to the code -->
+                        <StackPanel Spacing="10" IsVisible="{Binding !Accounts.EpicSync.IsConnected}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Classes="caption" Text="{x:Static res:Strings.Settings_Epic_Step1}" VerticalAlignment="Center" />
+                                <HyperlinkButton Content="epicgames.com" Command="{Binding Accounts.OpenEpicSignInCommand}" Padding="2,0" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Classes="caption" Text="{x:Static res:Strings.Settings_Epic_Step2}" VerticalAlignment="Center" />
+                                <HyperlinkButton Content="{x:Static res:Strings.Settings_Epic_OpenPage}" Command="{Binding Accounts.OpenEpicCodePageCommand}" Padding="2,0" />
+                            </StackPanel>
+                            <TextBlock Classes="caption" TextWrapping="Wrap" Text="{x:Static res:Strings.Settings_Epic_Step3}" />
+                            <TextBox Text="{Binding Accounts.EpicCodeInput}" PasswordChar="•"
+                                     PlaceholderText="{x:Static res:Strings.Settings_Epic_CodePlaceholder}" />
+                            <Button Classes="accent" Content="{x:Static res:Strings.Settings_Epic_Connect}" Command="{Binding Accounts.ConnectEpicCommand}"
+                                    HorizontalAlignment="Left" />
+                        </StackPanel>
+                        <ProgressBar Classes="thin" IsIndeterminate="True"
+                                     IsVisible="{Binding Accounts.ConnectEpicCommand.IsRunning}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- GOG profile: public, no sign-in nor key, only its name -->
+                <Border Classes="card">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Path Classes="icon accent" Data="{StaticResource IconUser}" />
+                            <TextBlock Classes="subtitle" Text="{x:Static res:Strings.Settings_Gog_Title}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Classes="secondary" TextWrapping="Wrap"
+                                   Text="{x:Static res:Strings.Settings_Gog_Description}" />
+                        <TextBlock Text="{Binding Accounts.GogAccountLabel}" FontWeight="SemiBold" />
+
+                        <!-- Connected -->
+                        <StackPanel Orientation="Horizontal" Spacing="12" IsVisible="{Binding Accounts.GogSync.IsConnected}">
+                            <Button Classes="accent" Content="{x:Static res:Strings.Account_Sync}" Command="{Binding Accounts.RefreshHistoryCommand}" />
+                            <Button Content="{x:Static res:Strings.Account_SignOut}" Command="{Binding Accounts.DisconnectGogCommand}" />
+                        </StackPanel>
+
+                        <!-- Not connected: the profile name -->
+                        <StackPanel Spacing="10" IsVisible="{Binding !Accounts.GogSync.IsConnected}">
+                            <TextBlock Classes="caption" TextWrapping="Wrap"
+                                       Text="{x:Static res:Strings.Settings_Gog_PublicProfile}" />
+                            <TextBox Text="{Binding Accounts.GogProfileInput}"
+                                     PlaceholderText="{x:Static res:Strings.Settings_Gog_ProfilePlaceholder}" />
+                            <Button Classes="accent" Content="{x:Static res:Strings.Settings_Gog_Connect}" Command="{Binding Accounts.ConnectGogCommand}"
+                                    HorizontalAlignment="Left" />
+                        </StackPanel>
+                        <ProgressBar Classes="thin" IsIndeterminate="True"
+                                     IsVisible="{Binding Accounts.ConnectGogCommand.IsRunning}" />
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</ContentPage>

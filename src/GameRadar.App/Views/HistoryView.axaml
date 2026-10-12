@@ -1,0 +1,321 @@
+<ContentPage xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GameRadar.App.ViewModels"
+             xmlns:res="using:GameRadar.App.Resources"
+             xmlns:app="using:GameRadar.App"
+             x:Class="GameRadar.App.Views.HistoryView"
+             x:DataType="vm:MainWindowViewModel">
+
+    <DockPanel Margin="32,28,32,0">
+
+        <!-- Header + toolbar -->
+        <StackPanel DockPanel.Dock="Top" Spacing="16" Margin="0,0,0,16">
+            <StackPanel Spacing="4">
+                <TextBlock Classes="display" Text="{x:Static res:Strings.Nav_History}" />
+                <TextBlock Classes="secondary" Text="{Binding History.Summary}" TextWrapping="Wrap" />
+            </StackPanel>
+
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                <!-- A game played elsewhere (PlayStation, Switch...) -->
+                <Button Grid.Column="1" Content="{x:Static res:Strings.AddGame_Open}" Command="{Binding AddGame.OpenCommand}"
+                        ToolTip.Tip="{x:Static res:Strings.AddGame_Open_Tip}" />
+                <TextBox Grid.Column="0" Text="{Binding History.SearchText}" PlaceholderText="{x:Static res:Strings.History_Search}">
+                    <TextBox.InnerLeftContent>
+                        <Path Classes="icon secondary small" Data="{StaticResource IconSearch}" Margin="4,0,0,0" />
+                    </TextBox.InnerLeftContent>
+                </TextBox>
+            </Grid>
+
+            <!-- Sort, then the filters: one group of boxes per criterion -->
+            <WrapPanel Orientation="Horizontal" ItemSpacing="24" LineSpacing="8">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Classes="caption" Text="{x:Static res:Strings.History_Sort}" VerticalAlignment="Center" />
+                    <ComboBox ItemsSource="{Binding History.SortOptions}" SelectedItem="{Binding History.SelectedSort, Converter={x:Static app:KeepChoice.Instance}}" MinWidth="140">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:HistoryViewModel+SortOption">
+                                <TextBlock Text="{Binding Label}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <!-- Picklists: several choices each (Button.picklist + Flyout of check boxes),
+                     one per HistoryFilterGroup -->
+                <ItemsControl ItemsSource="{Binding History.Filters}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" ItemSpacing="24" LineSpacing="8" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:HistoryFilterGroup">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Classes="caption" Text="{Binding Title}" VerticalAlignment="Center" />
+                                <Button Classes="picklist" MinWidth="120" MaxWidth="220">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBlock Text="{Binding Summary}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                        <Path Grid.Column="1" Classes="icon secondary small" Data="{StaticResource IconChevronDown}" />
+                                    </Grid>
+                                    <Button.Flyout>
+                                        <Flyout Placement="BottomEdgeAlignedLeft">
+                                            <StackPanel>
+                                                <!-- First: every box at once, ticked when all are -->
+                                                <CheckBox Content="{Binding AllLabel}" IsChecked="{Binding AllChecked}" />
+                                                <Separator />
+                                                <ItemsControl ItemsSource="{Binding Choices}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate x:DataType="vm:HistoryFilterChoice">
+                                                            <CheckBox Content="{Binding Label}" IsChecked="{Binding IsChecked}"
+                                                                      IsVisible="{Binding IsOffered}" />
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
+                                        </Flyout>
+                                    </Button.Flyout>
+                                </Button>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </WrapPanel>
+
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Classes="caption" Text="{Binding History.FilterStatus}" VerticalAlignment="Center" />
+                <HyperlinkButton Content="{x:Static res:Strings.History_Filter_ShowAll}" Command="{Binding History.ShowAllCommand}"
+                                 IsVisible="{Binding History.IsFiltered}" Padding="2,0" />
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Game rows -->
+        <ListBox Classes="plain" ItemsSource="{Binding History.Games}" Padding="0,0,0,24">
+            <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:GameGroupRow">
+                    <Border Classes="card row">
+                      <StackPanel>
+                        <!-- Header: the game, with the progress of its best platform -->
+                        <Grid ColumnDefinitions="*,180,90,84" ColumnSpacing="16">
+
+                            <StackPanel Grid.Column="0" Spacing="4">
+                            <!-- Name: for a game on several platforms or added by hand, a toggle that
+                                 unfolds the details (the line that edits a game added by hand).
+                                 Otherwise it lets clicks through and takes no focus. -->
+                            <ToggleButton Classes="disclosure"
+                                          IsChecked="{Binding IsExpanded}"
+                                          IsHitTestVisible="{Binding HasDetails}"
+                                          Focusable="{Binding HasDetails}"
+                                          AutomationProperties.Name="{Binding Name}">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                        <Border Classes="badge platform xbox" IsVisible="{Binding IsXbox}" VerticalAlignment="Center">
+                                            <TextBlock Text="Xbox" />
+                                        </Border>
+                                        <Border Classes="badge platform steam" IsVisible="{Binding IsSteam}" VerticalAlignment="Center">
+                                            <TextBlock Text="Steam" />
+                                        </Border>
+                                        <Border Classes="badge platform playstation" IsVisible="{Binding IsPlayStation}" VerticalAlignment="Center">
+                                            <TextBlock Text="PlayStation" />
+                                        </Border>
+                                        <Border Classes="badge platform gog" IsVisible="{Binding IsGog}" VerticalAlignment="Center">
+                                            <TextBlock Text="GOG" />
+                                        </Border>
+                                        <Border Classes="badge platform ea" IsVisible="{Binding IsEa}" VerticalAlignment="Center">
+                                            <TextBlock Text="EA" />
+                                        </Border>
+                                        <Border Classes="badge platform epic" IsVisible="{Binding IsEpic}" VerticalAlignment="Center">
+                                            <TextBlock Text="Epic" />
+                                        </Border>
+                                        <!-- A game added by hand: its platform in the platform's color (one badge, the tooltip tells it can be edited). -->
+                                        <Border Classes="badge platform playstation" IsVisible="{Binding ShowManualPlayStationBadge}" VerticalAlignment="Center"
+                                                ToolTip.Tip="{x:Static res:Strings.History_EditManual_Tip}">
+                                            <TextBlock Text="{Binding ManualPlatformLabel}" />
+                                        </Border>
+                                        <Border Classes="badge platform xbox" IsVisible="{Binding ShowManualXboxBadge}" VerticalAlignment="Center"
+                                                ToolTip.Tip="{x:Static res:Strings.History_EditManual_Tip}">
+                                            <TextBlock Text="{Binding ManualPlatformLabel}" />
+                                        </Border>
+                                        <Border Classes="badge neutral" IsVisible="{Binding ShowManualNeutralBadge}" VerticalAlignment="Center"
+                                                ToolTip.Tip="{x:Static res:Strings.History_EditManual_Tip}">
+                                            <TextBlock Text="{Binding ManualPlatformLabel}" />
+                                        </Border>
+                                        <Path Classes="icon secondary small chevron"
+                                              Classes.expanded="{Binding IsExpanded}"
+                                              Data="{StaticResource IconChevronDown}"
+                                              IsVisible="{Binding HasDetails}"
+                                              ToolTip.Tip="{x:Static res:Strings.History_Details_Tip}" />
+                                    </StackPanel>
+                            </ToggleButton>
+
+                            <!-- Its tags as badges: the player's first (× on hover or focus), then Steam's;
+                                 then "+", whose panel searches Steam's tags. Outside the toggle: a click
+                                 on a badge does not unfold the row. -->
+                            <WrapPanel ItemSpacing="6" LineSpacing="4" IsVisible="{Binding HasTagLine}">
+                                <ItemsControl ItemsSource="{Binding TagBadges}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel ItemSpacing="6" LineSpacing="4" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:TagBadge">
+                                            <StackPanel Classes="tagBadge" Orientation="Horizontal">
+                                                <Border Classes="badge" Classes.accent="{Binding IsAdded}" Classes.neutral="{Binding !IsAdded}"
+                                                        VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Label}" />
+                                                </Border>
+                                                <Button Classes="icon removeTag" VerticalAlignment="Center"
+                                                        IsVisible="{Binding IsAdded}" Command="{Binding Remove}"
+                                                        ToolTip.Tip="{x:Static res:Strings.History_RemoveTag_Tip}"
+                                                        AutomationProperties.Name="{x:Static res:Strings.History_RemoveTag_Tip}">
+                                                    <Path Classes="icon secondary small" Data="{StaticResource IconClose}" />
+                                                </Button>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <Button Classes="badgeLink" VerticalAlignment="Center"
+                                        IsVisible="{Binding TagEditor.CanAdd}"
+                                        ToolTip.Tip="{x:Static res:Strings.History_AddTag_Tip}"
+                                        AutomationProperties.Name="{x:Static res:Strings.History_AddTag_Placeholder}">
+                                    <Border Classes="badge neutral">
+                                        <TextBlock Text="{Binding AddTagLabel}" />
+                                    </Border>
+                                    <Button.Flyout>
+                                        <!-- A picked suggestion fills the box; Enter or "Ajouter" adds it -->
+                                        <Flyout Placement="BottomEdgeAlignedLeft">
+                                            <StackPanel Orientation="Horizontal" Spacing="8" x:DataType="vm:GameGroupRow">
+                                                <AutoCompleteBox Width="280"
+                                                                 ItemsSource="{Binding TagEditor.Suggestions}"
+                                                                 Text="{Binding TagEditor.Text}"
+                                                                 FilterMode="Custom" ItemFilter="{x:Static vm:GameTagEditor.Filter}"
+                                                                 MinimumPrefixLength="1"
+                                                                 PlaceholderText="{x:Static res:Strings.History_AddTag_Placeholder}">
+                                                    <!-- Fluent lists the suggestions against the popup's edge:
+                                                         the field's own padding, so they line up with the typed text. -->
+                                                    <AutoCompleteBox.ItemTemplate>
+                                                        <DataTemplate x:DataType="x:String">
+                                                            <TextBlock Text="{Binding}" Margin="{DynamicResource TextControlThemePadding}" />
+                                                        </DataTemplate>
+                                                    </AutoCompleteBox.ItemTemplate>
+                                                    <AutoCompleteBox.KeyBindings>
+                                                        <KeyBinding Gesture="Enter" Command="{Binding TagEditor.AddCommand}" />
+                                                    </AutoCompleteBox.KeyBindings>
+                                                </AutoCompleteBox>
+                                                <Button Content="{x:Static res:Strings.History_AddTag_Button}"
+                                                        Command="{Binding TagEditor.AddCommand}" />
+                                            </StackPanel>
+                                        </Flyout>
+                                    </Button.Flyout>
+                                </Button>
+                            </WrapPanel>
+
+                            <TextBlock Classes="caption" Text="{Binding LastPlayedLabel}" />
+                            </StackPanel>
+
+                            <!-- Progress: text + small bar -->
+                            <StackPanel Grid.Column="1" Spacing="6" VerticalAlignment="Center">
+                                <TextBlock Classes="caption" Text="{Binding AchievementsLabel}" />
+                                <ProgressBar Classes="thin" Minimum="0" Maximum="100" Value="{Binding Progress}"
+                                             IsVisible="{Binding HasProgress}" />
+                            </StackPanel>
+
+                            <Border Grid.Column="2" Classes="badge"
+                                    Classes.accent="{Binding IsStatusHighlighted}"
+                                    Classes.neutral="{Binding !IsStatusHighlighted}">
+                                <TextBlock Text="{Binding StatusLabel}" />
+                            </Border>
+
+                            <!-- User choices, as icon toggles with an explaining tooltip -->
+                            <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="4"
+                                        HorizontalAlignment="Right">
+                                <ToggleButton Classes="iconToggle" IsChecked="{Binding IsCompleted}"
+                                              IsVisible="{Binding CanMarkCompleted}"
+                                              ToolTip.Tip="{x:Static res:Strings.History_Completed_Tip}">
+                                    <Path Classes="icon" Data="{StaticResource IconFlag}" />
+                                </ToggleButton>
+                                <!-- Finished according to the platform: ticked, shown, not changeable -->
+                                <ToggleButton Classes="iconToggle" IsChecked="True" IsEnabled="False"
+                                              IsVisible="{Binding IsCompletedOnPlatform}"
+                                              ToolTip.Tip="{x:Static res:Strings.History_CompletedOnPlatform_Tip}"
+                                              ToolTip.ShowOnDisabled="True"
+                                              AutomationProperties.Name="{x:Static res:Strings.History_CompletedOnPlatform_Tip}">
+                                    <Path Classes="icon" Data="{StaticResource IconFlag}" />
+                                </ToggleButton>
+                                <ToggleButton Classes="iconToggle" IsChecked="{Binding CountsInTaste}"
+                                              IsVisible="{Binding CanCountInTaste}"
+                                              ToolTip.Tip="{Binding TasteTip}">
+                                    <Path Classes="icon" Data="{StaticResource IconHeart}" />
+                                </ToggleButton>
+                            </StackPanel>
+
+                        </Grid>
+
+                        <!-- Details: one line per platform, same columns as the header -->
+                        <ItemsControl ItemsSource="{Binding Details}" IsVisible="{Binding IsExpanded}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:GameRow">
+                                    <Border Classes="subrow">
+                                        <Grid ColumnDefinitions="*,180,90,84" ColumnSpacing="16">
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" Margin="12,0,0,0"
+                                                        IsVisible="{Binding !IsManual}">
+                                                <StackPanel Spacing="2" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding PlatformName}" />
+                                                    <TextBlock Classes="caption" Text="{Binding LastPlayedLabel}" />
+                                                </StackPanel>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="1" Spacing="6" VerticalAlignment="Center"
+                                                        IsVisible="{Binding !IsManual}">
+                                                <TextBlock Classes="caption" Text="{Binding AchievementsLabel}" />
+                                                <ProgressBar Classes="thin" Minimum="0" Maximum="100" Value="{Binding Progress}"
+                                                             IsVisible="{Binding HasProgress}" />
+                                            </StackPanel>
+
+                                            <!-- Added by hand: edited right here (platform, how far).
+                                                 "Ajouté à la main" is already under the name. -->
+                                            <ComboBox Grid.Column="0" Margin="12,0,0,0" MinWidth="200" VerticalAlignment="Center"
+                                                      IsVisible="{Binding IsManual}"
+                                                      ItemsSource="{Binding Manual.Platforms}" SelectedItem="{Binding Manual.SelectedPlatform, Converter={x:Static app:KeepChoice.Instance}}"
+                                                      ToolTip.Tip="{x:Static res:Strings.History_ManualPlatform_Tip}">
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate x:DataType="vm:ManualPlatformOption">
+                                                        <TextBlock Text="{Binding Label}" />
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
+                                            <ComboBox Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch"
+                                                      IsVisible="{Binding IsManual}"
+                                                      ItemsSource="{Binding Manual.Levels}" SelectedItem="{Binding Manual.SelectedLevel, Converter={x:Static app:KeepChoice.Instance}}"
+                                                      ToolTip.Tip="{x:Static res:Strings.History_ManualLevel_Tip}">
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate x:DataType="vm:ManualLevelOption">
+                                                        <TextBlock Text="{Binding Label}" />
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
+
+                                            <Border Grid.Column="2" Classes="badge"
+                                                    Classes.accent="{Binding IsStatusHighlighted}"
+                                                    Classes.neutral="{Binding !IsStatusHighlighted}">
+                                                <TextBlock Text="{Binding StatusLabel}" />
+                                            </Border>
+
+                                            <Button Grid.Column="3" Classes="icon" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                    IsVisible="{Binding IsManual}"
+                                                    Command="{Binding Manual.RemoveCommand}"
+                                                    ToolTip.Tip="{x:Static res:Strings.History_RemoveManual_Tip}"
+                                                    AutomationProperties.Name="{x:Static res:Strings.History_RemoveManual_Tip}">
+                                                <Path Classes="icon secondary" Data="{StaticResource IconClose}" />
+                                            </Button>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                      </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+    </DockPanel>
+</ContentPage>

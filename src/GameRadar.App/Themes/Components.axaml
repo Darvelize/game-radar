@@ -1,0 +1,558 @@
+<!--
+  GameRadar components, as style classes (Avalonia's equivalent of CSS
+  classes): <Border Classes="card">, <TextBlock Classes="caption">...
+  Only tokens from Tokens.axaml are used here: no raw color or size.
+
+  "/template/ X#Name" reaches INSIDE a control's template (e.g. the
+  presenter that actually paints a Button's background), needed to
+  override Fluent's own state styles (hover, pressed, checked).
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ============ Typography ============ -->
+
+    <!-- :is(TextBlock): also the SelectableTextBlock (legal texts). A plain
+         type selector only matches that exact type, not the derived ones. -->
+
+    <Style Selector=":is(TextBlock).display">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeDisplay}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector=":is(TextBlock).title">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeTitle}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector=":is(TextBlock).subtitle">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSubtitle}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector=":is(TextBlock).caption">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeCaption}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+    </Style>
+    <Style Selector=":is(TextBlock).secondary">
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+    </Style>
+    <Style Selector=":is(TextBlock).accent">
+        <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
+    </Style>
+
+    <!-- ============ Icons ============ -->
+
+    <Style Selector="Path.icon">
+        <Setter Property="Width" Value="24" />
+        <Setter Property="Height" Value="24" />
+        <Setter Property="Stretch" Value="None" />
+        <Setter Property="StrokeThickness" Value="1.75" />
+        <Setter Property="StrokeLineCap" Value="Round" />
+        <Setter Property="StrokeJoin" Value="Round" />
+        <Setter Property="Stroke" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Path.icon.secondary">
+        <Setter Property="Stroke" Value="{DynamicResource TextSecondaryBrush}" />
+    </Style>
+    <Style Selector="Path.icon.accent">
+        <Setter Property="Stroke" Value="{DynamicResource AccentTextBrush}" />
+    </Style>
+    <!-- Solid icon (e.g. the rating star), filled with its stroke color -->
+    <Style Selector="Path.icon.accent.filled">
+        <Setter Property="Fill" Value="{DynamicResource AccentBrush}" />
+    </Style>
+    <!-- Smaller icon next to a caption or a title -->
+    <Style Selector="Path.icon.small">
+        <Setter Property="RenderTransform" Value="scale(0.7)" />
+        <Setter Property="Margin" Value="-4" />
+    </Style>
+
+    <!--
+      Endless rotation while something runs, on a Decorator wrapping the
+      icon: <Decorator Classes.spinning="..."><Path Classes="icon" /></Decorator>.
+      Not on the Path itself: to animate RotateTransform.Angle, Avalonia puts
+      a TransformGroup as LOCAL value on every control of the selector's type
+      (the class may show up later), and a local value beats any style. On
+      "Path" it silently disabled every RenderTransform of icons and logos
+      (the scale of "small" included). Decorator is used nowhere else.
+    -->
+    <Style Selector="Decorator.spinning">
+        <Style.Animations>
+            <Animation Duration="0:0:1" IterationCount="Infinite">
+                <!-- Key frames animate a transform's sub-property: Avalonia then
+                     builds a transform group for each control on its own. -->
+                <KeyFrame Cue="0%">
+                    <Setter Property="RotateTransform.Angle" Value="0" />
+                </KeyFrame>
+                <KeyFrame Cue="100%">
+                    <Setter Property="RotateTransform.Angle" Value="360" />
+                </KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+
+    <!--
+      Small flag next to a language name (Icons.axaml: FlagFrance...). Every
+      flag in the same 3:2 box, cropped if needed, so the names line up; a
+      thin border so the white of a flag stays visible on a white list.
+    -->
+    <Style Selector="Border.flag">
+        <Setter Property="Width" Value="21" />
+        <Setter Property="Height" Value="14" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusXSmall}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="ClipToBounds" Value="True" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Border.flag > Image">
+        <Setter Property="Stretch" Value="UniformToFill" />
+    </Style>
+
+    <!-- ============ Notice banner ============ -->
+
+    <Style Selector="Border.notice">
+        <Setter Property="Background" Value="{DynamicResource DangerSubtleBrush}" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
+        <Setter Property="Padding" Value="12,8" />
+    </Style>
+    <Style Selector="Border.notice Path.icon.alert">
+        <Setter Property="Stroke" Value="{DynamicResource DangerBrush}" />
+    </Style>
+    <!-- Good news rather than an error (a new version...): accent instead of red -->
+    <Style Selector="Border.notice.info">
+        <Setter Property="Background" Value="{DynamicResource AccentSubtleBrush}" />
+    </Style>
+
+    <!-- ============ Card ============ -->
+
+    <Style Selector="Border.card">
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusLarge}" />
+        <Setter Property="Padding" Value="{StaticResource PaddingCard}" />
+        <Setter Property="BoxShadow" Value="{DynamicResource ShadowCard}" />
+        <Setter Property="RenderTransform" Value="translateY(0px)" />
+        <!-- Animated state changes: this is what makes the UI feel fluid. -->
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background" Duration="{StaticResource DurationFast}" />
+                <BoxShadowsTransition Property="BoxShadow" Duration="{StaticResource DurationNormal}" />
+                <TransformOperationsTransition Property="RenderTransform" Duration="{StaticResource DurationNormal}" Easing="CubicEaseOut" />
+            </Transitions>
+        </Setter>
+    </Style>
+    <!-- Card with a full-bleed picture on top: no padding (the text area
+         adds its own), and children clipped to the rounded corners. -->
+    <Style Selector="Border.card.media">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+    <!-- Picture area: placeholder behind, picture fading in on top -->
+    <Style Selector="Border.cover">
+        <Setter Property="Height" Value="158" />
+        <Setter Property="Background" Value="{DynamicResource AccentSubtleBrush}" />
+    </Style>
+    <Style Selector="Image.cover">
+        <Setter Property="Stretch" Value="UniformToFill" />
+        <Setter Property="Opacity" Value="0" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <DoubleTransition Property="Opacity" Duration="{StaticResource DurationNormal}" />
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Image.cover.loaded">
+        <Setter Property="Opacity" Value="1" />
+    </Style>
+
+    <!-- Flat variant: no shadow (e.g. inside the sidebar) -->
+    <Style Selector="Border.card.flat">
+        <Setter Property="BoxShadow" Value="{StaticResource ShadowNone}" />
+    </Style>
+    <!-- List rows: flat, tighter, no lift -->
+    <Style Selector="Border.card.row">
+        <Setter Property="Padding" Value="14,10" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
+        <Setter Property="BoxShadow" Value="{StaticResource ShadowNone}" />
+    </Style>
+    <Style Selector="Border.card.row:pointerover">
+        <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+    </Style>
+
+    <!-- ============ Badges ============ -->
+
+    <Style Selector="Border.badge">
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusSmall}" />
+        <Setter Property="Padding" Value="6,2" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+    <Style Selector="Border.badge > TextBlock">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBadge}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="Border.badge.gamepass">
+        <Setter Property="Background" Value="{DynamicResource GamePassBrush}" />
+    </Style>
+    <Style Selector="Border.badge.gamepass > TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource OnGamePassBrush}" />
+    </Style>
+    <Style Selector="Border.badge.danger">
+        <Setter Property="Background" Value="{DynamicResource DangerBrush}" />
+    </Style>
+    <Style Selector="Border.badge.danger > TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource OnDangerBrush}" />
+    </Style>
+    <Style Selector="Border.badge.accent">
+        <Setter Property="Background" Value="{DynamicResource AccentSubtleBrush}" />
+    </Style>
+    <Style Selector="Border.badge.accent > TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
+    </Style>
+    <Style Selector="Border.badge.neutral">
+        <Setter Property="Background" Value="{DynamicResource BorderBrush}" />
+    </Style>
+    <Style Selector="Border.badge.neutral > TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+    </Style>
+    <!-- A platform in its color, written out (never a logo): xbox, steam, playstation, gog, ea, epic -->
+    <Style Selector="Border.badge.platform">
+        <Setter Property="BorderBrush" Value="{DynamicResource PlatformOutlineBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Border.badge.platform > TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource OnPlatformBrush}" />
+    </Style>
+    <Style Selector="Border.badge.platform.xbox">
+        <Setter Property="Background" Value="{DynamicResource XboxBrush}" />
+    </Style>
+    <Style Selector="Border.badge.platform.steam">
+        <Setter Property="Background" Value="{DynamicResource SteamBrush}" />
+    </Style>
+    <Style Selector="Border.badge.platform.playstation">
+        <Setter Property="Background" Value="{DynamicResource PlayStationBrush}" />
+    </Style>
+    <Style Selector="Border.badge.platform.gog">
+        <Setter Property="Background" Value="{DynamicResource GogBrush}" />
+    </Style>
+    <Style Selector="Border.badge.platform.ea">
+        <Setter Property="Background" Value="{DynamicResource EaBrush}" />
+    </Style>
+    <Style Selector="Border.badge.platform.epic">
+        <Setter Property="Background" Value="{DynamicResource EpicBrush}" />
+    </Style>
+
+    <!-- ============ Picklist ============ -->
+    <!-- A list where several choices can be ticked (the history filters): a
+         ComboBox only takes one. A button dressed like the ComboBox of
+         "Trier" (Fluent's own ComboBox resources, Avalonia 12.1.3), whose
+         Flyout holds check boxes; its label sums up the choices. -->
+    <Style Selector="Button.picklist">
+        <Setter Property="Background" Value="{DynamicResource ComboBoxBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrush}" />
+        <Setter Property="BorderThickness" Value="{DynamicResource ComboBoxBorderThemeThickness}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+        <Setter Property="Padding" Value="{DynamicResource ComboBoxPadding}" />
+        <Setter Property="MinHeight" Value="{DynamicResource ComboBoxMinHeight}" />
+        <Setter Property="Foreground" Value="{DynamicResource ComboBoxForeground}" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    </Style>
+    <Style Selector="Button.picklist:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ComboBoxBackgroundPointerOver}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrushPointerOver}" />
+        <Setter Property="Foreground" Value="{DynamicResource ComboBoxForeground}" />
+    </Style>
+    <Style Selector="Button.picklist:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ComboBoxBackgroundPressed}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrushPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource ComboBoxForeground}" />
+    </Style>
+    <!-- The chevron, where the ComboBox has its own. Keeps the -4 of a small
+         icon vertically (its box stays 24 px): else the button grows taller
+         than the ComboBox next to it. -->
+    <Style Selector="Button.picklist Path.icon.small">
+        <Setter Property="Margin" Value="4,-4,6,-4" />
+    </Style>
+
+    <!-- ============ Sidebar navigation ============ -->
+
+    <!-- Plain buttons (they hold no state): the "selected" class comes from
+         the view model, so the current page is always the single truth. -->
+    <Style Selector="Button.nav">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="Padding" Value="10,8" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+    <Style Selector="Button.nav:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+    <Style Selector="Button.nav.selected /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AccentSubtleBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
+    </Style>
+    <Style Selector="Button.nav.selected TextBlock">
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="Button.nav.selected Path.icon">
+        <Setter Property="Stroke" Value="{DynamicResource AccentTextBrush}" />
+    </Style>
+
+    <!-- ============ Buttons ============ -->
+
+    <!-- Fluent already provides Classes="accent" (filled with the accent). -->
+    <Style Selector="Button">
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
+    </Style>
+    <Style Selector="Button.accent /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource OnAccentBrush}" />
+    </Style>
+    <!-- Irreversible action, only in a confirmation (e.g. erasing all data) -->
+    <Style Selector="Button.danger /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource DangerBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource OnDangerBrush}" />
+    </Style>
+    <Style Selector="Button.danger:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource DangerBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource OnDangerBrush}" />
+        <Setter Property="Opacity" Value="0.9" />
+    </Style>
+    <!--
+      A platform badge that opens the game's page there ("Game Pass", "Steam"
+      on a recommendation card), reachable with Tab + Enter: the button draws
+      nothing but the badge inside, underlined on hover to show it is a link.
+      Fluent's hover and pressed states would tint its background:
+      neutralized here.
+    -->
+    <Style Selector="Button.badgeLink">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="MinHeight" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusSmall}" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.badgeLink:pointerover /template/ ContentPresenter#PART_ContentPresenter, Button.badgeLink:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.badgeLink:pointerover Border.badge > TextBlock">
+        <Setter Property="TextDecorations" Value="Underline" />
+    </Style>
+    <!--
+      "Pas intéressé" over a card's picture: a round button, shown when the
+      card is hovered or holds the keyboard focus (:focus-within: Tab reaches
+      it with the card's badges).
+    -->
+    <Style Selector="Button.dismiss">
+        <Setter Property="Width" Value="32" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="Padding" Value="4" />
+        <!-- Half the size: a circle -->
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Opacity" Value="0" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <DoubleTransition Property="Opacity" Duration="{StaticResource DurationFast}" />
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Border.card:pointerover Button.dismiss, Border.card:focus-within Button.dismiss">
+        <Setter Property="Opacity" Value="1" />
+    </Style>
+    <Style Selector="Button.dismiss:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+    </Style>
+
+    <!-- Transparent button with an icon only (tooltip required for meaning) -->
+    <Style Selector="Button.icon">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="4" />
+    </Style>
+    <!--
+      The × of a tag the player added (history badges): no width at rest, so the
+      player's badges sit as close as Steam's; it opens, pushing the next badges,
+      when its badge is hovered or holds the keyboard focus (:focus-within: Tab
+      still reaches it, a hidden control would not). Tight, so the badges line
+      keeps the height of a badge.
+    -->
+    <Style Selector="StackPanel.tagBadge">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.icon.removeTag">
+        <Setter Property="Padding" Value="2" />
+        <Setter Property="MinHeight" Value="0" />
+        <Setter Property="MinWidth" Value="0" />
+        <Setter Property="MaxWidth" Value="0" />
+        <Setter Property="Opacity" Value="0" />
+    </Style>
+    <Style Selector="StackPanel.tagBadge:pointerover Button.removeTag, StackPanel.tagBadge:focus-within Button.removeTag">
+        <Setter Property="MaxWidth" Value="Infinity" />
+        <Setter Property="Opacity" Value="1" />
+    </Style>
+    <Style Selector="Button.icon:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+    </Style>
+    <!-- Disabled: fades out instead of Fluent's gray block -->
+    <Style Selector="Button.icon:disabled /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.icon:disabled">
+        <Setter Property="Opacity" Value="0.4" />
+    </Style>
+
+    <!-- ============ Icon toggles (history rows) ============ -->
+
+    <Style Selector="ToggleButton.iconToggle">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="6" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
+    </Style>
+    <Style Selector="ToggleButton.iconToggle Path.icon">
+        <Setter Property="Stroke" Value="{DynamicResource TextSecondaryBrush}" />
+    </Style>
+    <Style Selector="ToggleButton.iconToggle:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+    </Style>
+    <Style Selector="ToggleButton.iconToggle:checked /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AccentSubtleBrush}" />
+    </Style>
+    <!-- On: a solid icon (filled with its own stroke color), off: outline only.
+         Closed shapes fill (heart, flag); an open line (the flag pole) stays a line. -->
+    <Style Selector="ToggleButton.iconToggle:checked Path.icon">
+        <Setter Property="Stroke" Value="{DynamicResource AccentTextBrush}" />
+        <Setter Property="Fill" Value="{DynamicResource AccentTextBrush}" />
+    </Style>
+
+    <!-- ============ Disclosure (history: game on several platforms) ============ -->
+
+    <!-- An invisible toggle around content that unfolds details: no
+         background, border or color change in any state (Fluent paints the
+         checked state in accent color with white text). -->
+    <Style Selector="ToggleButton.disclosure">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="ToggleButton.disclosure /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+    <Style Selector="ToggleButton.disclosure:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+    <Style Selector="ToggleButton.disclosure:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+    <Style Selector="ToggleButton.disclosure:checked /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+
+    <!-- Chevron that turns over when its details are unfolded.
+         A transition (not a key-frame animation) handles RenderTransform. -->
+    <Style Selector="Path.icon.chevron">
+        <Setter Property="RenderTransform" Value="rotate(0deg)" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <TransformOperationsTransition Property="RenderTransform" Duration="{StaticResource DurationNormal}" Easing="CubicEaseOut" />
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Path.icon.small.chevron">
+        <Setter Property="RenderTransform" Value="scale(0.7) rotate(0deg)" />
+    </Style>
+    <Style Selector="Path.icon.small.chevron.expanded">
+        <Setter Property="RenderTransform" Value="scale(0.7) rotate(180deg)" />
+    </Style>
+
+    <!-- Detail line inside a row card, separated by a thin line -->
+    <Style Selector="Border.subrow">
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,1,0,0" />
+        <Setter Property="Padding" Value="0,8,0,0" />
+        <Setter Property="Margin" Value="0,8,0,0" />
+    </Style>
+
+    <!-- ============ Standard controls, adjusted ============ -->
+
+    <!-- Fluent draws a white check mark: unreadable on the light dark-theme accent. -->
+    <Style Selector="CheckBox:checked /template/ Path#CheckGlyph">
+        <Setter Property="Fill" Value="{DynamicResource OnAccentBrush}" />
+    </Style>
+    <Style Selector="ToggleSwitch:checked /template/ Ellipse#SwitchKnobOn">
+        <Setter Property="Fill" Value="{DynamicResource OnAccentBrush}" />
+    </Style>
+
+    <Style Selector="TextBox">
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
+    </Style>
+
+    <!-- Lists without Fluent's gray block and selection highlight:
+         each item is a card that handles its own hover. -->
+    <Style Selector="ListBox.plain">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="ListBox.plain ListBoxItem">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0,0,0,6" />
+    </Style>
+    <Style Selector="ListBox.plain ListBoxItem /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <Style Selector="ProgressBar.thin">
+        <Setter Property="MinHeight" Value="3" />
+        <Setter Property="Height" Value="3" />
+    </Style>
+
+    <!-- ============ Pages ============ -->
+
+    <!-- Fluent paints every page with its own page color: ours shows through
+         instead (the tabs of a TabbedPage are themed in Pages.axaml). -->
+    <Style Selector="ContentPage">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <!-- The window: sidebar (the drawer, locked open) + content. Fluent's
+         template kept (a SplitView): it can fold the drawer later on narrow
+         windows (DrawerBreakpointLength). -->
+    <Style Selector="DrawerPage">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="DrawerBackground" Value="{DynamicResource SidebarBrush}" />
+    </Style>
+    <!-- The drawer has no border of its own: the content draws the line. -->
+    <Style Selector="ContentPage.main">
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1,0,0,0" />
+    </Style>
+
+    <!-- The pages of the window: a TabbedPage whose tabs are hidden (the
+         sidebar navigates). Two template levels: the TabbedPage's TabControl,
+         then its tab strip. A page cross-fades in when it is selected. -->
+    <Style Selector="TabbedPage.hiddenTabs">
+        <Setter Property="PageTransition">
+            <CrossFade Duration="{StaticResource DurationNormal}" />
+        </Setter>
+    </Style>
+    <Style Selector="TabbedPage.hiddenTabs /template/ TabControl#PART_TabControl /template/ ItemsPresenter#PART_ItemsPresenter">
+        <Setter Property="IsVisible" Value="False" />
+    </Style>
+
+</Styles>

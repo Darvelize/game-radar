@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- DPAPI: encrypts the saved Xbox session with the Windows user account. -->
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.12" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Lets the tests reach internal types (sign-in steps) without making them public.
+         The App tests only seed a saved session (SecretStore, SavedXboxAccount). -->
+    <InternalsVisibleTo Include="GameRadar.Core.Tests" />
+    <InternalsVisibleTo Include="GameRadar.App.Tests" />
+  </ItemGroup>
+
+  <!--
+    Messages of the Core (errors explained to the user, the browser page after
+    signing in): Resources\CoreStrings.resx (French, neutral) and
+    CoreStrings.en.resx. Same generation as in the App, but the class stays
+    internal: the Core owns its texts, in the language of the current UI culture.
+  -->
+  <PropertyGroup>
+    <NeutralLanguage>fr</NeutralLanguage>
+  </PropertyGroup>
+  <ItemGroup>
+    <Using Include="GameRadar.Core.Resources" />
+    <EmbeddedResource Update="Resources\CoreStrings.resx">
+      <Generator>MSBuild:Compile</Generator>
+      <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+      <StronglyTypedFileName>$(IntermediateOutputPath)CoreStrings.Designer.cs</StronglyTypedFileName>
+      <StronglyTypedNamespace>GameRadar.Core.Resources</StronglyTypedNamespace>
+      <StronglyTypedClassName>CoreStrings</StronglyTypedClassName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>

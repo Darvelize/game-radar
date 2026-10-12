@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Texts shown to the user, in French (the neutral language: used when no
+  translation matches). English: Strings.en.resx, with exactly the same keys
+  (checked by LocalizationTests). Keys: Page_Element, e.g. Settings_Language_Title.
+  A text with {0} is a format: string.Format(CultureInfo.CurrentCulture, Strings.X, value).
+-->
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <!-- Settings: language -->
+  <data name="Settings_Language_Title" xml:space="preserve"><value>Langue</value></data>
+  <data name="Settings_Language_Description" xml:space="preserve"><value>La langue de GameRadar et des pages des jeux qu'il ouvre. Les titres des jeux et le catalogue Game Pass restent ceux de la France.</value></data>
+  <data name="Settings_Language_Automatic" xml:space="preserve"><value>Automatique (langue de Windows)</value></data>
+  <data name="Settings_Language_RestartNeeded" xml:space="preserve"><value>La nouvelle langue s'appliquera au prochain démarrage de GameRadar.</value></data>
+  <data name="Settings_Language_Restart" xml:space="preserve"><value>Redémarrer maintenant</value></data>
+  <data name="Settings_NotInterested_Title" xml:space="preserve"><value>Jeux qui ne t'intéressent pas</value></data>
+  <data name="Settings_NotInterested_Description" xml:space="preserve"><value>Refusés depuis « Pour toi » (le bouton qui apparaît au survol d'une carte) : ils ne te sont plus proposés, ni les jeux qui leur ressemblent trop.</value></data>
+  <data name="Settings_NotInterested_Empty" xml:space="preserve"><value>Aucun pour l'instant.</value></data>
+  <data name="Settings_NotInterested_Restore" xml:space="preserve"><value>Remettre</value></data>
+  <data name="Settings_NotInterested_Restore_Tip" xml:space="preserve"><value>Le proposer de nouveau, ainsi que les jeux qui lui ressemblent</value></data>
+  <data name="Settings_Language_SaveError" xml:space="preserve"><value>Impossible d'enregistrer la langue : {0}</value></data>
+
+
+  <!-- Views -->
+  <data name="Nav_History" xml:space="preserve"><value>Historique</value></data>
+  <data name="Nav_ForYou" xml:space="preserve"><value>Pour toi</value></data>
+  <data name="Nav_Settings" xml:space="preserve"><value>Réglages</value></data>
+  <data name="Common_Close" xml:space="preserve"><value>Fermer</value></data>
+  <data name="Common_Cancel" xml:space="preserve"><value>Annuler</value></data>
+  <data name="News_Title" xml:space="preserve"><value>Nouveautés</value></data>
+  <data name="Common_XboxHistory" xml:space="preserve"><value>Historique Xbox</value></data>
+  <data name="Common_SteamHistory" xml:space="preserve"><value>Historique Steam</value></data>
+  <data name="Common_SteamCatalog" xml:space="preserve"><value>Catalogue Steam</value></data>
+  <data name="Common_GamePassCatalog" xml:space="preserve"><value>Catalogue Game Pass</value></data>
+  <data name="Account_SignInMicrosoft" xml:space="preserve"><value>Se connecter avec Microsoft</value></data>
+  <data name="Account_Sync" xml:space="preserve"><value>Synchroniser</value></data>
+  <data name="Account_SignOut" xml:space="preserve"><value>Se déconnecter</value></data>
+  <data name="Sidebar_Sync_Tip" xml:space="preserve"><value>Synchroniser mes comptes Xbox et Steam</value></data>
+  <data name="Sidebar_CatalogUpdate_Tip" xml:space="preserve"><value>Mise à jour des catalogues Game Pass et Steam</value></data>
+  <data name="Update_Download" xml:space="preserve"><value>Télécharger</value></data>
+  <data name="Update_Download_Tip" xml:space="preserve"><value>Ouvre la page de téléchargement dans le navigateur</value></data>
+  <data name="Update_Later" xml:space="preserve"><value>Plus tard</value></data>
+  <data name="News_Banner_Open" xml:space="preserve"><value>Voir les nouveautés</value></data>
+  <data name="History_Search" xml:space="preserve"><value>Rechercher un jeu…</value></data>
+  <data name="History_Details_Tip" xml:space="preserve"><value>Détail par plateforme</value></data>
+  <data name="History_AddTag_Placeholder" xml:space="preserve"><value>Ajouter un tag Steam…</value></data>
+  <data name="History_AddTag_Tip" xml:space="preserve"><value>Tape le début d'un tag, choisis-le dans la liste, puis appuie sur Entrée ou sur « Ajouter »</value></data>
+  <data name="History_RemoveTag_Tip" xml:space="preserve"><value>Retirer ce tag</value></data>
+  <data name="History_AddTag_Button" xml:space="preserve"><value>Ajouter</value></data>
+  <data name="Tag_Badge_Unknown" xml:space="preserve"><value>#Tag n° {0}</value></data>
+  <data name="Tag_Badge" xml:space="preserve"><value>#{0}</value></data>
+  <data name="History_AddTag_More" xml:space="preserve"><value>+</value></data>
+  <data name="History_AddTag_First" xml:space="preserve"><value>+ Tag</value></data>
+  <data name="ManualPlatform_OtherPcStore" xml:space="preserve"><value>PC (autre boutique)</value></data>
+  <data name="ManualPlatform_Other" xml:space="preserve"><value>Autre</value></data>
+  <data name="ManualLevel_Mastered" xml:space="preserve"><value>Platiné (100 %)</value></data>
+  <data name="ManualLevel_Completed" xml:space="preserve"><value>Terminé</value></data>
+  <data name="ManualLevel_PlayedALot" xml:space="preserve"><value>Beaucoup joué</value></data>
+  <data name="ManualLevel_PlayedALittle" xml:space="preserve"><value>Un peu joué</value></data>
+  <data name="ManualLevel_DidNotLike" xml:space="preserve"><value>Pas accroché</value></data>
+  <data name="Row_AddedByHand" xml:space="preserve"><value>Ajouté à la main</value></data>
+  <data name="History_ManualPlatform_Tip" xml:space="preserve"><value>Où tu y as joué</value></data>
+  <data name="History_ManualLevel_Tip" xml:space="preserve"><value>Jusqu'où tu es allé : c'est ce qui compte pour tes goûts</value></data>
+  <data name="History_RemoveManual_Tip" xml:space="preserve"><value>Retirer ce jeu de ton historique</value></data>
+  <data name="History_EditManual_Tip" xml:space="preserve"><value>Clique pour modifier sa plateforme ou jusqu'où tu es allé</value></data>
+  <data name="AddGame_Open" xml:space="preserve"><value>Ajouter un jeu</value></data>
+  <data name="AddGame_Open_Tip" xml:space="preserve"><value>Un jeu joué là où GameRadar ne voit rien : PlayStation, Xbox, Nintendo, une autre boutique PC, un mobile</value></data>
+  <data name="AddGame_Title" xml:space="preserve"><value>Ajouter un jeu</value></data>
+  <data name="AddGame_Intro" xml:space="preserve"><value>Un jeu joué là où GameRadar ne voit rien (PlayStation, Xbox, Nintendo, une autre boutique PC, un mobile), ou tous tes jeux si tu ne connectes aucun compte. Il compte dans tes goûts, et ne te sera plus recommandé.</value></data>
+  <data name="AddGame_Search_Placeholder" xml:space="preserve"><value>Nom du jeu, puis Entrée</value></data>
+  <data name="AddGame_Search" xml:space="preserve"><value>Chercher</value></data>
+  <data name="AddGame_Searching" xml:space="preserve"><value>Recherche…</value></data>
+  <data name="AddGame_NoResult" xml:space="preserve"><value>Aucun jeu trouvé : tu peux l'ajouter tel quel.</value></data>
+  <data name="AddGame_SteamUnreachable" xml:space="preserve"><value>Le catalogue Steam ne répond pas : ses jeux ne sont pas proposés.</value></data>
+  <data name="AddGame_XboxUnreachable" xml:space="preserve"><value>Le catalogue Xbox ne répond pas : ses jeux ne sont pas proposés.</value></data>
+  <data name="AddGame_PlayStationUnreachable" xml:space="preserve"><value>Le PlayStation Store ne répond pas : la recherche se limite au catalogue PS Plus.</value></data>
+  <data name="AddGame_AsTyped" xml:space="preserve"><value>Ajouter « {0} » tel quel</value></data>
+  <data name="AddGame_AsTyped_Hint" xml:space="preserve"><value>Sans fiche trouvée, il ne pèsera pas dans tes goûts, mais ne te sera plus proposé.</value></data>
+  <data name="AddGame_Platform" xml:space="preserve"><value>Plateforme</value></data>
+  <data name="AddGame_Level" xml:space="preserve"><value>Jusqu'où tu es allé</value></data>
+  <data name="AddGame_Add" xml:space="preserve"><value>Ajouter à mon historique</value></data>
+  <data name="AddGame_Added" xml:space="preserve"><value>« {0} » est ajouté à ton historique.</value></data>
+  <data name="AddGame_Updated" xml:space="preserve"><value>« {0} » était déjà dans ton historique : il est mis à jour.</value></data>
+  <data name="Welcome_AddByHand" xml:space="preserve"><value>Ajoute tes jeux à la main</value></data>
+  <data name="History_Completed_Tip" xml:space="preserve"><value>Histoire finie : les succès ne permettent pas de le savoir, indique-le ici</value></data>
+  <data name="Recommendations_Show" xml:space="preserve"><value>Afficher :</value></data>
+  <data name="Recommendations_GamePass_Tip" xml:space="preserve"><value>Les jeux inclus dans ton abonnement (palier à choisir dans les Réglages)</value></data>
+  <data name="Recommendations_Steam_Tip" xml:space="preserve"><value>Les jeux vendus sur Steam, y compris ceux aussi présents au Game Pass</value></data>
+  <data name="Welcome_Title" xml:space="preserve"><value>Bienvenue sur GameRadar</value></data>
+  <data name="Welcome_Intro" xml:space="preserve"><value>GameRadar regarde les jeux que tu as vraiment joués, et jusqu'où tu es allé, pour te conseiller ceux qui devraient te plaire, au Game Pass ou sur Steam.</value></data>
+  <data name="Welcome_LoadHistory" xml:space="preserve"><value>Charger mon historique</value></data>
+  <data name="Welcome_HowTo" xml:space="preserve"><value>Pour commencer :</value></data>
+  <data name="Welcome_Step1" xml:space="preserve"><value>Connecte ton compte Xbox, Steam, PlayStation ou Epic Games, ou ton profil GOG, dans Réglages › Comptes (un seul suffit).</value></data>
+  <data name="Welcome_Step2" xml:space="preserve"><value>Ton historique se charge tout seul ; le bouton de synchronisation, en bas de la barre latérale, le remet à jour quand tu veux.</value></data>
+  <data name="Welcome_Step3" xml:space="preserve"><value>Découvre tes jeux dans « Pour toi », et affine tes goûts dans l'Historique : histoire finie, jeux qui ne doivent pas compter.</value></data>
+  <data name="Welcome_ConnectAccounts" xml:space="preserve"><value>Connecter mes comptes</value></data>
+  <data name="Welcome_NoAccount" xml:space="preserve"><value>Pas de compte, ou une autre console ?</value></data>
+  <data name="Welcome_Private" xml:space="preserve"><value>Tes données restent sur ton PC, et GameRadar ne voit jamais tes mots de passe.</value></data>
+  <data name="Card_LeavingSoon" xml:space="preserve"><value>Bientôt retiré</value></data>
+  <data name="Settings_Xbox_Title" xml:space="preserve"><value>Compte Xbox</value></data>
+  <data name="Settings_Xbox_Description" xml:space="preserve"><value>GameRadar lit ton historique directement sur Xbox Live, avec ton compte Microsoft. Ta session reste chiffrée sur cet ordinateur ; ton mot de passe n'y passe jamais.</value></data>
+  <data name="Settings_Plan_Title" xml:space="preserve"><value>Mon abonnement</value></data>
+  <data name="Settings_Plan_Description" xml:space="preserve"><value>Chaque palier propose des jeux différents : les recommandations Game Pass se limitent au tien. Les jeux des paliers supérieurs restent visibles s'ils sont vendus sur Steam.</value></data>
+  <data name="Settings_Steam_Title" xml:space="preserve"><value>Compte Steam</value></data>
+  <data name="Settings_PlayStation_Title" xml:space="preserve"><value>Compte PlayStation</value></data>
+  <data name="Settings_Steam_Description" xml:space="preserve"><value>Ajoute ta bibliothèque Steam : ses succès et ton temps de jeu affinent tes recommandations. Steam ne propose pas de connexion aux applis : il faut ta clé API personnelle, qui reste chiffrée sur cet ordinateur.</value></data>
+  <data name="Settings_Steam_PublicProfile" xml:space="preserve"><value>Ton profil doit montrer ses jeux : Steam › Modifier le profil › Confidentialité › « Détails des jeux » : Public.</value></data>
+  <data name="Settings_Steam_ProfilePlaceholder" xml:space="preserve"><value>Adresse de ton profil (https://steamcommunity.com/id/…)</value></data>
+  <data name="Settings_Steam_KeyLabel" xml:space="preserve"><value>Clé API :</value></data>
+  <data name="Settings_Steam_GetKey" xml:space="preserve"><value>l'obtenir sur steamcommunity.com/dev/apikey</value></data>
+  <data name="Settings_Steam_Domain" xml:space="preserve"><value>(nom de domaine : localhost)</value></data>
+  <data name="Settings_Steam_KeyPlaceholder" xml:space="preserve"><value>Clé API Steam</value></data>
+  <data name="Settings_Steam_Connect" xml:space="preserve"><value>Connecter Steam</value></data>
+  <data name="Settings_Data_Title" xml:space="preserve"><value>Données</value></data>
+  <data name="Settings_Data_CatalogsNote" xml:space="preserve"><value>Jeux proposés en plus des abonnements, même sans compte Steam, GOG ni Epic. Les catalogues Steam, GOG et Epic sont mis à jour automatiquement chaque semaine.</value></data>
+  <data name="Settings_Data_RefreshCatalogs" xml:space="preserve"><value>Actualiser les catalogues maintenant</value></data>
+  <data name="Settings_Data_Folder_Title" xml:space="preserve"><value>Dossier des données</value></data>
+  <data name="Data_Location_Normal" xml:space="preserve"><value>Tes données sont rangées dans {0} (mode normal).</value></data>
+  <data name="Data_Location_Portable" xml:space="preserve"><value>Tes données sont rangées dans {0} (mode portable).</value></data>
+  <data name="Settings_Data_OpenFolder" xml:space="preserve"><value>Ouvrir le dossier des données</value></data>
+  <data name="Settings_Data_OpenFolder_Tip" xml:space="preserve"><value>Ouvre ce dossier dans l'explorateur de fichiers</value></data>
+  <data name="Settings_Data_Portable_Title" xml:space="preserve"><value>Emporter GameRadar sur une clé USB (mode portable)</value></data>
+  <data name="Settings_Data_Portable_Step1" xml:space="preserve"><value>1. Crée un dossier vide nommé « Data » juste à côté de GameRadar.exe.</value></data>
+  <data name="Settings_Data_Portable_Step2" xml:space="preserve"><value>2. Relance GameRadar : les réglages, les caches, les images et les journaux sont alors rangés dans ce dossier, que tu peux copier ou emporter.</value></data>
+  <data name="Settings_Data_Portable_Step3" xml:space="preserve"><value>3. Sur un autre ordinateur, reconnecte-toi à Xbox, Steam et PlayStation : tes connexions sont chiffrées pour ta session Windows et ne suivent pas le dossier.</value></data>
+  <data name="Settings_Data_Portable_Step4" xml:space="preserve"><value>4. Pour revenir au mode normal, renomme ou supprime le dossier « Data » : GameRadar ne le crée jamais lui-même.</value></data>
+  <data name="Privacy_Title" xml:space="preserve"><value>Confidentialité</value></data>
+  <data name="Privacy_Statement" xml:space="preserve"><value>GameRadar n'a aucun serveur : il ne collecte, ne transmet et ne vend aucune donnée. Ton historique, tes réglages et ses caches restent sur cet ordinateur ; ta session Xbox, ta clé Steam, ton jeton PlayStation et ta connexion Epic y sont chiffrés par Windows ; le jeton EA n'est jamais enregistré. Le journal des erreurs, sans aucun secret, ne quitte cet ordinateur que si tu l'envoies toi-même.</value></data>
+  <data name="Privacy_Services" xml:space="preserve"><value>L'appli ne contacte que les services dont elle a besoin : Microsoft (Xbox Live, catalogue Game Pass et Microsoft Store), Steam (ta bibliothèque, tes succès et ta liste de souhaits si tu connectes ton compte), Sony (PlayStation Network si tu le connectes, catalogue PS Plus si tu as choisi un abonnement PS Plus, PlayStation Store quand tu cherches un jeu à ajouter et pour ses meilleures ventes si la case « PlayStation Store » est cochée, et le catalogue PS Plus à ce moment-là si le PlayStation Store ne répond pas), GOG (ton profil public si tu l'indiques, et le catalogue de ses meilleures ventes, sans compte), EA (tes jeux joués dans l'appli EA, seulement quand tu colles la page EA), Epic Games (tes jeux, ton temps de jeu et tes succès si tu connectes ton compte, et les meilleures ventes, les plus joués et les mieux notés de son catalogue, sans compte), et GitHub pour vérifier les mises à jour. Chacun ne reçoit que ce qu'il faut pour répondre : ta connexion pour lire tes propres données, rien de personnel pour les catalogues.</value></data>
+  <data name="Privacy_Revoke_Title" xml:space="preserve"><value>Retirer l'accès de GameRadar</value></data>
+  <data name="Privacy_Revoke_Description" xml:space="preserve"><value>Se déconnecter oublie ta session sur cet ordinateur. Pour retirer aussi l'autorisation donnée à GameRadar, passe par ton compte :</value></data>
+  <data name="Privacy_Revoke_Microsoft" xml:space="preserve"><value>Autorisations de mon compte Microsoft</value></data>
+  <data name="Privacy_Revoke_Microsoft_Tip" xml:space="preserve"><value>Ouvre la liste des applis autorisées sur ton compte Microsoft</value></data>
+  <data name="Privacy_Revoke_Steam" xml:space="preserve"><value>Révoquer ma clé Steam</value></data>
+  <data name="Privacy_Revoke_Steam_Tip" xml:space="preserve"><value>Ouvre la page de ta clé API Steam, avec son bouton « Révoquer »</value></data>
+  <data name="Privacy_Erase_Title" xml:space="preserve"><value>Effacer toutes mes données</value></data>
+  <data name="Privacy_Erase_Description" xml:space="preserve"><value>Comptes Xbox, Steam et PlayStation, profil GOG, réglages (jeux marqués terminés, choix de tes goûts), caches et jaquettes. GameRadar se ferme ensuite ; au prochain lancement, tout repart de zéro.</value></data>
+  <data name="Privacy_Erase_Ask" xml:space="preserve"><value>Effacer toutes mes données…</value></data>
+  <data name="Privacy_Erase_Confirm" xml:space="preserve"><value>Oui, tout effacer</value></data>
+  <data name="Privacy_Erase_Final" xml:space="preserve"><value>C'est définitif.</value></data>
+  <data name="About_Title" xml:space="preserve"><value>À propos</value></data>
+  <data name="About_Intro" xml:space="preserve"><value>GameRadar recoupe plusieurs sources pour savoir ce que tu as joué et ce qui existe à jouer :</value></data>
+  <data name="About_XboxLive" xml:space="preserve"><value>— ton historique : jeux lancés, succès, dates. Avec ton compte Microsoft ; service non documenté.</value></data>
+  <data name="About_Catalog_Name" xml:space="preserve"><value>Catalogue Game Pass et Microsoft Store</value></data>
+  <data name="About_Catalog" xml:space="preserve"><value>— les jeux de chaque palier, leurs genres, modes, notes, jaquettes et départs annoncés. Sans compte ; services non documentés.</value></data>
+  <data name="About_SteamWebApi" xml:space="preserve"><value>— ta bibliothèque, ton temps de jeu et tes succès. API officielle, avec ta clé personnelle.</value></data>
+  <data name="About_SteamStore" xml:space="preserve"><value>— les meilleures ventes, les tags des joueurs (le « style » d'un jeu, qui sert à comparer les jeux entre eux), les avis et les images. API publiques, sans clé.</value></data>
+  <data name="About_News_Tip" xml:space="preserve"><value>Ce qui a changé dans chaque version</value></data>
+  <data name="About_ErrorLog" xml:space="preserve"><value>Journal des erreurs</value></data>
+  <data name="About_ErrorLog_Tip" xml:space="preserve"><value>Ouvre le dossier des journaux : en cas de souci, envoie le fichier du jour à la personne qui t'a partagé GameRadar</value></data>
+  <data name="About_Terms" xml:space="preserve"><value>Conditions d'utilisation</value></data>
+  <data name="About_Terms_Tip" xml:space="preserve"><value>Ce que tu peux faire de GameRadar, et ses limites : fourni tel quel, sans garantie</value></data>
+  <data name="About_Licenses" xml:space="preserve"><value>Licences des composants</value></data>
+  <data name="About_Licenses_Tip" xml:space="preserve"><value>Les composants open source que contient GameRadar (Avalonia, .NET, SkiaSharp…) et leurs licences</value></data>
+  <data name="Licenses_Intro" xml:space="preserve"><value>GameRadar est construit avec ces composants open source. Leurs licences demandent de joindre leurs textes à chaque copie : les voici, repliés sous la liste.</value></data>
+  <data name="Licenses_Component" xml:space="preserve"><value>Composant</value></data>
+  <data name="Licenses_Version" xml:space="preserve"><value>Version</value></data>
+  <data name="Licenses_License" xml:space="preserve"><value>Licence</value></data>
+  <data name="Licenses_LicenseText" xml:space="preserve"><value>Texte de la licence {0}</value></data>
+  <data name="Licenses_Bundled" xml:space="preserve"><value>Composants inclus dans {0}</value></data>
+  <data name="About_Trademarks" xml:space="preserve"><value>GameRadar est un projet indépendant, non affilié à Microsoft Corporation, Valve Corporation, Sony Interactive Entertainment, GOG sp. z o.o., Electronic Arts Inc. ni Epic Games, Inc., et approuvé par aucune d'elles. Xbox et Game Pass sont des marques de Microsoft Corporation ; Steam est une marque de Valve Corporation ; PlayStation et PlayStation Plus sont des marques de Sony Interactive Entertainment ; GOG et GOG.com sont des marques de GOG sp. z o.o. ; EA et EA Play sont des marques d'Electronic Arts Inc. ; Epic Games et Epic Games Store sont des marques d'Epic Games, Inc. Les jaquettes et noms des jeux appartiennent à leurs éditeurs.</value></data>
+  <data name="Common_Back_Tip" xml:space="preserve"><value>Revenir à la page précédente (Échap)</value></data>
+  <data name="Common_Back" xml:space="preserve"><value>Retour</value></data>
+  <data name="News_NewBadge" xml:space="preserve"><value>Nouveau</value></data>
+
+
+  <!-- History rows, times, genres, modes -->
+  <data name="Row_NoAchievements" xml:space="preserve"><value>Pas de succès</value></data>
+  <data name="Row_Achievements" xml:space="preserve"><value>{0}/{1} succès</value></data>
+  <data name="Row_AchievementsPercent" xml:space="preserve"><value>{0} succès ({1:0} %)</value></data>
+  <data name="Row_PlayedOn" xml:space="preserve"><value>Joué le {0:d MMM yyyy}</value></data>
+  <data name="Row_NeverLaunched" xml:space="preserve"><value>Jamais lancé</value></data>
+  <data name="Row_UnknownDate" xml:space="preserve"><value>Date inconnue</value></data>
+  <data name="Status_Mastered" xml:space="preserve"><value>Platiné</value></data>
+  <data name="Status_Completed" xml:space="preserve"><value>Terminé</value></data>
+  <data name="Status_NotLaunched" xml:space="preserve"><value>Pas lancé</value></data>
+  <data name="Status_Played" xml:space="preserve"><value>Joué</value></data>
+  <data name="Taste_Counts_Tip" xml:space="preserve"><value>Compte dans mes goûts : désactive pour ignorer ce jeu (ex. platiné juste pour le gamerscore)</value></data>
+  <data name="Taste_BarelyPlayed_Tip" xml:space="preserve"><value>Ignoré d'office : à peine lancé (moins de 5 % des succès et, si le temps de jeu est connu, moins de 2 h). Active pour le compter quand même ; il comptera tout seul si tu avances.</value></data>
+  <data name="Taste_Ignored_Tip" xml:space="preserve"><value>Ignoré dans tes goûts : active pour le compter à nouveau</value></data>
+  <data name="Playtime_Minutes" xml:space="preserve"><value>{0} min</value></data>
+  <data name="Playtime_Hours" xml:space="preserve"><value>{0} h</value></data>
+  <data name="Time_JustNow" xml:space="preserve"><value>à l'instant</value></data>
+  <data name="Time_MinutesAgo" xml:space="preserve"><value>il y a {0} min</value></data>
+  <data name="Time_HoursAgo" xml:space="preserve"><value>il y a {0} h</value></data>
+  <data name="Time_Yesterday" xml:space="preserve"><value>hier</value></data>
+  <data name="Time_DaysAgo" xml:space="preserve"><value>il y a {0} jours</value></data>
+  <data name="Time_On" xml:space="preserve"><value>le {0:d MMM yyyy}</value></data>
+  <data name="Genre_ActionAdventure" xml:space="preserve"><value>Action-aventure</value></data>
+  <data name="Genre_Shooter" xml:space="preserve"><value>Tir</value></data>
+  <data name="Genre_RolePlaying" xml:space="preserve"><value>RPG</value></data>
+  <data name="Genre_Simulation" xml:space="preserve"><value>Simulation</value></data>
+  <data name="Genre_Strategy" xml:space="preserve"><value>Stratégie</value></data>
+  <data name="Genre_Racing" xml:space="preserve"><value>Course et pilotage</value></data>
+  <data name="Genre_Sports" xml:space="preserve"><value>Sport</value></data>
+  <data name="Genre_Platformer" xml:space="preserve"><value>Plateforme</value></data>
+  <data name="Genre_Family" xml:space="preserve"><value>Famille et enfants</value></data>
+  <data name="Genre_Fighting" xml:space="preserve"><value>Combat</value></data>
+  <data name="Genre_CardBoard" xml:space="preserve"><value>Cartes et plateau</value></data>
+  <data name="Genre_Classics" xml:space="preserve"><value>Classiques</value></data>
+  <data name="Genre_Puzzle" xml:space="preserve"><value>Réflexion</value></data>
+  <data name="Genre_Moba" xml:space="preserve"><value>MOBA</value></data>
+  <data name="Genre_Music" xml:space="preserve"><value>Musique</value></data>
+  <data name="Genre_Educational" xml:space="preserve"><value>Éducatif</value></data>
+  <data name="Genre_Tools" xml:space="preserve"><value>Outils</value></data>
+  <data name="Genre_Other" xml:space="preserve"><value>Autre</value></data>
+  <data name="Mode_Solo" xml:space="preserve"><value>solo</value></data>
+  <data name="Mode_CoopOnline" xml:space="preserve"><value>coop en ligne</value></data>
+  <data name="Mode_MultiOnline" xml:space="preserve"><value>multi en ligne</value></data>
+  <data name="Mode_Local" xml:space="preserve"><value>en local</value></data>
+
+
+  <!-- Recommendation cards -->
+  <data name="Reason_SameStyle" xml:space="preserve"><value>Même style : {0}</value></data>
+  <data name="Reason_CloseTo" xml:space="preserve"><value>Proche de {0} : {1}</value></data>
+  <data name="Reason_ToDiscover" xml:space="preserve"><value>À découvrir : genre encore peu exploré</value></data>
+  <data name="Reason_GoFarIn" xml:space="preserve"><value>Parce que tu vas loin dans : {0}</value></data>
+  <data name="Reason_GenreGames" xml:space="preserve"><value>{0} ({1} jeux)</value></data>
+  <data name="Rating_Percent" xml:space="preserve"><value>{0:0} %</value></data>
+  <data name="Rating_None" xml:space="preserve"><value>Pas encore noté</value></data>
+  <data name="Rating_SteamCount" xml:space="preserve"><value>{0:N0} avis Steam</value></data>
+  <data name="Rating_Count" xml:space="preserve"><value>{0:N0} avis</value></data>
+  <data name="Platform_PcAndConsole" xml:space="preserve"><value>PC et console</value></data>
+  <data name="Platform_Pc" xml:space="preserve"><value>PC</value></data>
+  <data name="Platform_Console" xml:space="preserve"><value>Console</value></data>
+  <data name="Platform_PcSteam" xml:space="preserve"><value>PC (Steam)</value></data>
+  <data name="Platform_PlayStation" xml:space="preserve"><value>PlayStation</value></data>
+  <data name="Platform_PlayStationAndSteam" xml:space="preserve"><value>PlayStation et PC (Steam)</value></data>
+  <data name="Card_OpenPlayStation_Tip" xml:space="preserve"><value>Voir sa page sur le PlayStation Store</value></data>
+  <data name="Recommendations_PsPlus_Tip" xml:space="preserve"><value>Les jeux inclus dans ton abonnement PS Plus (palier à choisir dans les Réglages)</value></data>
+  <data name="Settings_PsPlus_Title" xml:space="preserve"><value>Mon abonnement PS Plus</value></data>
+  <data name="Settings_PsPlus_Description" xml:space="preserve"><value>Chaque palier propose des jeux différents : les recommandations PS Plus se limitent au tien. Sans abonnement, aucun jeu PS Plus n'est proposé. Les jeux d'un palier supérieur restent visibles s'ils sont vendus sur Steam.</value></data>
+  <data name="Common_PsPlusCatalog" xml:space="preserve"><value>Catalogue PS Plus</value></data>
+  <data name="Card_OpenXbox_Tip" xml:space="preserve"><value>Voir sa page sur le Store Xbox</value></data>
+  <data name="Card_OpenSteam_Tip" xml:space="preserve"><value>Voir sa page sur Steam</value></data>
+  <data name="Card_NotInterested_Tip" xml:space="preserve"><value>Pas intéressé : ne plus me proposer ce jeu, ni ceux qui lui ressemblent trop</value></data>
+  <data name="NotInterested_Done" xml:space="preserve"><value>« {0} » ne te sera plus proposé, ni les jeux qui lui ressemblent trop.</value></data>
+  <data name="NotInterested_Undo" xml:space="preserve"><value>Annuler</value></data>
+
+
+  <!-- Main view model: statuses, errors, sections -->
+  <data name="Sync_None" xml:space="preserve"><value>aucun</value></data>
+  <data name="Sync_CatalogWaiting" xml:space="preserve"><value>Catalogue : en attente</value></data>
+  <data name="Sync_Catalog" xml:space="preserve"><value>Catalogue : {0}</value></data>
+  <data name="About_Version" xml:space="preserve"><value>Version {0}</value></data>
+  <data name="Data_PortableNotWritable" xml:space="preserve"><value>Le dossier « Data » à côté de GameRadar.exe n'est pas accessible en écriture : tes données restent dans le dossier habituel (%LOCALAPPDATA%\GameRadar).</value></data>
+  <data name="Update_Available" xml:space="preserve"><value>GameRadar {0} est disponible (tu as la {1}).</value></data>
+  <data name="History_Filter" xml:space="preserve"><value>{0} jeux affichés sur {1}</value></data>
+  <data name="Status_FetchingXbox" xml:space="preserve"><value>Récupération de ton historique Xbox…</value></data>
+  <data name="Status_FetchingSteam" xml:space="preserve"><value>Récupération de ton historique Steam…</value></data>
+  <data name="Status_FetchingSteamAchievements" xml:space="preserve"><value>Récupération des succès Steam ({0}/{1} jeux)…</value></data>
+  <data name="Status_FetchingSteamCatalog" xml:space="preserve"><value>Récupération du catalogue Steam…</value></data>
+  <data name="Status_FetchingGamePass" xml:space="preserve"><value>Récupération du catalogue Game Pass…</value></data>
+  <data name="Error_Unexpected" xml:space="preserve"><value>Erreur inattendue : {0}</value></data>
+  <data name="Error_XboxUnreachable" xml:space="preserve"><value>Impossible de joindre Xbox Live. Vérifie ta connexion Internet.</value></data>
+  <data name="Error_XboxSlow" xml:space="preserve"><value>Xbox Live met trop de temps à répondre. Réessaie plus tard.</value></data>
+  <data name="Error_XboxFormat" xml:space="preserve"><value>La réponse de Xbox Live a un format inattendu (l'API a peut-être changé).</value></data>
+  <data name="Error_SteamUnreachable" xml:space="preserve"><value>Impossible de joindre Steam. Vérifie ta connexion Internet.</value></data>
+  <data name="Error_SteamSlow" xml:space="preserve"><value>Steam met trop de temps à répondre. Réessaie plus tard.</value></data>
+  <data name="Error_SteamFormat" xml:space="preserve"><value>La réponse de Steam a un format inattendu (l'API a peut-être changé).</value></data>
+  <data name="Error_SteamStoreUnreachable" xml:space="preserve"><value>Impossible de joindre le catalogue Steam. Vérifie ta connexion Internet.</value></data>
+  <data name="Error_SteamStoreSlow" xml:space="preserve"><value>Le catalogue Steam met trop de temps à répondre. Réessaie plus tard.</value></data>
+  <data name="Error_SteamStoreFormat" xml:space="preserve"><value>Le catalogue Steam a un format inattendu (l'API a peut-être changé).</value></data>
+  <data name="Error_CatalogUnreachable" xml:space="preserve"><value>Impossible de joindre le catalogue Game Pass. Vérifie ta connexion Internet.</value></data>
+  <data name="Error_CatalogSlow" xml:space="preserve"><value>Le catalogue Game Pass met trop de temps à répondre. Réessaie plus tard.</value></data>
+  <data name="Error_CatalogFormat" xml:space="preserve"><value>Le catalogue Game Pass a un format inattendu (l'API a peut-être changé).</value></data>
+  <data name="Error_GenresUnreachable" xml:space="preserve"><value>Impossible de joindre le catalogue Microsoft pour les genres de tes jeux. Vérifie ta connexion Internet.</value></data>
+  <data name="Error_SaveChoice" xml:space="preserve"><value>Impossible d'enregistrer ton choix : {0}</value></data>
+  <data name="Status_SteamCatalogNotLoaded" xml:space="preserve"><value>Pas encore chargé.</value></data>
+  <data name="Status_SteamCatalog" xml:space="preserve"><value>{0} jeux bien notés parmi les meilleures ventes — catalogue du {1:dd/MM/yyyy 'à' HH:mm}.</value></data>
+  <data name="Status_NoXboxHistory" xml:space="preserve"><value>Aucun historique Xbox : connecte-toi à ton compte Xbox pour le charger.</value></data>
+  <data name="Status_XboxHistory" xml:space="preserve"><value>{0} jeux, dont {1} platinés — historique du {2:dd/MM/yyyy 'à' HH:mm}.</value></data>
+  <data name="Status_NoSteamHistory" xml:space="preserve"><value>Aucun historique Steam : connecte ton compte Steam pour l'ajouter.</value></data>
+  <data name="Status_SteamHistory" xml:space="preserve"><value>{0} jeux possédés, dont {1} lancés et {2} à 100 % — historique du {3:dd/MM/yyyy 'à' HH:mm}.</value></data>
+  <data name="History_NoGames" xml:space="preserve"><value>Aucun jeu pour l'instant : connecte un compte Xbox ou Steam.</value></data>
+  <data name="History_Summary" xml:space="preserve"><value>{0} jeux, dont {1} platinés.</value></data>
+  <data name="History_SummaryCompleted" xml:space="preserve"><value>{0} jeux, dont {1} platinés, {2} terminés.</value></data>
+  <data name="Catalog_All" xml:space="preserve"><value>{0} jeux au Game Pass</value></data>
+  <data name="Catalog_InPlan" xml:space="preserve"><value>{0} jeux dans ton {1}</value></data>
+  <data name="Catalog_InPlanPlayed" xml:space="preserve"><value>{0} jeux dans ton {1}, dont {2} de tes jeux</value></data>
+  <data name="Catalog_OfAllPlans" xml:space="preserve"><value>{0}, sur {1} tous paliers confondus</value></data>
+  <data name="Catalog_Status" xml:space="preserve"><value>{0} — catalogue du {1:dd/MM/yyyy 'à' HH:mm}.</value></data>
+  <data name="Plan_None" xml:space="preserve"><value>Pas d'abonnement</value></data>
+  <data name="Reco_Waiting" xml:space="preserve"><value>Les recommandations apparaîtront dès que ton historique et le catalogue seront chargés.</value></data>
+  <data name="Reco_Analyzing" xml:space="preserve"><value>Analyse de tes goûts…</value></data>
+  <data name="Reco_GenresXbox" xml:space="preserve"><value>Recherche des genres de tes jeux Xbox ({0}/{1})…</value></data>
+  <data name="Reco_GenresSteam" xml:space="preserve"><value>Recherche des genres de tes jeux Steam ({0}/{1})…</value></data>
+  <data name="Reco_Tags" xml:space="preserve"><value>Analyse du style de tes jeux et du Game Pass sur Steam ({0}/{1})… Les recommandations s'affineront à la fin.</value></data>
+  <data name="Reco_NoSource" xml:space="preserve"><value>Coche au moins une source (Game Pass, PS Plus ou Steam) pour voir des recommandations.</value></data>
+  <data name="Reco_SourceSteam" xml:space="preserve"><value>catalogue Steam</value></data>
+  <data name="Reco_TwoSources" xml:space="preserve"><value>{0} et {1}</value></data>
+  <data name="Status_FetchingPsPlus" xml:space="preserve"><value>Récupération du catalogue PS Plus…</value></data>
+  <data name="Error_PsPlusUnreachable" xml:space="preserve"><value>Impossible de joindre le catalogue PS Plus. Vérifie ta connexion Internet.</value></data>
+  <data name="Error_PsPlusSlow" xml:space="preserve"><value>Le catalogue PS Plus met trop de temps à répondre. Réessaie plus tard.</value></data>
+  <data name="Error_PsPlusFormat" xml:space="preserve"><value>Le catalogue PS Plus a un format inattendu (l'API a peut-être changé).</value></data>
+  <data name="Status_PsPlusCatalogNotLoaded" xml:space="preserve"><value>Pas encore chargé.</value></data>
+  <data name="Status_PsPlusCatalog" xml:space="preserve"><value>{0} jeux (Extra et Premium) — catalogue du {1:dd/MM/yyyy 'à' HH:mm}.</value></data>
+  <data name="Reco_ThreeSources" xml:space="preserve"><value>{0}, {1} et {2}</value></data>
+  <data name="Reco_ExcludedByYou" xml:space="preserve"><value>{0} exclus par toi</value></data>
+  <data name="Reco_BarelyPlayed" xml:space="preserve"><value>{0} à peine lancés ignorés</value></data>
+  <data name="Reco_Summary" xml:space="preserve"><value>{0} de tes jeux favoris servent de point de départ, sur {1} jeux analysés dans ton historique. Jeux proposés : {2}.</value></data>
+  <data name="Reco_SummaryIgnored" xml:space="preserve"><value>{0} de tes jeux favoris servent de point de départ, sur {1} jeux analysés dans ton historique ({2}). Jeux proposés : {3}.</value></data>
+  <data name="Section_LeavingSoon" xml:space="preserve"><value>À jouer avant qu'ils quittent le Game Pass</value></data>
+  <data name="Section_BecauseYouLiked" xml:space="preserve"><value>Parce que tu as aimé {0}</value></data>
+  <data name="Section_ByGenres" xml:space="preserve"><value>D'après tes goûts</value></data>
+
+
+  <!-- Accounts, errors, privacy, release notes -->
+  <data name="Account_SignedInAs" xml:space="preserve"><value>Connecté en tant que {0}</value></data>
+  <data name="Account_SignedIn" xml:space="preserve"><value>Connecté</value></data>
+  <data name="Account_NotSignedIn" xml:space="preserve"><value>Non connecté</value></data>
+  <data name="Account_SigningIn" xml:space="preserve"><value>Connexion en cours dans ton navigateur…</value></data>
+  <data name="Account_SignInCancelled" xml:space="preserve"><value>Connexion annulée.</value></data>
+  <data name="Error_MicrosoftUnreachable" xml:space="preserve"><value>Impossible de joindre Microsoft. Vérifie ta connexion Internet.</value></data>
+  <data name="Error_MicrosoftSlow" xml:space="preserve"><value>Microsoft met trop de temps à répondre. Réessaie plus tard.</value></data>
+  <data name="Error_UnexpectedSignIn" xml:space="preserve"><value>Erreur inattendue pendant la connexion : {0}</value></data>
+  <data name="Account_XboxSignedOut" xml:space="preserve"><value>Déconnecté. Ton historique Xbox reste affiché jusqu'à la prochaine connexion.</value></data>
+  <data name="Account_SteamChecking" xml:space="preserve"><value>Vérification de ta clé et de ton profil Steam…</value></data>
+  <data name="Account_SteamSignedOut" xml:space="preserve"><value>Déconnecté. Ton historique Steam reste affiché jusqu'à la prochaine connexion.</value></data>
+  <data name="Error_UnexpectedLogged" xml:space="preserve"><value>Une erreur inattendue s'est produite. Elle est notée dans le journal des erreurs (Réglages › À propos).</value></data>
+  <data name="Privacy_Erase_Busy" xml:space="preserve"><value>Une synchronisation est en cours : attends qu'elle se termine pour effacer tes données.</value></data>
+  <data name="Privacy_Erase_Failed" xml:space="preserve"><value>Certaines données n'ont pas pu être effacées : {0} Ferme les autres programmes et réessaie.</value></data>
+  <data name="News_None" xml:space="preserve"><value>Aucune note de version jusqu'à la {0}, la version de cette copie de GameRadar.</value></data>
+  <data name="News_Banner" xml:space="preserve"><value>GameRadar {0} est installé : découvre ses nouveautés.</value></data>
+  <data name="News_Version" xml:space="preserve"><value>Version {0}</value></data>
+  <data name="News_PublishedOn" xml:space="preserve"><value>Publiée le {0:d MMM yyyy}</value></data>
+  <data name="News_InPreparation" xml:space="preserve"><value>En préparation</value></data>
+
+
+  <!-- Settings tabs -->
+  <data name="Settings_Tab_Accounts" xml:space="preserve"><value>Comptes</value></data>
+  <data name="Settings_Tab_Preferences" xml:space="preserve"><value>Préférences</value></data>
+  <data name="Common_PlayStationHistory" xml:space="preserve"><value>Historique PlayStation</value></data>
+  <data name="Status_FetchingPlayStation" xml:space="preserve"><value>Récupération de tes trophées et de tes jeux PlayStation…</value></data>
+  <data name="Status_NoPlayStationHistory" xml:space="preserve"><value>Aucun historique PlayStation : connecte ton compte PlayStation pour le charger.</value></data>
+  <data name="Status_PlayStationHistory" xml:space="preserve"><value>{0} jeux, dont {1} platinés — historique du {2:dd/MM/yyyy 'à' HH:mm}.</value></data>
+  <data name="Error_PlayStationUnreachable" xml:space="preserve"><value>Impossible de joindre PlayStation Network. Vérifie ta connexion Internet.</value></data>
+  <data name="Error_PlayStationSlow" xml:space="preserve"><value>PlayStation Network met trop de temps à répondre. Réessaie plus tard.</value></data>
+  <data name="Error_PlayStationFormat" xml:space="preserve"><value>La réponse de PlayStation Network a un format inattendu (l'API a peut-être changé).</value></data>
+  <data name="Account_PlayStationChecking" xml:space="preserve"><value>Vérification de ton jeton PlayStation…</value></data>
+  <data name="Account_PlayStationSignedOut" xml:space="preserve"><value>Déconnecté : le jeton est effacé de cet ordinateur. Ton historique PlayStation reste affiché jusqu'à la prochaine connexion.</value></data>
+  <data name="Settings_PlayStation_Description" xml:space="preserve"><value>Ajoute tes trophées (PS3, PS4, PS5, Vita) et ton temps de jeu (PS4, PS5) : ils affinent tes recommandations. Sony ne propose pas de connexion aux applis : GameRadar passe par une API non officielle, avec ton jeton de session (NPSSO), qui reste chiffré sur cet ordinateur.</value></data>
+  <data name="Settings_PlayStation_Step1" xml:space="preserve"><value>1. Connecte-toi sur</value></data>
+  <data name="Settings_PlayStation_Step2" xml:space="preserve"><value>2. Puis ouvre</value></data>
+  <data name="Settings_PlayStation_OpenNpsso" xml:space="preserve"><value>la page de ton jeton</value></data>
+  <data name="Settings_PlayStation_Step3" xml:space="preserve"><value>3. Copie tout ce que la page affiche ({"npsso":"…"}) et colle-le ici :</value></data>
+  <data name="Settings_PlayStation_NpssoPlaceholder" xml:space="preserve"><value>Jeton NPSSO</value></data>
+  <data name="Settings_PlayStation_Connect" xml:space="preserve"><value>Connecter PlayStation</value></data>
+  <data name="Privacy_Revoke_PlayStation" xml:space="preserve"><value>Déconnecter ma session Sony</value></data>
+  <data name="Privacy_Revoke_PlayStation_Tip" xml:space="preserve"><value>Ouvre la gestion de ton compte Sony : Sécurité › « Se déconnecter de tous les appareils » rend le jeton de GameRadar inutilisable</value></data>
+  <data name="About_PlayStationNetwork" xml:space="preserve"><value>— tes trophées, tes jeux PS4/PS5 et ton temps de jeu. Avec ton jeton de session ; service non documenté.</value></data>
+  <data name="About_PsPlusCatalog" xml:space="preserve"><value>— les jeux de chaque palier (Extra, Premium), leurs genres et jaquettes. Sans compte, seulement si tu as choisi un abonnement ; listes publiques de playstation.com, service non documenté.</value></data>
+  <data name="About_PsStoreCatalog" xml:space="preserve"><value>— les meilleures ventes PS5 et PS4 du PlayStation Store, leurs genres, notes et jaquettes, sans les précommandes. Sans compte, seulement si la case « PlayStation Store » est cochée ; service non documenté du site du PlayStation Store.</value></data>
+  <data name="History_Sort" xml:space="preserve"><value>Trier :</value></data>
+  <data name="History_Sort_Recent" xml:space="preserve"><value>Plus récents</value></data>
+  <data name="History_Sort_Alphabetical" xml:space="preserve"><value>A → Z</value></data>
+  <data name="History_Filter_Platform" xml:space="preserve"><value>Plateforme :</value></data>
+  <data name="History_Filter_Manual" xml:space="preserve"><value>Ajoutés à la main</value></data>
+  <data name="History_Filter_Status" xml:space="preserve"><value>Statut :</value></data>
+  <data name="History_Filter_Taste" xml:space="preserve"><value>Goûts :</value></data>
+  <data name="History_Filter_Counting" xml:space="preserve"><value>Comptent</value></data>
+  <data name="History_Filter_Ignored" xml:space="preserve"><value>Ignorés</value></data>
+  <data name="History_Filter_Tags" xml:space="preserve"><value>Tags :</value></data>
+  <data name="History_Filter_WithTags" xml:space="preserve"><value>Avec tags</value></data>
+  <data name="History_Filter_WithoutTags" xml:space="preserve"><value>Sans tags</value></data>
+  <data name="History_Filter_ShowAll" xml:space="preserve"><value>Tout afficher</value></data>
+  <data name="History_Filter_AllFeminine" xml:space="preserve"><value>Toutes</value></data>
+  <data name="History_Filter_NoneFeminine" xml:space="preserve"><value>Aucune</value></data>
+  <data name="History_Filter_All" xml:space="preserve"><value>Tous</value></data>
+  <data name="History_Filter_None" xml:space="preserve"><value>Aucun</value></data>
+  <data name="Common_GogCatalog" xml:space="preserve"><value>Catalogue GOG</value></data>
+  <data name="Status_GogCatalog" xml:space="preserve"><value>{0} jeux bien notés parmi les meilleures ventes — catalogue du {1:dd/MM/yyyy 'à' HH:mm}.</value></data>
+  <data name="Status_GogCatalogNotLoaded" xml:space="preserve"><value>Pas encore chargé.</value></data>
+  <data name="Status_FetchingGogCatalog" xml:space="preserve"><value>Récupération du catalogue GOG…</value></data>
+  <data name="Error_GogStoreUnreachable" xml:space="preserve"><value>Impossible de joindre le catalogue GOG. Vérifie ta connexion Internet.</value></data>
+  <data name="Error_GogStoreSlow" xml:space="preserve"><value>Le catalogue GOG met trop de temps à répondre. Réessaie plus tard.</value></data>
+  <data name="Error_GogStoreFormat" xml:space="preserve"><value>Le catalogue GOG a un format inattendu (l'API a peut-être changé).</value></data>
+  <data name="Recommendations_Gog_Tip" xml:space="preserve"><value>Les jeux vendus sur GOG, y compris ceux aussi présents ailleurs</value></data>
+  <data name="Card_OpenGog_Tip" xml:space="preserve"><value>Voir sa page sur GOG</value></data>
+  <data name="Rating_GogCount" xml:space="preserve"><value>{0:N0} avis GOG</value></data>
+  <data name="Platform_PcGog" xml:space="preserve"><value>PC (GOG)</value></data>
+  <data name="Reco_SourceGog" xml:space="preserve"><value>catalogue GOG</value></data>
+  <data name="Reco_FourSources" xml:space="preserve"><value>{0}, {1}, {2} et {3}</value></data>
+  <data name="About_GogCatalog" xml:space="preserve"><value>— les meilleures ventes, leurs genres, notes et jaquettes. Sans compte ; API publique du catalogue de gog.com, service non documenté.</value></data>
+  <data name="About_EpicCatalog" xml:space="preserve"><value>— les meilleures ventes, les plus joués et les mieux notés d'Epic Games, leurs genres, notes et jaquettes. Sans compte ; service non documenté du lanceur Epic.</value></data>
+  <data name="Card_OpenEpic_Tip" xml:space="preserve"><value>Voir sa page sur Epic Games</value></data>
+  <data name="Common_EpicCatalog" xml:space="preserve"><value>Catalogue Epic</value></data>
+  <data name="Error_EpicStoreSlow" xml:space="preserve"><value>Le catalogue Epic met trop de temps à répondre. Réessaie plus tard.</value></data>
+  <data name="Error_EpicStoreUnreachable" xml:space="preserve"><value>Impossible de joindre le catalogue Epic. Vérifie ta connexion Internet.</value></data>
+  <data name="Platform_PcEpic" xml:space="preserve"><value>PC (Epic)</value></data>
+  <data name="Platform_PlayStationAndGog" xml:space="preserve"><value>PlayStation et PC (GOG)</value></data>
+  <data name="Platform_PlayStationAndEpic" xml:space="preserve"><value>PlayStation et PC (Epic)</value></data>
+  <data name="Rating_EpicPlayers" xml:space="preserve"><value>note des joueurs Epic</value></data>
+  <data name="Rating_PsPlayers" xml:space="preserve"><value>note des joueurs PlayStation</value></data>
+  <data name="Reco_FiveSources" xml:space="preserve"><value>{0}, {1}, {2}, {3} et {4}</value></data>
+  <data name="Reco_SixSources" xml:space="preserve"><value>{0}, {1}, {2}, {3}, {4} et {5}</value></data>
+  <data name="Reco_SourceEpic" xml:space="preserve"><value>catalogue Epic</value></data>
+  <data name="Reco_SourcePsStore" xml:space="preserve"><value>catalogue PlayStation Store</value></data>
+  <data name="Recommendations_Epic_Tip" xml:space="preserve"><value>Les jeux vendus sur Epic Games, y compris ceux aussi présents ailleurs</value></data>
+  <data name="Recommendations_PsStore_Tip" xml:space="preserve"><value>Les meilleures ventes du PlayStation Store (PS5 et PS4), y compris celles aussi présentes ailleurs</value></data>
+  <data name="Status_EpicCatalog" xml:space="preserve"><value>{0} jeux parmi les meilleures ventes, les plus joués et les mieux notés — catalogue du {1:dd/MM/yyyy 'à' HH:mm}.</value></data>
+  <data name="Status_EpicCatalogNotLoaded" xml:space="preserve"><value>Pas encore chargé.</value></data>
+  <data name="Status_FetchingEpicCatalog" xml:space="preserve"><value>Récupération du catalogue Epic…</value></data>
+  <data name="Common_PsStoreCatalog" xml:space="preserve"><value>Catalogue PlayStation Store</value></data>
+  <data name="Error_PsStoreSlow" xml:space="preserve"><value>Le catalogue PlayStation Store met trop de temps à répondre. Réessaie plus tard.</value></data>
+  <data name="Error_PsStoreUnreachable" xml:space="preserve"><value>Impossible de joindre le catalogue PlayStation Store. Vérifie ta connexion Internet.</value></data>
+  <data name="Status_PsStoreCatalog" xml:space="preserve"><value>{0} jeux parmi les meilleures ventes PS5 et PS4 — catalogue du {1:dd/MM/yyyy 'à' HH:mm}.</value></data>
+  <data name="Status_PsStoreCatalogNotLoaded" xml:space="preserve"><value>Pas encore chargé.</value></data>
+  <data name="Status_FetchingPsStoreCatalog" xml:space="preserve"><value>Récupération du catalogue PlayStation Store…</value></data>
+  <data name="Common_GogHistory" xml:space="preserve"><value>Historique GOG</value></data>
+  <data name="Status_FetchingGog" xml:space="preserve"><value>Récupération de ton historique GOG…</value></data>
+  <data name="Status_NoGogHistory" xml:space="preserve"><value>Aucun historique GOG : indique ton profil GOG pour l'ajouter.</value></data>
+  <data name="Status_GogHistory" xml:space="preserve"><value>{0} jeux possédés, dont {1} suivis par GOG Galaxy et {2} à 100 % — historique du {3:dd/MM/yyyy 'à' HH:mm}.</value></data>
+  <data name="Error_GogUnreachable" xml:space="preserve"><value>Impossible de joindre GOG. Vérifie ta connexion Internet.</value></data>
+  <data name="Error_GogSlow" xml:space="preserve"><value>GOG met trop de temps à répondre. Réessaie plus tard.</value></data>
+  <data name="Account_GogSignedOut" xml:space="preserve"><value>Profil oublié. Ton historique GOG reste affiché jusqu'à la prochaine connexion.</value></data>
+  <data name="Settings_Gog_Title" xml:space="preserve"><value>Profil GOG</value></data>
+  <data name="Settings_Gog_Description" xml:space="preserve"><value>Ajoute ta bibliothèque GOG : le temps de jeu et les succès que GOG Galaxy a suivis affinent tes recommandations. Aucune connexion ni clé : GameRadar lit ton profil public.</value></data>
+  <data name="Settings_Gog_PublicProfile" xml:space="preserve"><value>Ton profil doit être public : dans les réglages de confidentialité de ton compte GOG, rends ton profil visible par tout le monde.</value></data>
+  <data name="Settings_Gog_ProfilePlaceholder" xml:space="preserve"><value>Nom de ton profil, ou son adresse (https://www.gog.com/u/…)</value></data>
+  <data name="Settings_Gog_Connect" xml:space="preserve"><value>Ajouter mon profil GOG</value></data>
+  <data name="Row_AchievementsPercentOnly" xml:space="preserve"><value>{0:0} % des succès</value></data>
+  <data name="About_GogProfile" xml:space="preserve"><value>— ta bibliothèque, et le temps de jeu et les succès suivis par GOG Galaxy. Ton profil public, sans connexion ; service non documenté.</value></data>
+  <data name="History_CompletedOnPlatform_Tip" xml:space="preserve"><value>Terminé d'après la plateforme : platine obtenu. Il manque seulement des trophées de DLC pour « Platiné ».</value></data>
+  <data name="Settings_Ea_Title" xml:space="preserve"><value>Compte EA</value></data>
+  <data name="Settings_Ea_Description" xml:space="preserve"><value>Ajoute les jeux auxquels tu as joué dans l'appli EA (EA Play compris), avec leur temps de jeu et leurs succès. EA ne propose pas de connexion aux applis : GameRadar passe par une API non officielle, avec un jeton que tu copies depuis la page d'EA. Il vaut 4 heures et n'est jamais enregistré : recolle-le quand tu veux mettre ton historique EA à jour.</value></data>
+  <data name="Settings_Ea_Step1" xml:space="preserve"><value>1. Connecte-toi sur</value></data>
+  <data name="Settings_Ea_Step2" xml:space="preserve"><value>2. Puis ouvre</value></data>
+  <data name="Settings_Ea_OpenPage" xml:space="preserve"><value>la page EA</value></data>
+  <data name="Settings_Ea_Step3" xml:space="preserve"><value>3. Copie tout ce que la page affiche (Ctrl+A, Ctrl+C : {"access_token":…}) et colle-le ici :</value></data>
+  <data name="Settings_Ea_TokenPlaceholder" xml:space="preserve"><value>Page EA ({"access_token":…})</value></data>
+  <data name="Settings_Ea_Update" xml:space="preserve"><value>Mettre à jour mon historique EA</value></data>
+  <data name="Account_EaTokenInMemory" xml:space="preserve"><value>Jeton EA en mémoire pour cette session (4 heures au plus)</value></data>
+  <data name="Common_EaHistory" xml:space="preserve"><value>Historique EA</value></data>
+  <data name="Status_FetchingEa" xml:space="preserve"><value>Récupération de ton historique EA…</value></data>
+  <data name="Status_FetchingEaGames" xml:space="preserve"><value>Recherche de tes jeux EA ({0}/{1})…</value></data>
+  <data name="Status_NoEaHistory" xml:space="preserve"><value>Aucun historique EA : colle la page EA dans Réglages › Comptes pour l'ajouter.</value></data>
+  <data name="Status_EaHistory" xml:space="preserve"><value>{0} jeux joués, dont {1} à 100 % — historique du {2:dd/MM/yyyy 'à' HH:mm}.</value></data>
+  <data name="Error_EaUnreachable" xml:space="preserve"><value>Impossible de joindre EA. Vérifie ta connexion Internet.</value></data>
+  <data name="Error_EaSlow" xml:space="preserve"><value>EA met trop de temps à répondre. Réessaie plus tard.</value></data>
+  <data name="About_EaHistory" xml:space="preserve"><value>— tes jeux joués dans l'appli EA (EA Play compris), ton temps de jeu et tes succès. Avec un jeton que tu copies depuis la page d'EA, jamais enregistré ; service non documenté.</value></data>
+  <data name="About_EpicHistory" xml:space="preserve"><value>— tes jeux joués sur Epic Games, ton temps de jeu et tes succès. Avec un code collé une fois ; la connexion, chiffrée, reste sur cet ordinateur ; services non documentés du lanceur Epic.</value></data>
+  <data name="Account_EpicChecking" xml:space="preserve"><value>Vérification de ton code Epic…</value></data>
+  <data name="Account_EpicSignedOut" xml:space="preserve"><value>Déconnecté : la connexion Epic est effacée de cet ordinateur. Ton historique Epic reste affiché jusqu'à la prochaine connexion.</value></data>
+  <data name="Common_EpicHistory" xml:space="preserve"><value>Historique Epic</value></data>
+  <data name="Error_EpicSlow" xml:space="preserve"><value>Epic Games met trop de temps à répondre. Réessaie plus tard.</value></data>
+  <data name="Error_EpicUnreachable" xml:space="preserve"><value>Impossible de joindre Epic Games. Vérifie ta connexion Internet.</value></data>
+  <data name="Settings_Epic_CodePlaceholder" xml:space="preserve"><value>Code Epic</value></data>
+  <data name="Settings_Epic_Connect" xml:space="preserve"><value>Connecter Epic</value></data>
+  <data name="Settings_Epic_Description" xml:space="preserve"><value>Ajoute les jeux auxquels tu as joué sur Epic Games, ton temps de jeu et tes succès (pour les jeux qui en ont) : ils affinent tes recommandations. Epic ne propose pas de connexion aux applis : GameRadar passe par les services non officiels du lanceur Epic, avec un code que tu colles une seule fois ; la connexion reste chiffrée sur cet ordinateur.</value></data>
+  <data name="Settings_Epic_OpenPage" xml:space="preserve"><value>la page de ton code</value></data>
+  <data name="Settings_Epic_Step1" xml:space="preserve"><value>1. Connecte-toi sur</value></data>
+  <data name="Settings_Epic_Step2" xml:space="preserve"><value>2. Puis ouvre</value></data>
+  <data name="Settings_Epic_Step3" xml:space="preserve"><value>3. Copie tout ce que la page affiche (il contient "authorizationCode") et colle-le ici sans attendre : le code expire vite.</value></data>
+  <data name="Settings_Epic_Title" xml:space="preserve"><value>Compte Epic Games</value></data>
+  <data name="Status_EpicHistory" xml:space="preserve"><value>{0} jeux joués, dont {1} à 100 % — historique du {2:dd/MM/yyyy 'à' HH:mm}.</value></data>
+  <data name="Status_FetchingEpic" xml:space="preserve"><value>Récupération de ton historique Epic…</value></data>
+  <data name="Status_NoEpicHistory" xml:space="preserve"><value>Aucun historique Epic : connecte ton compte Epic Games dans Réglages › Comptes pour l'ajouter.</value></data>
+</root>

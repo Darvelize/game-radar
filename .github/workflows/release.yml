@@ -1,0 +1,103 @@
+# Publishes a release of GameRadar in this repository.
+#
+#   - tag "vX.Y.Z" pushed: tests, publish, then the release is created;
+#   - run by hand ("Run workflow"): same steps, but the release is NOT created
+#     unless "dry-run" is unchecked. The exe and the notes are kept as an
+#     artifact of the run: the way to check everything before a first real release.
+#
+# The exe gets a build provenance attestation: anyone can check that it was built
+# here, from the tagged code (gh attestation verify GameRadar.exe -R Darvelize/game-radar).
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: 'Dry run: build everything, but do not create the release'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+# Two releases at once would fight over the same files: queued, never cancelled.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: windows-latest
+    permissions:
+      contents: write      # create the release
+      id-token: write      # sign the attestation
+      attestations: write  # store the attestation
+    steps:
+      - uses: actions/checkout@v4
+
+      # Same SDK as ci.yml (the third-party notices test depends on it).
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.401
+
+      # The version to publish is the one of the csproj. A tag must say the same:
+      # a numbered release never goes back, so a wrong tag must not publish.
+      - name: Check the version
+        id: version
+        shell: pwsh
+        env:
+          EVENT: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          $csproj = Get-Content src/GameRadar.App/GameRadar.App.csproj -Raw
+          if ($csproj -notmatch '<Version>(\d+\.\d+\.\d+)</Version>') { throw 'No <Version> in GameRadar.App.csproj.' }
+          $version = $Matches[1]
+          if ($env:EVENT -eq 'push' -and $env:REF_NAME -ne "v$version") {
+            throw "The tag $($env:REF_NAME) does not match the version $version of GameRadar.App.csproj."
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
+          Write-Host "Version $version"
+
+      # The tests include the changelogs of this version and the legal texts.
+      - name: Test
+        run: dotnet test --configuration Release --nologo
+
+      - name: Publish
+        run: dotnet publish src/GameRadar.App -p:PublishProfile=win-x64 --nologo
+
+      - name: Release notes
+        shell: pwsh
+        run: |
+          ./tools/Build-ReleaseNotes.ps1 -Version '${{ steps.version.outputs.version }}' -ExePath publish/GameRadar.exe -OutFile publish/release-notes.md
+          Get-Content publish/release-notes.md -Raw | Out-File -Append -Encoding utf8 $env:GITHUB_STEP_SUMMARY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GameRadar-${{ steps.version.outputs.version }}
+          path: |
+            publish/GameRadar.exe
+            publish/release-notes.md
+
+      # Only for a real release: a dry run attests nothing.
+      - name: Attest the build provenance
+        if: github.event_name == 'push' || inputs.dry-run == false
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: publish/GameRadar.exe
+
+      - name: Create the release
+        if: github.event_name == 'push' || inputs.dry-run == false
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          $repo = '${{ github.repository }}'
+          # A published release is never overwritten.
+          gh release view "v$env:VERSION" --repo $repo *> $null
+          if ($LASTEXITCODE -eq 0) { throw "The release v$env:VERSION already exists in $repo." }
+          gh release create "v$env:VERSION" "publish/GameRadar.exe#GameRadar.exe (Windows 64 bits)" `
+            --repo $repo --title "GameRadar $env:VERSION" --notes-file publish/release-notes.md
+          if ($LASTEXITCODE -ne 0) { throw 'gh release create failed.' }

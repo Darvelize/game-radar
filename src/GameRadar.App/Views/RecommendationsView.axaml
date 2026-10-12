@@ -1,0 +1,279 @@
+<ContentPage xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GameRadar.App.ViewModels"
+             xmlns:res="using:GameRadar.App.Resources"
+             x:Class="GameRadar.App.Views.RecommendationsView"
+             x:DataType="vm:MainWindowViewModel">
+
+    <ScrollViewer>
+        <StackPanel Margin="32,28,32,32" Spacing="24">
+
+            <!-- Header -->
+            <StackPanel Spacing="4">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
+                    <TextBlock Classes="display" Text="{x:Static res:Strings.Nav_ForYou}" />
+                    <!-- Filter: where the games can be played. Each box only when it
+                         means something (a Game Pass plan, Steam candidates loaded).
+                         Wraps in a narrow window: six boxes no longer fit on one line. -->
+                    <WrapPanel Grid.Column="1" ItemSpacing="16" LineSpacing="4" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <TextBlock Classes="secondary" Text="{x:Static res:Strings.Recommendations_Show}" VerticalAlignment="Center" />
+                        <CheckBox IsChecked="{Binding SourceFilter.ShowGamePass}" IsVisible="{Binding SourceFilter.HasGamePassPlan}"
+                                  Content="{Binding SourceFilter.GamePassLabel}"
+                                  ToolTip.Tip="{x:Static res:Strings.Recommendations_GamePass_Tip}" />
+                        <CheckBox IsChecked="{Binding SourceFilter.ShowPsPlus}" IsVisible="{Binding SourceFilter.HasPsPlusPlan}"
+                                  Content="{Binding SourceFilter.PsPlusLabel}"
+                                  ToolTip.Tip="{x:Static res:Strings.Recommendations_PsPlus_Tip}" />
+                        <CheckBox IsChecked="{Binding SourceFilter.ShowSteam}" IsVisible="{Binding Recommendations.HasSteamCandidates}"
+                                  Content="Steam"
+                                  ToolTip.Tip="{x:Static res:Strings.Recommendations_Steam_Tip}" />
+                        <CheckBox IsChecked="{Binding SourceFilter.ShowGog}" IsVisible="{Binding Recommendations.HasGogCandidates}"
+                                  Content="GOG"
+                                  ToolTip.Tip="{x:Static res:Strings.Recommendations_Gog_Tip}" />
+                        <CheckBox IsChecked="{Binding SourceFilter.ShowEpic}" IsVisible="{Binding Recommendations.HasEpicCandidates}"
+                                  Content="Epic"
+                                  ToolTip.Tip="{x:Static res:Strings.Recommendations_Epic_Tip}" />
+                        <!-- Always there: the box itself asks for the catalog (never downloaded while unticked). -->
+                        <CheckBox IsChecked="{Binding SourceFilter.ShowPlayStationStore}"
+                                  Content="PlayStation Store"
+                                  ToolTip.Tip="{x:Static res:Strings.Recommendations_PsStore_Tip}" />
+                    </WrapPanel>
+                </Grid>
+                <TextBlock Classes="secondary" Text="{Binding Recommendations.Status}" TextWrapping="Wrap" />
+                <ProgressBar Classes="thin" IsIndeterminate="True" Margin="0,8,0,0"
+                             IsVisible="{Binding Recommendations.IsComputing}" />
+            </StackPanel>
+
+            <!-- Right after "Pas intéressé": what it did, and a way back from a click by mistake -->
+            <Border Classes="notice info" IsVisible="{Binding NotInterested.HasLastRefusal}">
+                <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+                    <Path Grid.Column="0" Classes="icon accent" Data="{StaticResource IconNotInterested}" />
+                    <TextBlock Grid.Column="1" Text="{Binding NotInterested.LastRefusalLabel}"
+                               TextWrapping="Wrap" VerticalAlignment="Center" />
+                    <Button Grid.Column="2" Content="{x:Static res:Strings.NotInterested_Undo}"
+                            Command="{Binding NotInterested.UndoCommand}" />
+                    <Button Grid.Column="3" Classes="icon"
+                            Command="{Binding NotInterested.DismissCommand}" ToolTip.Tip="{x:Static res:Strings.Common_Close}">
+                        <Path Classes="icon secondary" Data="{StaticResource IconClose}" />
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- Welcome: first launch, no history yet -->
+            <Border Classes="card" IsVisible="{Binding !History.HasHistory}"
+                    Padding="32" MaxWidth="580" HorizontalAlignment="Left">
+                <StackPanel Spacing="16">
+                    <Border Background="{DynamicResource AccentSubtleBrush}" CornerRadius="{StaticResource RadiusLarge}"
+                            Width="56" Height="56" HorizontalAlignment="Left">
+                        <Path Classes="icon accent" Data="{StaticResource IconRadar}" StrokeThickness="2"
+                              HorizontalAlignment="Center" />
+                    </Border>
+                    <TextBlock Classes="title" Text="{x:Static res:Strings.Welcome_Title}" />
+                    <TextBlock Classes="secondary" TextWrapping="Wrap"
+                               Text="{x:Static res:Strings.Welcome_Intro}" />
+
+                    <!-- The way in, in three numbered steps: every account is
+                         connected in Settings › Accounts (one place, whatever
+                         the platform). -->
+                    <TextBlock FontWeight="SemiBold" Text="{x:Static res:Strings.Welcome_HowTo}" />
+                    <!-- One grid: the column of the numbers is as wide for the
+                         three rows ("1" is narrower), so the three texts start together. -->
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                        <Border Classes="badge accent" VerticalAlignment="Top" HorizontalAlignment="Center">
+                            <TextBlock Text="1" />
+                        </Border>
+                        <TextBlock Grid.Column="1" TextWrapping="Wrap" Text="{x:Static res:Strings.Welcome_Step1}" />
+                        <Border Grid.Row="1" Classes="badge accent" VerticalAlignment="Top" HorizontalAlignment="Center">
+                            <TextBlock Text="2" />
+                        </Border>
+                        <TextBlock Grid.Row="1" Grid.Column="1" TextWrapping="Wrap" Text="{x:Static res:Strings.Welcome_Step2}" />
+                        <Border Grid.Row="2" Classes="badge accent" VerticalAlignment="Top" HorizontalAlignment="Center">
+                            <TextBlock Text="3" />
+                        </Border>
+                        <TextBlock Grid.Row="2" Grid.Column="1" TextWrapping="Wrap" Text="{x:Static res:Strings.Welcome_Step3}" />
+                    </Grid>
+
+                    <!-- First the accounts; once one is connected but its history
+                         is not loaded yet (e.g. the first load failed), loading it
+                         comes first. -->
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Button Classes.accent="{Binding !Accounts.HasAccount}" Content="{x:Static res:Strings.Welcome_ConnectAccounts}"
+                                Command="{Binding OpenSettingsCommand}"
+                                CommandParameter="{x:Static vm:SettingsTab.Accounts}" />
+                        <Button Classes="accent" Content="{x:Static res:Strings.Welcome_LoadHistory}" IsVisible="{Binding Accounts.HasAccount}"
+                                Command="{Binding Accounts.RefreshHistoryCommand}" />
+                    </StackPanel>
+
+                    <!-- No account at all, or another console: games added by hand -->
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <TextBlock Classes="secondary" Text="{x:Static res:Strings.Welcome_NoAccount}" VerticalAlignment="Center" />
+                        <HyperlinkButton Content="{x:Static res:Strings.Welcome_AddByHand}" Padding="2,0"
+                                         Command="{Binding AddGame.OpenCommand}" />
+                    </StackPanel>
+
+                    <!-- A Grid, not a horizontal StackPanel: the text can wrap -->
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
+                        <Path Classes="icon secondary small" Data="{StaticResource IconShield}" />
+                        <TextBlock Grid.Column="1" Classes="caption" TextWrapping="Wrap" VerticalAlignment="Center"
+                                   Text="{x:Static res:Strings.Welcome_Private}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Sections: "À jouer avant...", "Parce que tu as aimé X"... -->
+            <ItemsControl ItemsSource="{Binding Recommendations.Sections}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:RecommendationSectionRow">
+                        <StackPanel Spacing="12" Margin="0,0,0,32">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Path Classes="icon accent" Data="{StaticResource IconHourglass}"
+                                      IsVisible="{Binding IsLeavingSoon}" />
+                                <TextBlock Classes="title" Text="{Binding Title}" VerticalAlignment="Center" />
+                            </StackPanel>
+
+                            <!-- Cards wrap to the window width -->
+                            <ItemsControl ItemsSource="{Binding Games}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel ItemSpacing="16" LineSpacing="16" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:RecommendationRow">
+                                        <!-- 280: three cards fit side by side in the default window.
+                                             Not a link itself: its platform badges are (the player
+                                             chooses where to see the game). -->
+                                        <Border Classes="card media" Width="280" MinHeight="340">
+                                            <DockPanel>
+                                                <!-- Picture: placeholder first, picture fades in once loaded -->
+                                                <Border DockPanel.Dock="Top" Classes="cover">
+                                                    <Panel>
+                                                        <Path Classes="icon accent" Data="{StaticResource IconRadar}"
+                                                              HorizontalAlignment="Center" Opacity="0.5" />
+                                                        <Image Classes="cover" Classes.loaded="{Binding HasImage}"
+                                                               Source="{Binding Image}" />
+                                                        <!-- "Pas intéressé": shown on hover (Components.axaml) -->
+                                                        <Button Classes="dismiss" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8"
+                                                                Command="{Binding $parent[ContentPage].((vm:MainWindowViewModel)DataContext).NotInterested.RefuseCommand}"
+                                                                CommandParameter="{Binding}"
+                                                                ToolTip.Tip="{x:Static res:Strings.Card_NotInterested_Tip}"
+                                                                AutomationProperties.Name="{x:Static res:Strings.Card_NotInterested_Tip}">
+                                                            <Path Classes="icon secondary small" Data="{StaticResource IconNotInterested}" />
+                                                        </Button>
+                                                    </Panel>
+                                                </Border>
+
+                                                <DockPanel Margin="{StaticResource PaddingCardBody}">
+                                                    <!-- Footer, kept at the bottom so cards of a row align -->
+                                                    <StackPanel DockPanel.Dock="Bottom" Spacing="4" Margin="0,12,0,0">
+                                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                                            <Path Classes="icon accent small filled" Data="{StaticResource IconStar}"
+                                                                  IsVisible="{Binding HasRating}" />
+                                                            <TextBlock Text="{Binding RatingValueLabel}" FontWeight="SemiBold"
+                                                                       VerticalAlignment="Center" IsVisible="{Binding HasRating}" />
+                                                            <TextBlock Classes="caption" Text="{Binding RatingCountLabel}"
+                                                                       VerticalAlignment="Center" />
+                                                        </StackPanel>
+                                                        <TextBlock Classes="caption" Text="{Binding PlatformsLabel}"
+                                                                   TextWrapping="Wrap" />
+                                                    </StackPanel>
+    
+                                                    <StackPanel Spacing="6">
+                                                        <!-- Where to play it: subscription, Steam, or both. Each
+                                                             platform badge opens the game's page there; the
+                                                             command is the page's, reached through the page
+                                                             (the card's DataContext is the row). -->
+                                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                                            <Button Classes="badgeLink" IsVisible="{Binding InGamePass}"
+                                                                    Command="{Binding $parent[ContentPage].((vm:MainWindowViewModel)DataContext).Recommendations.OpenPageCommand}"
+                                                                    CommandParameter="{Binding XboxStorePage}"
+                                                                    ToolTip.Tip="{x:Static res:Strings.Card_OpenXbox_Tip}"
+                                                                    AutomationProperties.Name="{x:Static res:Strings.Card_OpenXbox_Tip}">
+                                                                <Border Classes="badge gamepass">
+                                                                    <TextBlock Text="Game Pass" />
+                                                                </Border>
+                                                            </Button>
+                                                            <Button Classes="badgeLink" IsVisible="{Binding InPsPlus}"
+                                                                    Command="{Binding $parent[ContentPage].((vm:MainWindowViewModel)DataContext).Recommendations.OpenPageCommand}"
+                                                                    CommandParameter="{Binding PsPlusPage}"
+                                                                    ToolTip.Tip="{x:Static res:Strings.Card_OpenPlayStation_Tip}"
+                                                                    AutomationProperties.Name="{x:Static res:Strings.Card_OpenPlayStation_Tip}">
+                                                                <Border Classes="badge platform playstation">
+                                                                    <TextBlock Text="PS Plus" />
+                                                                </Border>
+                                                            </Button>
+                                                            <Border Classes="badge danger" IsVisible="{Binding IsLeavingSoon}">
+                                                                <TextBlock Text="{x:Static res:Strings.Card_LeavingSoon}" />
+                                                            </Border>
+                                                            <Button Classes="badgeLink" IsVisible="{Binding IsOnSteam}"
+                                                                    Command="{Binding $parent[ContentPage].((vm:MainWindowViewModel)DataContext).Recommendations.OpenPageCommand}"
+                                                                    CommandParameter="{Binding SteamPage}"
+                                                                    ToolTip.Tip="{x:Static res:Strings.Card_OpenSteam_Tip}"
+                                                                    AutomationProperties.Name="{x:Static res:Strings.Card_OpenSteam_Tip}">
+                                                                <Border Classes="badge platform steam">
+                                                                    <TextBlock Text="Steam" />
+                                                                </Border>
+                                                            </Button>
+                                                            <Button Classes="badgeLink" IsVisible="{Binding IsOnGog}"
+                                                                    Command="{Binding $parent[ContentPage].((vm:MainWindowViewModel)DataContext).Recommendations.OpenPageCommand}"
+                                                                    CommandParameter="{Binding GogPage}"
+                                                                    ToolTip.Tip="{x:Static res:Strings.Card_OpenGog_Tip}"
+                                                                    AutomationProperties.Name="{x:Static res:Strings.Card_OpenGog_Tip}">
+                                                                <Border Classes="badge platform gog">
+                                                                    <TextBlock Text="GOG" />
+                                                                </Border>
+                                                            </Button>
+                                                            <Button Classes="badgeLink" IsVisible="{Binding IsOnEpic}"
+                                                                    Command="{Binding $parent[ContentPage].((vm:MainWindowViewModel)DataContext).Recommendations.OpenPageCommand}"
+                                                                    CommandParameter="{Binding EpicPage}"
+                                                                    ToolTip.Tip="{x:Static res:Strings.Card_OpenEpic_Tip}"
+                                                                    AutomationProperties.Name="{x:Static res:Strings.Card_OpenEpic_Tip}">
+                                                                <Border Classes="badge platform epic">
+                                                                    <TextBlock Text="Epic" />
+                                                                </Border>
+                                                            </Button>
+                                                            <Button Classes="badgeLink" IsVisible="{Binding IsOnPsStore}"
+                                                                    Command="{Binding $parent[ContentPage].((vm:MainWindowViewModel)DataContext).Recommendations.OpenPageCommand}"
+                                                                    CommandParameter="{Binding PsStorePage}"
+                                                                    ToolTip.Tip="{x:Static res:Strings.Card_OpenPlayStation_Tip}"
+                                                                    AutomationProperties.Name="{x:Static res:Strings.Card_OpenPlayStation_Tip}">
+                                                                <Border Classes="badge platform playstation">
+                                                                    <TextBlock Text="PlayStation" />
+                                                                </Border>
+                                                            </Button>
+                                                        </StackPanel>
+                                                        <TextBlock Classes="subtitle" Text="{Binding Title}"
+                                                                   TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                                                        <!-- Its tags as badges, else its genres in text -->
+                                                        <ItemsControl ItemsSource="{Binding StyleTags}" IsVisible="{Binding HasStyleTags}">
+                                                            <ItemsControl.ItemsPanel>
+                                                                <ItemsPanelTemplate>
+                                                                    <WrapPanel ItemSpacing="6" LineSpacing="4" />
+                                                                </ItemsPanelTemplate>
+                                                            </ItemsControl.ItemsPanel>
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate x:DataType="x:String">
+                                                                    <Border Classes="badge neutral">
+                                                                        <TextBlock Text="{Binding}" />
+                                                                    </Border>
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
+                                                        <TextBlock Classes="caption" Text="{Binding StyleLabel}" TextWrapping="Wrap"
+                                                                   IsVisible="{Binding StyleLabel, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                                        <TextBlock Classes="accent" FontSize="{StaticResource FontSizeCaption}"
+                                                                   Text="{Binding ReasonLabel}" TextWrapping="Wrap" />
+                                                    </StackPanel>
+                                                </DockPanel>
+                                            </DockPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+        </StackPanel>
+    </ScrollViewer>
+</ContentPage>
