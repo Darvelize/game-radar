@@ -74,7 +74,7 @@ public static partial class GameTitle
 
     // A trailing platform, in the three forms seen in the Store:
     //   "Skyrim Special Edition (PC)"      -> in parentheses
-    //   "Battlefield 2042 sur Xbox One"    -> after "sur" / "pour" / "for"
+    //   "Battlefield 2042 sur Xbox One"    -> after "sur" / "pour" / "for" ("for PlayStation 4" too)
     //   "Overwatch PC", "Dead by Daylight Windows", "Enlisted Xbox One"
     //                                      -> a bare platform at the end
     // PlayStation titles say their console versions the same ways, in square
@@ -84,7 +84,7 @@ public static partial class GameTitle
     // [GeneratedRegex]: the regex code is generated at build time (faster,
     // and checked by the compiler) instead of being parsed at run time.
     [GeneratedRegex(
-        @"\s*([\(\[][^)\]]*\b(PC|Windows|Xbox|PS[2-5]|PlayStation)\b[^)\]]*[\)\]]|\b(sur|pour|for)\s+(PC|Windows|Xbox)\b.*|\b(PC|Windows|Xbox One|Xbox Series X\|S|Xbox 360)|\b(PS|PlayStation\s*)[45]\s*(&|\+|and)?\s*((PS|PlayStation\s*)[45])?(\s+(Version|Free Upgrade))?)\s*$",
+        @"\s*([\(\[][^)\]]*\b(PC|Windows|Xbox|PS[2-5]|PlayStation)\b[^)\]]*[\)\]]|\b(sur|pour|for)\s+(PC|Windows|Xbox|PS[45]|PlayStation)\b.*|\b(PC|Windows|Xbox One|Xbox Series X\|S|Xbox 360)|\b(PS|PlayStation\s*)[45]\s*(&|\+|and)?\s*((PS|PlayStation\s*)[45])?(\s+(Version|Free Upgrade))?)\s*$",
         RegexOptions.IgnoreCase)]
     private static partial Regex PlatformSuffix();
 

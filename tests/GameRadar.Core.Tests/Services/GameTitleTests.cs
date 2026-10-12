@@ -56,6 +56,9 @@ public class GameTitleTests
     // The console written in full (PlayStation Store best sellers, oct. 2026).
     [InlineData("Wreckfest", "Wreckfest PlayStation®5 Version")]
     [InlineData("Hogwarts Legacy", "Hogwarts Legacy PlayStation 4 Version")]
+    // After "for" / "pour", like "for Xbox": the whole console goes, not just its name.
+    [InlineData("Lake", "Lake for PlayStation 4")]
+    [InlineData("Lake", "Lake pour PS5")]
     [InlineData("Ghost of Tsushima DIRECTOR’S CUT", "Ghost of Tsushima DIRECTOR’S CUT (PlayStation Plus)")]
     // An em dash separates an edition too (a Steam store title).
     [InlineData("The Witcher 3: Wild Hunt", "The Witcher 3: Wild Hunt — Remastered")]
