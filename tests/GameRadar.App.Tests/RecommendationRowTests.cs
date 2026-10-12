@@ -136,6 +136,19 @@ public sealed class RecommendationRowTests
         Assert.Equal(expected, row.PlatformsLabel);
     }
 
+    [Theory]
+    // In the player's PS Plus and sold on a PC store other than Steam: both platforms too.
+    [InlineData("https://www.gog.com/en/game/hat", null, "PlayStation et PC (GOG)")]
+    [InlineData(null, "https://store.epicgames.com/p/hat", "PlayStation et PC (Epic)")]
+    public void PS_Plus_game_sold_on_a_PC_store_names_both_platforms(string? gogLink, string? epicLink, string expected)
+    {
+        var game = new CatalogGame("psplus:228903", "A Hat in Time", null, null, ["Action & adventure"],
+            OnPc: false, OnConsole: false, LeavingSoon: false,
+            PsPlusTiers: PsPlusTier.Extra, PlayStationConceptId: "228903", GogStoreLink: gogLink, EpicStoreLink: epicLink);
+
+        Assert.Equal(expected, Row(game).PlatformsLabel);
+    }
+
     [Fact]
     public void PlayStation_Store_only_game_shows_its_players_rating_out_of_5_and_opens_its_store_page()
     {

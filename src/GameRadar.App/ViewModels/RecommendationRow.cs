@@ -103,19 +103,25 @@ public sealed partial class RecommendationRow : ObservableObject
             _ => Localization.Format(Strings.Rating_Count, game.RatingCount)
         };
 
-        // On PlayStation (PS Plus or the store) and a PC store: the console first.
+        // On PlayStation (PS Plus or the store) and a PC store: the console first. The PC
+        // store is the first that sells it, as in the merge (a PS Plus game keeps its PS Plus entry).
         bool onPlayStation = game.InPsPlus || game.PlayStationProductId is not null;
+        CatalogSource? pcStore = game.IsIn(CatalogSource.Steam) ? CatalogSource.Steam
+            : game.IsIn(CatalogSource.Gog) ? CatalogSource.Gog
+            : game.IsIn(CatalogSource.Epic) ? CatalogSource.Epic
+            : null;
         string platforms = (game.OnPc, game.OnConsole) switch
         {
             (true, true) => Strings.Platform_PcAndConsole,
             (true, false) => Strings.Platform_Pc,
             (false, true) => Strings.Platform_Console,
-            // Not in the Game Pass lists: the PC store whose entry was kept, and PlayStation.
-            _ => (onPlayStation, store) switch
+            // Not in the Game Pass lists: PlayStation and the PC store.
+            _ => (onPlayStation, pcStore) switch
             {
+                (true, CatalogSource.Steam) => Strings.Platform_PlayStationAndSteam,
                 (true, CatalogSource.Gog) => Strings.Platform_PlayStationAndGog,
                 (true, CatalogSource.Epic) => Strings.Platform_PlayStationAndEpic,
-                (true, _) => game.SteamAppId is null ? Strings.Platform_PlayStation : Strings.Platform_PlayStationAndSteam,
+                (true, _) => Strings.Platform_PlayStation,
                 (false, CatalogSource.Gog) => Strings.Platform_PcGog,
                 (false, CatalogSource.Epic) => Strings.Platform_PcEpic,
                 _ => Strings.Platform_PcSteam
