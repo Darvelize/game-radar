@@ -81,10 +81,9 @@ public sealed partial class RecommendationRow : ObservableObject
         StyleTags = SteamTagIndex.TopNames(game.Tags, tagNames).Select(name => Localization.Format(Strings.Tag_Badge, name)).ToList();
         StyleLabel = StyleTags.Count > 0 ? string.Empty : string.Join(" · ", game.Genres.Select(GenreLabels.Display));
 
-        // The rating and the picture come from the entry the merge kept, except
-        // for a PS Plus game sold on Steam: Steam's rating (PS Plus has none), its PS Plus picture.
+        // The picture comes from the entry the merge kept, the rating from its RatingStore.
         var store = game.PrimaryStore;
-        var ratingStore = store == CatalogSource.PsPlus && game.SteamAppId is not null ? CatalogSource.Steam : store;
+        var ratingStore = game.RatingStore;
 
         // Split in two so the view can show a star icon, the value in bold
         // and the count in secondary text. A Steam or GOG game is rated as
@@ -105,7 +104,7 @@ public sealed partial class RecommendationRow : ObservableObject
 
         // On PlayStation (PS Plus or the store) and a PC store: the console first. The PC
         // store is the first that sells it, as in the merge (a PS Plus game keeps its PS Plus entry).
-        bool onPlayStation = game.InPsPlus || game.PlayStationProductId is not null;
+        bool onPlayStation = game.IsIn(CatalogSource.PsPlus) || game.IsIn(CatalogSource.PlayStationStore);
         CatalogSource? pcStore = game.IsIn(CatalogSource.Steam) ? CatalogSource.Steam
             : game.IsIn(CatalogSource.Gog) ? CatalogSource.Gog
             : game.IsIn(CatalogSource.Epic) ? CatalogSource.Epic

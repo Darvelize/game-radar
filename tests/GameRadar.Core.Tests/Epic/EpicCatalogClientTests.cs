@@ -109,7 +109,6 @@ public class EpicCatalogClientTests
 
         Assert.Null(game.EpicStoreLink);
         Assert.Equal(CatalogSource.Gog, game.PrimaryStore);
-        Assert.NotEqual(CatalogSource.Epic, game.PrimaryStore);
         // Not written when null: the cache format stays as it was.
         Assert.DoesNotContain("EpicStoreLink", JsonSerializer.Serialize(game, CoreJsonContext.Default.CatalogGame));
     }

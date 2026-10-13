@@ -101,17 +101,22 @@ public sealed record CatalogGame(
     /// <summary>
     /// The source whose entry the merge kept (CatalogMerger.Combine: the first of the
     /// Game Pass, PS Plus, Steam, GOG, Epic and the PlayStation Store that has the game):
-    /// where its rating and its picture come from. A PS Plus game sold on Steam is the
-    /// exception the card knows: its PS Plus picture, Steam's rating.
+    /// where its picture comes from, and its rating but for <see cref="RatingStore"/>.
     /// </summary>
     [JsonIgnore]
-    public CatalogSource PrimaryStore =>
-        InGamePass ? CatalogSource.GamePass
-        : InPsPlus ? CatalogSource.PsPlus
-        : SteamAppId is not null ? CatalogSource.Steam
-        : GogStoreLink is not null ? CatalogSource.Gog
-        : EpicStoreLink is not null ? CatalogSource.Epic
-        : CatalogSource.PlayStationStore;
+    public CatalogSource PrimaryStore => MergeOrder.FirstOrDefault(IsIn, CatalogSource.PlayStationStore);
+
+    // The enum is declared in the order of the merge.
+    private static readonly CatalogSource[] MergeOrder = Enum.GetValues<CatalogSource>();
+
+    /// <summary>
+    /// Where its rating comes from: its <see cref="PrimaryStore"/>, except a PS Plus game
+    /// sold on Steam, which has Steam's rating (PS Plus has none: CatalogMerger copies it).
+    /// </summary>
+    [JsonIgnore]
+    public CatalogSource RatingStore => PrimaryStore == CatalogSource.PsPlus && IsIn(CatalogSource.Steam)
+        ? CatalogSource.Steam
+        : PrimaryStore;
 
     /// <summary>Offered by <paramref name="source"/>: a game may be in several (one badge each).</summary>
     public bool IsIn(CatalogSource source) => source switch

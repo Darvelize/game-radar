@@ -43,7 +43,6 @@ public class GogCatalogClientTests
         Assert.Equal("https://images.gog-statics.com/1207658787_product_card_v2_mobile_slider_639.jpg", game.ImageUrl);
         Assert.Null(game.SteamAppId);
         Assert.False(game.InGamePass);
-        Assert.NotEqual(CatalogSource.Steam, game.PrimaryStore);
         Assert.Equal(CatalogSource.Gog, game.PrimaryStore);
     }
 

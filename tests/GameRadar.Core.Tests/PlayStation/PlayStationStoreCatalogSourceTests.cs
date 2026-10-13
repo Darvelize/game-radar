@@ -187,7 +187,6 @@ public class PlayStationStoreCatalogSourceTests : IDisposable
 
         Assert.Null(game.PlayStationProductId);
         Assert.Equal(CatalogSource.Epic, game.PrimaryStore);
-        Assert.NotEqual(CatalogSource.PlayStationStore, game.PrimaryStore);
         // Not written when null: the cache format stays as it was.
         Assert.DoesNotContain("PlayStationProductId", JsonSerializer.Serialize(game, CoreJsonContext.Default.CatalogGame));
     }

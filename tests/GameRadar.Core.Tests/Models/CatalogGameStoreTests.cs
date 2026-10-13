@@ -30,6 +30,14 @@ public class CatalogGameStoreTests
     }
 
     [Fact]
+    public void RatingStore_IsSteamForAPsPlusGameSoldOnSteam_ElseThePrimaryStore()
+    {
+        Assert.Equal(CatalogSource.Steam, (OnNoStore with { PsPlusTiers = PsPlusTier.Extra, SteamAppId = "1" }).RatingStore);
+        Assert.Equal(CatalogSource.PsPlus, (OnNoStore with { PsPlusTiers = PsPlusTier.Extra, GogStoreLink = Gog }).RatingStore);
+        Assert.Equal(CatalogSource.GamePass, (Catalog("GP", steamAppId: "1")).RatingStore);
+    }
+
+    [Fact]
     public void IsIn_SaysEverySourceThatOffersTheGame()
     {
         var game = OnNoStore with { SteamAppId = "1", EpicStoreLink = Epic, PlayStationProductId = "EP1" };

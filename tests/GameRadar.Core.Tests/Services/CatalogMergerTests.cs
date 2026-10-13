@@ -163,7 +163,6 @@ public class CatalogMergerTests
         Assert.Equal("steam:1091500", game.ProductId);
         Assert.Equal("https://www.gog.com/en/game/2", game.GogStoreLink);
         Assert.Equal(CatalogSource.Steam, game.PrimaryStore);
-        Assert.NotEqual(CatalogSource.Gog, game.PrimaryStore);
     }
 
     [Fact]
@@ -211,7 +210,6 @@ public class CatalogMergerTests
         Assert.Equal(["steam:3", "gog:6"], combined.Select(g => g.ProductId));
         Assert.All(combined, g => Assert.NotNull(g.EpicStoreLink));
         Assert.Equal(CatalogSource.Gog, combined[1].PrimaryStore);
-        Assert.NotEqual(CatalogSource.Epic, combined[1].PrimaryStore);
     }
 
     private static CatalogGame PsStore(string id, string title) =>
@@ -240,7 +238,7 @@ public class CatalogMergerTests
         Assert.Equal(["psplus:1", "epic:aw2"], combined.Select(g => g.ProductId));
         Assert.Equal(["EP-GOT", "EP-AW2"], combined.Select(g => g.PlayStationProductId));
         Assert.True(combined[0].InPsPlus);
-        Assert.NotEqual(CatalogSource.PlayStationStore, combined[0].PrimaryStore);
+        Assert.Equal(CatalogSource.PsPlus, combined[0].PrimaryStore);
         Assert.Equal(CatalogSource.Epic, combined[1].PrimaryStore);
     }
 }
