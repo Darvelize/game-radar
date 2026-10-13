@@ -13,7 +13,7 @@ Traduction anglaise : `CHANGELOG.en.md` (`### Improvements`, `### Fixes`), même
 
 ### Corrections
 
-- Pour toi : un jeu vendu sur Epic ou GOG et au PlayStation Store indique maintenant « PlayStation et PC (Epic) » ou « PlayStation et PC (GOG) », et non plus seulement « PC (Epic) » ou « PC (GOG) ».
+- Pour toi : un jeu vendu sur Epic ou GOG et au PlayStation Store (ou dans ton PS Plus) indique maintenant « PlayStation et PC (Epic) » ou « PlayStation et PC (GOG) », et non plus seulement « PC (Epic) » ou « PC (GOG) ».
 - PS Plus : choisir ton palier pendant le démarrage de l'appli ne retélécharge plus un catalogue PS Plus déjà à jour.
 - Pour toi : « Wreckfest PlayStation®5 Version » et Wreckfest ne font plus qu'un seul jeu.
 

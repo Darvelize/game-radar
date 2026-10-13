@@ -12,7 +12,7 @@ Shown by the app when it runs in English, and used for the English part of the G
 
 ### Fixes
 
-- For you: a game sold on Epic or GOG and on the PlayStation Store now says "PlayStation and PC (Epic)" or "PlayStation and PC (GOG)", no longer just "PC (Epic)" or "PC (GOG)".
+- For you: a game sold on Epic or GOG and on the PlayStation Store (or in your PS Plus) now says "PlayStation and PC (Epic)" or "PlayStation and PC (GOG)", no longer just "PC (Epic)" or "PC (GOG)".
 - PS Plus: choosing your plan while the app starts no longer downloads again a PS Plus catalog that is up to date.
 - For you: "Wreckfest PlayStation®5 Version" and Wreckfest are now one game.
 
