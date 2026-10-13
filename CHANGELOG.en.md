@@ -3,7 +3,7 @@
 English translation of `CHANGELOG.md` (the French file comes first): same versions, same dates, same parts (`### Improvements` for `### Évolutions`, `### Fixes` for `### Corrections`), as many lines (checked by the tests).
 Shown by the app when it runs in English, and used for the English part of the GitHub release notes.
 
-## 1.6.1
+## 1.6.1 — 2026-10-13
 
 ### Improvements
 

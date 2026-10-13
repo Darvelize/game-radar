@@ -4,7 +4,7 @@ Source unique des notes de version : l'appli affiche ce fichier (page « Nouveau
 Format lu par `Changelog.Parse` : `## <version>` (suivi de ` — <AAAA-MM-JJ>` une fois publiée), puis les parties `### Évolutions` et `### Corrections` (depuis la 1.2.0), chacune avec une ligne `- ` par nouveauté, en français, écrite pour les joueurs.
 Traduction anglaise : `CHANGELOG.en.md` (`### Improvements`, `### Fixes`), mêmes versions, mêmes dates, mêmes parties, autant de lignes (vérifié par les tests).
 
-## 1.6.1
+## 1.6.1 — 2026-10-13
 
 ### Évolutions
 
