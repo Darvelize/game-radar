@@ -31,6 +31,7 @@ public sealed partial class RecommendationsViewModel : ObservableObject
     private readonly SteamGenreSource _steamGenreSource;
     private readonly SteamTagSource _tagSource;
     private readonly SteamWishlistSource _wishlistSource;
+    private readonly BackgroundWork _work;
 
     // Cancels a recommendation computation made obsolete by newer data.
     private CancellationTokenSource? _recommendationsCts;
@@ -44,8 +45,10 @@ public sealed partial class RecommendationsViewModel : ObservableObject
         LibraryState library,
         AccountsViewModel accounts,
         SettingsSaver saver,
-        SourceFilterViewModel filter)
+        SourceFilterViewModel filter,
+        BackgroundWork work)
     {
+        _work = work;
         _http = http;
         _imageCache = imageCache;
         _log = log;
@@ -107,29 +110,8 @@ public sealed partial class RecommendationsViewModel : ObservableObject
     /// May look up the genres of new played games in the Microsoft Store (and
     /// the Steam store). Never throws: errors end up in <see cref="Status"/>.
     /// </summary>
-    public Task UpdateAsync() => Track(ComputeAsync());
-
-    // The work still running: every computation (a replaced one still saves the
-    // genres and tags it found) and the card pictures. Only touched on the UI thread.
-    private readonly HashSet<Task> _running = [];
-
-    private Task Track(Task task)
-    {
-        _running.RemoveWhere(t => t.IsCompleted);
-        _running.Add(task);
-        return task;
-    }
-
-    /// <summary>
-    /// Completes once the computations and the card pictures started so far are over,
-    /// cancelled or not (the tests deleting their folder). Never throws: they never do.
-    /// </summary>
-    public async Task WhenIdleAsync()
-    {
-        // A finished computation may have started more (its cards load their pictures).
-        while (_running.Where(t => !t.IsCompleted).ToList() is { Count: > 0 } running)
-            await Task.WhenAll(running);
-    }
+    // Kept until it ends: a replaced computation still saves the genres and tags it found.
+    public Task UpdateAsync() => _work.Track(ComputeAsync());
 
     private async Task ComputeAsync()
     {
@@ -450,7 +432,7 @@ public sealed partial class RecommendationsViewModel : ObservableObject
         }
 
         // The cards are already on screen; pictures fill in as they arrive.
-        Track(LoadCardImagesAsync(Sections.SelectMany(s => s.Games).ToList(), imagesCts.Token));
+        _work.Track(LoadCardImagesAsync(Sections.SelectMany(s => s.Games).ToList(), imagesCts.Token));
     }
 
     /// <summary>

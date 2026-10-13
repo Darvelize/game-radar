@@ -22,6 +22,9 @@ public sealed partial class MainWindowViewModel : ObservableObject
 {
     private readonly SettingsStore _settingsStore;
     private readonly SettingsSaver _saver;
+
+    // What runs without being awaited ("_ ="): kept for WhenIdleAsync.
+    private readonly BackgroundWork _work = new();
     private readonly UpdateChecker _updateChecker;
     private readonly ErrorLog _log;
     private readonly Action<Uri> _openBrowser;
@@ -67,7 +70,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         Library = new LibraryState(Accounts, _saver, Catalogs);
         Accounts.AccountChanged += RefreshRelativeTimes;
         History = new HistoryViewModel(Accounts, Library, _saver, SourceFilter, OnChoicesChanged);
-        Recommendations = new RecommendationsViewModel(http, cache, imageCache, log, openBrowser, Library, Accounts, _saver, SourceFilter);
+        Recommendations = new RecommendationsViewModel(http, cache, imageCache, log, openBrowser, Library, Accounts, _saver, SourceFilter, _work);
         SourceFilter.PlanChanged += RebuildAndRecompute;
         // The download is heard once the caches are read (InitializeAsync).
         SourceFilter.PsPlusPlanChanged += RebuildAndRecompute;
@@ -116,7 +119,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private void RebuildAndRecompute()
     {
         History.Rebuild();
-        _ = Recommendations.SaveChoicesAndRecomputeAsync();
+        _work.Track(Recommendations.SaveChoicesAndRecomputeAsync());
     }
 
     // Another PS Plus plan: the recommendations follow at once with the catalog we have
@@ -151,7 +154,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     public AddGameViewModel AddGame { get; }
 
     // A choice is in the settings (taste, finished, a game edited by hand): saved, then the recommendations follow.
-    private void OnChoicesChanged() => _ = Recommendations.SaveChoicesAndRecomputeAsync();
+    private void OnChoicesChanged() => _work.Track(Recommendations.SaveChoicesAndRecomputeAsync());
 
     /// <summary>The release notes and their banner.</summary>
     public WhatsNewViewModel WhatsNew { get; }
@@ -314,7 +317,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         // background threads, all read at once (separate files), so the
         // window stays responsive; each await resumes here, on the UI thread.
         await Task.WhenAll(Accounts.LoadCachedAsync(), Catalogs.LoadCachedAsync());
-        SourceFilter.PsPlusPlanChanged += () => _ = DownloadPsPlusIfNeededAsync();
+        SourceFilter.PsPlusPlanChanged += () => _work.Track(DownloadPsPlusIfNeededAsync());
         // Settings still saved with French titles (refusals, games added by
         // hand), moved to the English ones of the cached catalogs before
         // anything reads them; nothing to read once done.
@@ -330,7 +333,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         // reported as an error, for someone without PS Plus).
         var now = DateTimeOffset.UtcNow;
         var stale = Catalogs.Lines.Where(l => l.IsWanted() && l.NeedsDownload(now)).ToList();
-        SourceFilter.PlayStationStoreTicked += () => _ = OnPlayStationStoreTickedAsync();
+        SourceFilter.PlayStationStoreTicked += () => _work.Track(OnPlayStationStoreTickedAsync());
         if (stale.Count > 0)
         {
             // A slow download (Game Pass, PlayStation Store): meanwhile the cached
@@ -354,12 +357,16 @@ public sealed partial class MainWindowViewModel : ObservableObject
     /// <summary>
     /// Stops the background work, then completes once nothing writes in the data folder
     /// anymore: settings saves, computations (their genre and tag lookups save what they
-    /// found) and card pictures. For the tests, which then delete their folder.
+    /// found), card pictures and catalogs downloaded on a choice. For the tests, which
+    /// then delete their folder.
     /// </summary>
-    public Task WhenIdleAsync()
+    public async Task WhenIdleAsync()
     {
         StopBackgroundWork();
-        return Task.WhenAll(WhenSettingsSavedAsync(), Recommendations.WhenIdleAsync());
+        // A save may start a recomputation, a download one too: until nothing is left.
+        do
+            await Task.WhenAll(WhenSettingsSavedAsync(), _work.WhenIdleAsync());
+        while (_work.IsBusy || _saver.IsSaving);
     }
 
     // The history rows were rebuilt: the figures drawn from them follow, in this order.
