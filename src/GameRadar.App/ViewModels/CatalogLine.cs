@@ -59,11 +59,9 @@ public sealed partial class CatalogLine : ObservableObject
     /// <summary>Its last download failed: the error stays on its line until the next one.</summary>
     public bool Failed { get; private set; }
 
-    /// <summary>
-    /// Being downloaded: asked again meanwhile (the button during the startup
-    /// refresh), it is not downloaded twice at once; its line says so until it ends.
-    /// </summary>
-    public bool IsFetching { get; private set; }
+    // Being downloaded: asked again meanwhile (the button during the startup
+    // refresh), it is not downloaded twice at once; its line says so until it ends.
+    private bool _fetching;
 
     /// <summary>None yet, or older than a week (every catalog: <see cref="CompactCatalogCache"/>).</summary>
     public bool NeedsDownload(DateTimeOffset now) => Catalog is null || CompactCatalogCache.IsStale(Catalog, now);
@@ -72,7 +70,17 @@ public sealed partial class CatalogLine : ObservableObject
     public void ShowLoaded()
     {
         if (Describe is not null)
-            Status = Catalog is null ? NotLoadedStatus ?? string.Empty : Describe(Catalog);
+            ShowStatus(Catalog is null ? NotLoadedStatus ?? string.Empty : Describe(Catalog));
+    }
+
+    /// <summary>
+    /// Writes its status line, unless it is being downloaded: it says so until the end,
+    /// and a history rebuild or a search must not write the old catalog over it.
+    /// </summary>
+    public void ShowStatus(string status)
+    {
+        if (!_fetching)
+            Status = status;
     }
 
     /// <summary>
@@ -82,9 +90,9 @@ public sealed partial class CatalogLine : ObservableObject
     /// </summary>
     public async Task<bool> FetchAsync(NoticeCenter notices)
     {
-        if (IsFetching)
+        if (_fetching)
             return false;
-        IsFetching = true;
+        _fetching = true;
         Status = FetchingStatus;
         try
         {
@@ -100,7 +108,7 @@ public sealed partial class CatalogLine : ObservableObject
         }
         finally
         {
-            IsFetching = false;
+            _fetching = false;
         }
         Failed = false;
         ShowLoaded();

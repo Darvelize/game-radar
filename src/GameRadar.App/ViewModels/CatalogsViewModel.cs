@@ -208,22 +208,20 @@ public sealed partial class CatalogsViewModel : ObservableObject
     public async Task RefreshAsync(IEnumerable<CatalogLine> lines)
     {
         var chosen = lines.ToList();
-        // Each recomputation cancels the one before; all are awaited at the end, once
-        // IsRefreshing is off (a recomputation may look up tags for minutes). The button's
-        // command awaits them too: it comes back with the cards, as before.
+        // One per catalog that arrived. Each recomputation cancels the one before; all are
+        // awaited at the end, once IsRefreshing is off (a recomputation may look up tags for
+        // minutes). The button's command awaits them too: it comes back with the cards, as before.
         var recomputations = new List<Task>();
-        bool[] fetched;
 
         // No ConfigureAwait(false): each line comes back on the UI thread to update itself.
-        async Task<bool> FetchAndShowAsync(CatalogLine line)
+        async Task FetchAndShowAsync(CatalogLine line)
         {
             if (!await line.FetchAsync(_notices))
-                return false;
+                return;
             // Status lines rewritten only after a success: an error stays readable.
             if (line.RebuildsHistory)
                 _rebuildHistory();
             recomputations.Add(_catalogsChanged());
-            return true;
         }
 
         // Refreshes may overlap (a PS Plus plan chosen during the startup one):
@@ -232,7 +230,7 @@ public sealed partial class CatalogsViewModel : ObservableObject
         IsRefreshing = true;
         try
         {
-            fetched = await Task.WhenAll(chosen.Select(FetchAndShowAsync));
+            await Task.WhenAll(chosen.Select(FetchAndShowAsync));
         }
         finally
         {
@@ -241,16 +239,12 @@ public sealed partial class CatalogsViewModel : ObservableObject
 
         // Settings saved with the former French titles (refusals, games added
         // by hand): moved once to the English titles of the new catalogs.
-        if (await MoveToEnglishTitlesAsync())
-        {
+        bool moved = await MoveToEnglishTitlesAsync();
+        if (moved)
             _rebuildHistory();
-            recomputations.Add(_catalogsChanged());
-        }
         // Even after errors only: the cached catalogs still make recommendations.
-        else if (!fetched.Any(f => f))
-        {
+        if (moved || recomputations.Count == 0)
             recomputations.Add(_catalogsChanged());
-        }
         await Task.WhenAll(recomputations);
     }
 
@@ -291,9 +285,9 @@ public sealed partial class CatalogsViewModel : ObservableObject
     /// </summary>
     public void UpdateGamePassStatus(int playedGames, int inGamePass)
     {
-        // A failed download keeps its error readable, and a running one says so: another
+        // A failed download keeps its error readable (a running one: see ShowStatus): another
         // catalog's success rebuilds the history, which must not write the old catalog over it.
-        if (GamePass.Catalog is not { } catalog || GamePass.Failed || GamePass.IsFetching)
+        if (GamePass.Catalog is not { } catalog || GamePass.Failed)
             return;
 
         // The player's plan first: that is what the recommendations use.
@@ -305,7 +299,7 @@ public sealed partial class CatalogsViewModel : ObservableObject
         string counts = !_filter.HasGamePassPlan ? Localization.Format(Strings.Catalog_All, catalog.Games.Count)
             : inPlan == catalog.Games.Count ? inYourPlan
             : Localization.Format(Strings.Catalog_OfAllPlans, inYourPlan, catalog.Games.Count);
-        GamePass.Status = Localization.Format(Strings.Catalog_Status, counts, catalog.FetchedAt.ToLocalTime());
+        GamePass.ShowStatus(Localization.Format(Strings.Catalog_Status, counts, catalog.FetchedAt.ToLocalTime()));
     }
 
     /// <summary>

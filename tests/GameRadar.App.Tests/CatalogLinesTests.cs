@@ -139,15 +139,7 @@ public sealed class CatalogLinesTests : AppTest
         int rebuilt = 0;
         vm.History.Rebuilt += () => rebuilt++;
         var slow = new TaskCompletionSource<GameCatalog>(TaskCreationOptions.RunContinuationsAsynchronously);
-        var held = new CatalogLine
-        {
-            Title = "Slow catalog",
-            LogContext = "Slow catalog",
-            FetchingStatus = "…",
-            LoadCached = () => null,
-            Refresh = () => slow.Task,
-            ErrorMessage = ex => ex.Message
-        };
+        var held = Line(rebuildsHistory: true, refresh: () => slow.Task);
 
         var refreshing = vm.Catalogs.RefreshAsync([held, Line(rebuildsHistory: true)]);
 
@@ -251,14 +243,14 @@ public sealed class CatalogLinesTests : AppTest
     private static Task SaveAsync(CacheStore cache, string key, TimeSpan age) =>
         cache.SaveAsync(key, TestJson.Serialize(new GameCatalog([SteamRpg], DateTimeOffset.UtcNow - age)));
 
-    // A catalog that downloads at once, for what RefreshAsync does with its result.
-    private static CatalogLine Line(bool rebuildsHistory) => new()
+    // A catalog that downloads at once (or when "refresh" ends), for what RefreshAsync does with its result.
+    private static CatalogLine Line(bool rebuildsHistory, Func<Task<GameCatalog>>? refresh = null) => new()
     {
         Title = "Test catalog",
         LogContext = "Test catalog",
         FetchingStatus = "…",
         LoadCached = () => null,
-        Refresh = () => Task.FromResult(new GameCatalog([SteamRpg], DateTimeOffset.UtcNow)),
+        Refresh = refresh ?? (() => Task.FromResult(new GameCatalog([SteamRpg], DateTimeOffset.UtcNow))),
         ErrorMessage = ex => ex.Message,
         RebuildsHistory = rebuildsHistory
     };
