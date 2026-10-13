@@ -110,7 +110,7 @@ internal static class SampleData
 
     // Long enough for any save or cancelled lookup; a guard in case the UI thread,
     // where they end, were not running during the cleanup.
-    private static readonly TimeSpan SaveWait = TimeSpan.FromSeconds(10);
+    private static readonly TimeSpan IdleWait = TimeSpan.FromSeconds(10);
 
     /// <summary>The folder of GameRadar.sln, above the test's output folder.</summary>
     public static string RepositoryRoot()
@@ -131,7 +131,7 @@ internal static class SampleData
         if (Built.TryRemove(tempFolder, out var viewModels))
         {
             var idle = Task.WhenAll(viewModels.Select(vm => vm.WhenIdleAsync()));
-            await Task.WhenAny(idle, Task.Delay(SaveWait));
+            await Task.WhenAny(idle, Task.Delay(IdleWait));
         }
         if (Directory.Exists(tempFolder))
             Directory.Delete(tempFolder, recursive: true);

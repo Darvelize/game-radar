@@ -493,7 +493,10 @@ public sealed partial class RecommendationsViewModel : ObservableObject
         }
     }
 
-    public async Task SaveChoicesAndRecomputeAsync()
+    // Kept until it ends: between the save and the recomputation, nothing else is running.
+    public Task SaveChoicesAndRecomputeAsync() => _work.Track(SaveAndRecomputeAsync());
+
+    private async Task SaveAndRecomputeAsync()
     {
         if (!await TrySaveAsync())
             return;

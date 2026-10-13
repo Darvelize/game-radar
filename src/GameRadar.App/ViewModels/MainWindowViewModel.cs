@@ -58,7 +58,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         _log = log;
         Notices = new NoticeCenter(log);
         // Before the accounts: the GOG profile name is a setting.
-        _saver = new SettingsSaver(settingsStore, settingsStore.Load());
+        _saver = new SettingsSaver(settingsStore, settingsStore.Load(), _work);
         // Before the accounts are read below: their changes refresh the platforms' lines.
         Accounts = new AccountsViewModel(http, cache, account, steamAccount, playStationAccount, epicAccount, _saver, openBrowser, Notices, OnHistoryFetchedAsync);
         WhatsNew = new WhatsNewViewModel(_saver, Show);
@@ -119,7 +119,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private void RebuildAndRecompute()
     {
         History.Rebuild();
-        _work.Track(Recommendations.SaveChoicesAndRecomputeAsync());
+        _ = Recommendations.SaveChoicesAndRecomputeAsync();
     }
 
     // Another PS Plus plan: the recommendations follow at once with the catalog we have
@@ -154,7 +154,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     public AddGameViewModel AddGame { get; }
 
     // A choice is in the settings (taste, finished, a game edited by hand): saved, then the recommendations follow.
-    private void OnChoicesChanged() => _work.Track(Recommendations.SaveChoicesAndRecomputeAsync());
+    private void OnChoicesChanged() => _ = Recommendations.SaveChoicesAndRecomputeAsync();
 
     /// <summary>The release notes and their banner.</summary>
     public WhatsNewViewModel WhatsNew { get; }
@@ -360,13 +360,11 @@ public sealed partial class MainWindowViewModel : ObservableObject
     /// found), card pictures and catalogs downloaded on a choice. For the tests, which
     /// then delete their folder.
     /// </summary>
-    public async Task WhenIdleAsync()
+    public Task WhenIdleAsync()
     {
         StopBackgroundWork();
-        // A save may start a recomputation, a download one too: until nothing is left.
-        do
-            await Task.WhenAll(WhenSettingsSavedAsync(), _work.WhenIdleAsync());
-        while (_work.IsBusy || _saver.IsSaving);
+        // Saves, recomputations and downloads all go through _work, which waits for what they start too.
+        return _work.WhenIdleAsync();
     }
 
     // The history rows were rebuilt: the figures drawn from them follow, in this order.

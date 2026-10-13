@@ -1,7 +1,7 @@
 namespace GameRadar.App.ViewModels;
 
 /// <summary>
-/// The work started without being awaited (a recomputation, card pictures, a catalog
+/// The work started without being awaited (a settings save, a recomputation, card pictures, a catalog
 /// downloaded on a click), kept until it ends: what <see cref="WhenIdleAsync"/> waits
 /// for before the tests delete their folder. Only touched on the UI thread.
 /// </summary>
@@ -16,8 +16,6 @@ public sealed class BackgroundWork
         _running.Add(task);
         return task;
     }
-
-    public bool IsBusy => _running.Any(t => !t.IsCompleted);
 
     /// <summary>
     /// Completes once the work started so far is over, and the work it started

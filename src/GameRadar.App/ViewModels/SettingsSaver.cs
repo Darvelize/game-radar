@@ -5,8 +5,9 @@ namespace GameRadar.App.ViewModels;
 /// <summary>
 /// The live settings, and their writes to settings.json, one at a time: every
 /// save goes through the same temp file, so quick clicks would otherwise collide.
+/// Each save is kept by <paramref name="work"/> until written (the tests wait for it).
 /// </summary>
-public sealed class SettingsSaver(SettingsStore store, AppSettings settings)
+public sealed class SettingsSaver(SettingsStore store, AppSettings settings, BackgroundWork? work = null)
 {
     // Async-friendly lock (a plain lock cannot be held across an await).
     private readonly SemaphoreSlim _saveLock = new(1, 1);
@@ -21,7 +22,11 @@ public sealed class SettingsSaver(SettingsStore store, AppSettings settings)
     /// <summary>A save is still writing: settings.json (or its temp file) may change.</summary>
     public bool IsSaving => _pendingSaves > 0;
 
-    public async Task SaveAsync()
+    private readonly BackgroundWork _work = work ?? new();
+
+    public Task SaveAsync() => _work.Track(WriteAsync());
+
+    private async Task WriteAsync()
     {
         // Counted before waiting for the lock: a save queued behind another is pending too.
         _pendingSaves++;
