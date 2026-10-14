@@ -343,22 +343,22 @@ public class XboxSignInTests : IDisposable
                     var form = HttpUtility.ParseQueryString(body);
                     TokenForms.Add(form.AllKeys.ToDictionary(k => k!, k => form[k]!));
                     if (form["refresh_token"] == "revoked")
-                        return Json(HttpStatusCode.BadRequest, """{ "error": "invalid_grant" }""");
+                        return Json(status: HttpStatusCode.BadRequest, body: """{ "error": "invalid_grant" }""");
                     if (form["refresh_token"] == "needs-consent")
-                        return Json(HttpStatusCode.BadRequest, """{ "error": "interaction_required" }""");
+                        return Json(status: HttpStatusCode.BadRequest, body: """{ "error": "interaction_required" }""");
                     if (form["code"] == "expired-code")
-                        return Json(HttpStatusCode.BadRequest, """{ "error": "invalid_grant" }""");
+                        return Json(status: HttpStatusCode.BadRequest, body: """{ "error": "invalid_grant" }""");
                     if (form["refresh_token"] == "app-disabled")
-                        return Json(HttpStatusCode.BadRequest, """
+                        return Json(status: HttpStatusCode.BadRequest, body: """
                             { "error": "unauthorized_client", "error_codes": [7000112],
                               "error_description": "AADSTS7000112: Application 'bd8f6bbf' is disabled." }
                             """);
                     _refreshTokens++;
-                    return Json(HttpStatusCode.OK, $$"""{ "access_token": "msa-token", "refresh_token": "refresh-{{_refreshTokens}}" }""");
+                    return Json(status: HttpStatusCode.OK, body: $$"""{ "access_token": "msa-token", "refresh_token": "refresh-{{_refreshTokens}}" }""");
 
                 case "user.auth.xboxlive.com":
                     UserTokenBody = JsonNode.Parse(body);
-                    return Json(HttpStatusCode.OK, """{ "Token": "user-token", "DisplayClaims": { "xui": [ { "uhs": "hash" } ] } }""");
+                    return Json(status: HttpStatusCode.OK, body: """{ "Token": "user-token", "DisplayClaims": { "xui": [ { "uhs": "hash" } ] } }""");
 
                 case "xsts.auth.xboxlive.com":
                     XstsBody = JsonNode.Parse(body);
@@ -366,9 +366,9 @@ public class XboxSignInTests : IDisposable
                     if (HoldXsts is { } hold)
                         await hold.Task;
                     if (XstsRefusal is { } xerr)
-                        return Json(HttpStatusCode.Unauthorized, $$"""{ "XErr": {{xerr}} }""");
+                        return Json(status: HttpStatusCode.Unauthorized, body: $$"""{ "XErr": {{xerr}} }""");
                     string gamertag = OmitGamertag ? "" : ", \"gtg\": \"Player One\"";
-                    return Json(HttpStatusCode.OK, $$"""
+                    return Json(status: HttpStatusCode.OK, body: $$"""
                         { "Token": "xsts-token", "NotAfter": "2099-01-01T00:00:00Z",
                           "DisplayClaims": { "xui": [ { "uhs": "hash", "xid": "2535"{{gamertag}} } ] } }
                         """);
@@ -377,14 +377,11 @@ public class XboxSignInTests : IDisposable
                     TitlehubCalls++;
                     if (TitlehubRefusals-- > 0)
                         return new HttpResponseMessage(HttpStatusCode.Unauthorized);
-                    return Json(HttpStatusCode.OK, """{ "titles": [] }""");
+                    return Json(status: HttpStatusCode.OK, body: """{ "titles": [] }""");
 
                 default:
                     return new HttpResponseMessage(HttpStatusCode.NotFound);
             }
         }
-
-        private static HttpResponseMessage Json(HttpStatusCode status, string body) =>
-            new(status) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
     }
 }

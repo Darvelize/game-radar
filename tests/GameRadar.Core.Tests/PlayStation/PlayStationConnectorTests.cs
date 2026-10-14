@@ -614,8 +614,5 @@ public class PlayStationConnectorTests : IDisposable
 
             return new HttpResponseMessage(HttpStatusCode.NotFound);
         }
-
-        private static HttpResponseMessage Json(string body, HttpStatusCode status = HttpStatusCode.OK) =>
-            new(status) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
     }
 }

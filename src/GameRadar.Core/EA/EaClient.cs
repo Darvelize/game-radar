@@ -24,16 +24,32 @@ public sealed partial class EaClient
     public const string TokenPageUrl = "https://accounts.ea.com/connect/auth?client_id=ORIGIN_JS_SDK&response_type=token&redirect_uri=nucleus:rest&prompt=none";
 
     /// <summary>
-    /// Slugs per recentGames request. Measured: beyond about ten, EA silently
-    /// drops played games (500 at once gave 2 of 12); 5 and 10 both give all 12.
+    /// Slugs per recentGames request, asked with a page as big (100, EA's largest:
+    /// "Paging limit must not exceed 100").
+    /// Measured (14/10/2026): EA answers by pages of 10 by default (the games "dropped"
+    /// beyond ~10 slugs were the next pages); 100 slugs with a page of 100: 8 requests
+    /// instead of 151, the 12 played games found. A batch of 100 has at most 100 played
+    /// games: the page never cuts any.
     /// </summary>
-    public const int RecentGamesBatchSize = 5;
+    public const int RecentGamesBatchSize = 100;
+
+    /// <summary>Slugs per games request (the names of the played games): the size measured to work; its paging was not measured.</summary>
+    public const int GamesBatchSize = 5;
+
+    /// <summary>
+    /// recentGames requests at once. Measured (14/10/2026, 151 requests of 5 slugs): 1 at a
+    /// time 86 s, 4 at a time 39 s, 8 at a time 38 s; the 12 played games found each time,
+    /// no rate limit. EA answers few requests at once per account: 4 is enough.
+    /// </summary>
+    public const int RequestsAtOnce = 4;
 
     private const string GraphQlUrl = "https://service-aggregation-layer.juno.ea.com/graphql";
 
     private const string IdentityQuery = "query { me { player { psd } } }";
     private const string GameSearchQuery = "query { gameSearch(filter: { gameTypes: [BASE_GAME, COLLECTION] }, paging: { limit: 9999 }) { items { slug } } }";
-    private const string RecentGamesQuery = "query GetRecentGames($gameSlugs: [String!]!) { me { recentGames(gameSlugs: $gameSlugs) { items { gameSlug lastSessionEndDate totalPlayTimeSeconds } } } }";
+    // A page as big as a batch (see RecentGamesBatchSize).
+    private static readonly string RecentGamesQuery = "query GetRecentGames($gameSlugs: [String!]!) { me { recentGames(gameSlugs: $gameSlugs, paging: { limit: "
+        + RecentGamesBatchSize + " }) { items { gameSlug lastSessionEndDate totalPlayTimeSeconds } } } }";
     private const string GamesQuery = "query GetGamesBySlugs($slugs: [String!]!, $locale: Locale) { games(slugs: $slugs, locale: $locale) { items { slug products { items { name originOfferId baseItem { gameType } } } } } }";
     private const string AchievementsQuery = "query GetAchievements($offerId: String!, $playerPsd: String!, $locale: Locale!) { achievements(offerId: $offerId, playerPsd: $playerPsd, showHidden: true, locale: $locale) { achievements { awardCount } } }";
 
@@ -64,7 +80,7 @@ public sealed partial class EaClient
     internal Task<string> FetchRecentGamesJsonAsync(IReadOnlyList<string> slugs, CancellationToken ct = default)
     {
         if (slugs.Count > RecentGamesBatchSize)
-            throw new ArgumentException($"EA drops played games beyond a few slugs per request: at most {RecentGamesBatchSize}.", nameof(slugs));
+            throw new ArgumentException($"At most {RecentGamesBatchSize} slugs per request: EA's largest page.", nameof(slugs));
         return PostAsync(new GraphQlRequest<GameSlugsVariables> { Query = RecentGamesQuery, Variables = new() { GameSlugs = slugs } },
             EaJsonContext.Default.GraphQlRequestGameSlugsVariables, withToken: true, ct);
     }

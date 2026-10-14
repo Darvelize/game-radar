@@ -79,11 +79,14 @@ internal static class SampleData
     /// <param name="imageNetwork">A fake server for the pictures of the cards; the real network by default (no card has a picture then).</param>
     public static MainWindowViewModel Empty(string tempFolder, Action<Uri>? openBrowser = null, Action? quit = null, HttpMessageHandler? network = null, HttpMessageHandler? imageNetwork = null)
     {
-        var secrets = new SecretStore(tempFolder);
-        var settings = new SettingsStore(tempFolder);
-        var cache = new CacheStore(Path.Combine(tempFolder, "cache"));
-        var images = new ImageFileCache(imageNetwork is null ? new HttpClient() : new HttpClient(imageNetwork), Path.Combine(tempFolder, "images"));
-        var log = new ErrorLog(Path.Combine(tempFolder, "logs"), "test");
+        // One folder and its guard for every store, as in the app: "Effacer toutes mes
+        // données" and its failure go through the shared guard here too.
+        var data = new DataFolder(tempFolder);
+        var secrets = new SecretStore(data.Root, data.Guard);
+        var settings = new SettingsStore(data.Root, data.Guard);
+        var cache = new CacheStore(data.Cache, data.Guard);
+        var images = new ImageFileCache(imageNetwork is null ? new HttpClient() : new HttpClient(imageNetwork), data.Images, guard: data.Guard);
+        var log = new ErrorLog(data.Logs, "test", guard: data.Guard);
         var vm = new MainWindowViewModel(
             network is null ? new HttpClient() : new HttpClient(network),
             settings,
@@ -94,11 +97,11 @@ internal static class SampleData
             new PlayStationAccount(secrets),
             new EpicAccount(network is null ? new HttpClient() : new HttpClient(network), secrets),
             openBrowser ?? (_ => { }),
-            new LocalDataEraser(settings, cache, secrets, images, log),
+            new LocalDataEraser(settings, cache, secrets, images, log, data),
             quit ?? (() => { }),
             log,
             restart: () => { },
-            dataFolder: new DataFolder(tempFolder));
+            dataFolder: data);
         Built.GetOrAdd(tempFolder, _ => new()).Add(vm);
         return vm;
     }

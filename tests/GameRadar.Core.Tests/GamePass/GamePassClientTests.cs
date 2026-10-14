@@ -155,7 +155,7 @@ public class GamePassClientTests
         static string List(params string[] ids) =>
             "[{\"siglId\":\"x\",\"title\":\"t\"}" + string.Concat(ids.Select(id => $",{{\"id\":\"{id}\"}}")) + "]";
         var requested = new List<string>();
-        using var http = new HttpClient(new FakeHandler(uri =>
+        using var http = new HttpClient(new JsonHandler(uri =>
         {
             string query = Uri.UnescapeDataString(uri.Query);
             requested.Add(query);
@@ -195,7 +195,7 @@ public class GamePassClientTests
         static string List(params string[] ids) =>
             "[{\"siglId\":\"x\",\"title\":\"t\"}" + string.Concat(ids.Select(id => $",{{\"id\":\"{id}\"}}")) + "]";
         bool ultimateEmpty = false;
-        using var http = new HttpClient(new FakeHandler(uri =>
+        using var http = new HttpClient(new JsonHandler(uri =>
         {
             string query = Uri.UnescapeDataString(uri.Query);
             if (uri.AbsolutePath.Contains("products"))
@@ -214,15 +214,5 @@ public class GamePassClientTests
         await Assert.ThrowsAsync<GamePassException>(() => source.RefreshAsync(new GamePassClient(http)));
 
         Assert.Equal(GamePassTier.Ultimate | GamePassTier.Premium, source.LoadCached()!.Games.Single(g => g.ProductId == "P1").ConsoleTiers);
-    }
-
-    /// <summary>Answers each request with the given JSON.</summary>
-    private sealed class FakeHandler(Func<Uri, string> answer) : HttpMessageHandler
-    {
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct) =>
-            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent(answer(request.RequestUri!), Encoding.UTF8, "application/json")
-            });
     }
 }

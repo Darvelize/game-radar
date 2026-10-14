@@ -22,14 +22,10 @@ public sealed class EpicAccount
 
     private readonly HttpClient _http;
     private readonly SecretStore _store;
-    // Tokens are renewed one caller at a time: Epic replaces the refresh token
-    // at each use, so two parallel renewals would lose one of them.
-    private readonly SemaphoreSlim _lock = new(1, 1);
+    // The access token (36 h): see AccessTokenCache.
+    private readonly AccessTokenCache _tokens = new();
 
     private SavedEpicAccount? _saved;
-    // Memory only (36 h): a new launch renews it silently. One object,
-    // replaced whole: never half written.
-    private EpicTokens? _accessToken;
     // Ended by each disconnect: a renewal or sign-in started before never saves.
     private readonly SessionGuard _session = new();
 
@@ -62,15 +58,7 @@ public sealed class EpicAccount
             ["code"] = code,
         }, exchange: true, ct).ConfigureAwait(false);
 
-        await _lock.WaitAsync(ct).ConfigureAwait(false);
-        try
-        {
-            Remember(session, tokens);
-        }
-        finally
-        {
-            _lock.Release();
-        }
+        await _tokens.RunLockedAsync(() => Remember(session, tokens), ct).ConfigureAwait(false);
     }
 
     /// <summary>Forgets the session on this computer (the history cache is kept).</summary>
@@ -78,8 +66,13 @@ public sealed class EpicAccount
     {
         _session.End();
         _store.Delete(Secret.EpicAccount);
+        ForgetMemory();
+    }
+
+    private void ForgetMemory()
+    {
         _saved = null;
-        _accessToken = null;
+        _tokens.Clear();
     }
 
     /// <summary>
@@ -87,54 +80,40 @@ public sealed class EpicAccount
     /// (no question asked). Throws <see cref="EpicException"/> with
     /// <see cref="EpicException.IsTokenRefused"/> when a new code is needed.
     /// </summary>
-    internal async Task<string> GetAccessTokenAsync(CancellationToken ct)
+    internal Task<string> GetAccessTokenAsync(CancellationToken ct) => _tokens.GetAsync(() => RenewAsync(ct), ct);
+
+    // Under the lock of _tokens.
+    private async Task<string> RenewAsync(CancellationToken ct)
     {
-        await _lock.WaitAsync(ct).ConfigureAwait(false);
+        if (_saved is not { } saved)
+            throw EpicException.SessionExpired();
+
+        int session = _session.Current;
+        EpicTokens tokens;
         try
         {
-            // A margin, so the token cannot expire between here and the call.
-            if (_accessToken is { } current && current.ExpiresAt > DateTimeOffset.UtcNow.AddMinutes(5))
-                return current.AccessToken;
-
-            if (_saved is not { } saved)
-                throw EpicException.SessionExpired();
-
-            int session = _session.Current;
-            EpicTokens tokens;
-            try
+            tokens = await RequestTokensAsync(new Dictionary<string, string>
             {
-                tokens = await RequestTokensAsync(new Dictionary<string, string>
-                {
-                    ["grant_type"] = "refresh_token",
-                    ["refresh_token"] = saved.RefreshToken,
-                }, exchange: false, ct).ConfigureAwait(false);
-            }
-            catch (EpicException ex) when (ex.IsTokenRefused)
-            {
-                // Expired (a year unused) or revoked: drop it, the UI asks for a new code.
-                Disconnect();
-                throw;
-            }
-
-            Remember(session, tokens);
-            return tokens.AccessToken;
+                ["grant_type"] = "refresh_token",
+                ["refresh_token"] = saved.RefreshToken,
+            }, exchange: false, ct).ConfigureAwait(false);
         }
-        finally
+        catch (EpicException ex) when (ex.IsTokenRefused)
         {
-            _lock.Release();
+            // Expired (a year unused) or revoked: drop it, the UI asks for a new code.
+            Disconnect();
+            throw;
         }
+
+        Remember(session, tokens);
+        return tokens.AccessToken;
     }
 
     /// <summary>
     /// Epic refused this access token: renew it on the next call. Only if it
     /// is still the current one: a 401 on an old token must not wipe a newer one.
     /// </summary>
-    internal void ForgetAccessToken(string refusedToken)
-    {
-        var current = Volatile.Read(ref _accessToken);
-        if (current?.AccessToken == refusedToken)
-            Interlocked.CompareExchange(ref _accessToken, null, current);
-    }
+    internal void ForgetAccessToken(string refusedToken) => _tokens.Forget(refusedToken);
 
     /// <summary>The token endpoint (eg1 tokens), with the Epic launcher's client.</summary>
     /// <param name="exchange">A pasted code: any refusal means "paste a new one". A renewal only drops the kept session when Epic says the token is invalid.</param>
@@ -168,21 +147,17 @@ public sealed class EpicAccount
     private void Remember(int session, EpicTokens tokens)
     {
         var saved = new SavedEpicAccount(tokens.RefreshToken, tokens.AccountId);
-        bool kept;
         try
         {
-            kept = _session.TrySave(_store, Secret.EpicAccount, saved, EpicJsonContext.Default.SavedEpicAccount, session);
+            _session.TrySave(_store, Secret.EpicAccount, saved, EpicJsonContext.Default.SavedEpicAccount, session);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             // The disk refused it (a backup, an antivirus): Epic already replaced
             // the old token, so the new one stays in memory and is saved again
             // at the next renewal rather than lost.
-            kept = session == _session.Current;
         }
-        if (!kept)
+        if (!_session.Keep(session, () => { _saved = saved; _tokens.Set(tokens.AccessToken, tokens.ExpiresAt); }, ForgetMemory))
             throw EpicException.SessionExpired();
-        _saved = saved;
-        Volatile.Write(ref _accessToken, tokens);
     }
 }

@@ -34,9 +34,6 @@ public sealed class PlayStationStoreCatalogSource
         var games = await client.FetchCatalogAsync(ct).ConfigureAwait(false);
 
         // Nothing left after parsing: the format changed. Keep the old cache.
-        if (games.Count == 0)
-            throw new PlayStationException(CoreStrings.PsStore_EmptyCatalog);
-
-        return await _cache.SaveAsync(games, ct).ConfigureAwait(false);
+        return await _cache.SaveAsync(games, () => new PlayStationException(CoreStrings.PsStore_EmptyCatalog), ct: ct).ConfigureAwait(false);
     }
 }

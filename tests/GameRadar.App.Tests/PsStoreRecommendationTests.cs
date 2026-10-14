@@ -8,6 +8,7 @@ using GameRadar.Core.Manual;
 using GameRadar.Core.Models;
 using GameRadar.Core.PlayStation;
 using GameRadar.Core.Settings;
+using static GameRadar.App.Tests.CachedCatalogs;
 
 namespace GameRadar.App.Tests;
 
@@ -21,11 +22,6 @@ public sealed class PsStoreRecommendationTests : AppTest
 {
     private static ManualGame Hero(ManualPlatform platform) => new("Hero Quest", platform, ManualLevel.Completed, SteamAppId: "100");
 
-    private static readonly CatalogGame HeroInGamePass =
-        new("GP-HERO", "Hero Quest", null, null, ["Role playing"], OnPc: true, OnConsole: true, LeavingSoon: false);
-
-    private static readonly TimeSpan Fresh = TimeSpan.FromHours(1);
-
     private async Task PrepareAsync(ManualPlatform platform, bool? showPlayStationStore = null, TimeSpan? psStoreAge = null)
     {
         var store = new SettingsStore(TempFolder);
@@ -35,8 +31,7 @@ public sealed class PsStoreRecommendationTests : AppTest
         await store.SaveAsync(settings);
 
         var cache = new CacheStore(Path.Combine(TempFolder, "cache"));
-        await cache.SaveAsync("gamepass-catalog-fr-v6", TestJson.Serialize(new GameCatalog([HeroInGamePass], DateTimeOffset.UtcNow - Fresh)));
-        await cache.SaveAsync("steam-catalog-fr-v3", TestJson.Serialize(new GameCatalog([], DateTimeOffset.UtcNow - Fresh)));
+        await SaveGamePassAndSteamAsync(cache);
         if (psStoreAge is { } age)
             await cache.SaveAsync(PlayStationStoreCatalogSource.CacheKey, TestJson.Serialize(new GameCatalog([CachedPsRpg], DateTimeOffset.UtcNow - age)));
     }
@@ -44,8 +39,6 @@ public sealed class PsStoreRecommendationTests : AppTest
     private static readonly CatalogGame CachedPsRpg =
         new("psstore:EP-CACHED", "Cached Ps Rpg", null, null, ["Role playing"], OnPc: false, OnConsole: false, LeavingSoon: false, PlayStationProductId: "EP-CACHED");
 
-    private static IEnumerable<string> Cards(MainWindowViewModel vm) =>
-        vm.Recommendations.Sections.SelectMany(s => s.Games).Select(g => g.Title);
 
     [AvaloniaFact]
     public async Task A_player_with_a_PlayStation_game_gets_the_box_ticked_and_the_store_games()
@@ -196,7 +189,7 @@ public sealed class PsStoreRecommendationTests : AppTest
                 : query.Contains("future_release_date") || !query.Contains("4cbf39e2")
                     ? """{ "data": { "categoryGridRetrieve": { "products": [] } } }"""
                     : """{ "data": { "categoryGridRetrieve": { "products": [ { "id": "EP-FRESH", "name": "Fresh Ps Rpg", "storeDisplayClassification": "FULL_GAME", "media": [] } ] } } }""";
-            return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
+            return FakeStores.Json(body);
         }
     }
 }

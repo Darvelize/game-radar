@@ -257,8 +257,5 @@ public class SteamGenreSourceTests : IDisposable
 
             return Task.FromResult(response);
         }
-
-        private static HttpResponseMessage Json(string body) =>
-            new(HttpStatusCode.OK) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
     }
 }

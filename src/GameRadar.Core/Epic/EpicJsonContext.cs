@@ -25,5 +25,5 @@ namespace GameRadar.Core.Epic;
 [JsonSerializable(typeof(GraphQlEnvelope<RatingData>))]
 // Compact caches
 [JsonSerializable(typeof(Dictionary<string, EpicTitle>))]
-[JsonSerializable(typeof(Dictionary<string, EpicHistorySource.AchievementEntry>))]
+[JsonSerializable(typeof(Dictionary<string, EpicHistorySource.EpicAchievementEntry>))]
 internal sealed partial class EpicJsonContext : JsonSerializerContext;

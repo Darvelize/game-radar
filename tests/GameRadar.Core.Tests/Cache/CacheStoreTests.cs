@@ -9,6 +9,13 @@ public class CacheStoreTests : IDisposable
 
     public void Dispose() => _folder.Dispose();
 
+    [Theory]
+    [InlineData(new string[0], "[]")]
+    [InlineData(new[] { "{\"a\":1}" }, "[{\"a\":1}]")]
+    [InlineData(new[] { "{\"a\":1}", "{\"b\":2}" }, "[{\"a\":1},{\"b\":2}]")]
+    public void JoinRaw_KeepsTheRawAnswersInOneJsonArray(string[] pages, string expected) =>
+        Assert.Equal(expected, CacheStore.JoinRaw(pages));
+
     [Fact]
     public void TryLoad_ReturnsNullWhenMissing()
     {

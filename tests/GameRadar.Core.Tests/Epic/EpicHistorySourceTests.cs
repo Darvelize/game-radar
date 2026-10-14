@@ -81,9 +81,6 @@ public class EpicHistorySourceTests : IDisposable
             Requests.Add("total");
             return Json("""{"data":{"Achievement":{"productAchievementsRecordBySandbox":{"totalAchievements":""" + (rivals ? "40" : "null") + "}}}}");
         }
-
-        private static HttpResponseMessage Json(string json) =>
-            new(HttpStatusCode.OK) { Content = new StringContent(json, Encoding.UTF8, "application/json") };
     }
 
     private async Task<EpicClient> ClientAsync(FakeEpic epic)

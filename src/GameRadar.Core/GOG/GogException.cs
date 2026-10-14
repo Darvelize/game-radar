@@ -1,3 +1,5 @@
+using GameRadar.Core.Services;
+
 namespace GameRadar.Core.GOG;
 
 /// <summary>
@@ -5,7 +7,7 @@ namespace GameRadar.Core.GOG;
 /// (catalog down, unexpected format...). A dedicated type lets the UI catch it
 /// separately from unexpected bugs.
 /// </summary>
-public sealed class GogException : Exception
+public sealed class GogException : ServiceException
 {
     public GogException(string message, Exception? inner = null)
         : base(message, inner)

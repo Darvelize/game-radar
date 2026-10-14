@@ -32,6 +32,12 @@ public sealed class CacheStore
     }
 
     /// <summary>
+    /// Raw answers (pages of a list, already parsed by their connector) as one JSON
+    /// array, to keep them in one cache file and read them back one by one.
+    /// </summary>
+    public static string JoinRaw(IEnumerable<string> pages) => "[" + string.Join(",", pages) + "]";
+
+    /// <summary>
     /// Returns the cached entry, or null if there is none. Never throws:
     /// an unreadable cache is treated as missing, the app can always refetch.
     /// </summary>

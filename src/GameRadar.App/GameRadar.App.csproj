@@ -14,7 +14,7 @@
     <ApplicationIcon>Assets\GameRadar.ico</ApplicationIcon>
 
     <!-- Shown in the file's properties (Windows Explorer > Details). -->
-    <Version>1.6.1</Version>
+    <Version>1.6.2</Version>
     <Product>GameRadar</Product>
     <Description>Recommandations de jeux d'après ce que tu as vraiment joué (Xbox, Steam, Game Pass).</Description>
     <Copyright>© 2026 Darvelize</Copyright>

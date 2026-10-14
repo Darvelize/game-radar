@@ -45,9 +45,6 @@ public class EpicAccountTests : IDisposable
                 return new HttpResponseMessage(status) { Content = new StringContent("") };
             return Json(request.RequestUri.AbsolutePath.Contains("/playtime/") ? "[]" : """{"records":[],"responseMetadata":{}}""");
         }
-
-        private static HttpResponseMessage Json(string json) =>
-            new(HttpStatusCode.OK) { Content = new StringContent(json, Encoding.UTF8, "application/json") };
     }
 
     private SecretStore Store() => new(_folder.Path);

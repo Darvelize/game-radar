@@ -33,7 +33,7 @@ public sealed class EaTests : AppTest
                 : query.Contains("games(") ? """{"data":{"games":{"items":[{"slug":"space-heroes","products":{"items":[{"name":"Space Heroes™","originOfferId":"offer-1","baseItem":{"gameType":"BASE_GAME"}}]}}]}}}"""
                 : query.Contains("achievements") ? """{"data":{"achievements":[{"achievements":[{"awardCount":1},{"awardCount":1}]}]}}"""
                 : """{"data":{"me":{"player":{"psd":"1000123"}}}}""";
-            return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(json, Encoding.UTF8, "application/json") };
+            return FakeStores.Json(json);
         }
     }
 

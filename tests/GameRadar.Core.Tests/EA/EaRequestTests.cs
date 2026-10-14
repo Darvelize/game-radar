@@ -5,6 +5,8 @@ using GameRadar.Core.EA;
 using GameRadar.Core.Logging;
 using GameRadar.Core.Resources;
 
+using static GameRadar.Core.Tests.TestData;
+
 namespace GameRadar.Core.Tests.EA;
 
 public class EaRequestTests
@@ -24,6 +26,8 @@ public class EaRequestTests
         Assert.Equal($"Bearer {Token}", handler.Authorization);
         var body = JsonNode.Parse(handler.Body!)!;
         Assert.Contains("recentGames", body["query"]!.GetValue<string>());
+        // EA answers by pages of 10 by default: a page as big as the batch.
+        Assert.Contains("paging: { limit: 100 }", body["query"]!.GetValue<string>());
         Assert.Equal(["anthem", "titanfall-2"], body["variables"]!["gameSlugs"]!.AsArray().Select(s => s!.GetValue<string>()));
     }
 
@@ -108,7 +112,7 @@ public class EaRequestTests
             Uri = request.RequestUri;
             Authorization = request.Headers.Authorization?.ToString();
             Body = request.Content is null ? null : await request.Content.ReadAsStringAsync(ct);
-            return new HttpResponseMessage(status) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
+            return Json(body, status);
         }
     }
 }

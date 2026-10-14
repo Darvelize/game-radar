@@ -90,7 +90,7 @@ public class PlayStationStoreTests
     [Fact]
     public async Task The_search_sends_the_persisted_query_without_any_account()
     {
-        var handler = new FakeStore(HttpStatusCode.OK, SearchJson);
+        var handler = new PlayStationFakeStore(HttpStatusCode.OK, SearchJson);
 
         var games = await new PlayStationStoreClient(new HttpClient(handler)).SearchGamesAsync("astro bot");
 
@@ -110,7 +110,7 @@ public class PlayStationStoreTests
     [Fact]
     public async Task The_genres_ask_for_the_chosen_product_only()
     {
-        var handler = new FakeStore(HttpStatusCode.OK, """{ "data": { "productRetrieve": { "localizedGenres": [ { "value": "Action" } ] } } }""");
+        var handler = new PlayStationFakeStore(HttpStatusCode.OK, """{ "data": { "productRetrieve": { "localizedGenres": [ { "value": "Action" } ] } } }""");
 
         var genres = await new PlayStationStoreClient(new HttpClient(handler)).FetchGenresAsync("EP9000-PPSA21567_00-0000000000000000");
 
@@ -122,7 +122,7 @@ public class PlayStationStoreTests
     [Fact]
     public async Task Nothing_is_asked_for_an_empty_title()
     {
-        var handler = new FakeStore(HttpStatusCode.OK, SearchJson);
+        var handler = new PlayStationFakeStore(HttpStatusCode.OK, SearchJson);
 
         Assert.Empty(await new PlayStationStoreClient(new HttpClient(handler)).SearchGamesAsync("  "));
         Assert.Null(handler.Request);
@@ -134,24 +134,10 @@ public class PlayStationStoreTests
     [InlineData(HttpStatusCode.InternalServerError, "500")]
     public async Task An_error_of_the_store_is_explained(HttpStatusCode status, string expected)
     {
-        var client = new PlayStationStoreClient(new HttpClient(new FakeStore(status, """{"message":"Query not whitelisted"}""")));
+        var client = new PlayStationStoreClient(new HttpClient(new PlayStationFakeStore(status, """{"message":"Query not whitelisted"}""")));
 
         var error = await Assert.ThrowsAsync<PlayStationException>(() => client.SearchGamesAsync("astro"));
 
         Assert.Contains(expected, error.Message);
-    }
-
-    private sealed class FakeStore(HttpStatusCode status, string body) : HttpMessageHandler
-    {
-        public HttpRequestMessage? Request { get; private set; }
-        // Read while the request is alive: the client disposes it once sent.
-        public string? ContentType { get; private set; }
-
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
-        {
-            Request = request;
-            ContentType = request.Content?.Headers.ContentType?.MediaType;
-            return Task.FromResult(new HttpResponseMessage(status) { Content = new StringContent(body) });
-        }
     }
 }

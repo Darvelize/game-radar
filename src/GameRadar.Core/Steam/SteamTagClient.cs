@@ -99,7 +99,7 @@ public sealed class SteamTagClient
             case HttpOutcome.Ok:
                 break;
             case HttpOutcome.RateLimited or HttpOutcome.Forbidden:
-                throw new SteamException(CoreStrings.Steam_StoreRateLimitedTags);
+                throw new SteamException(CoreStrings.Steam_StoreRateLimitedTags) { IsRateLimited = true };
             default:
                 throw new SteamException(CoreStrings.Steam_StoreDownTags);
         }

@@ -21,18 +21,33 @@ internal sealed class SessionGuard
 
     /// <summary>
     /// Saves the secret of <paramref name="session"/>, unless that session
-    /// ended: then nothing stays on disk, and false is returned.
+    /// ended: then nothing stays on disk (and <see cref="Keep"/> refuses).
     /// </summary>
-    public bool TrySave<T>(SecretStore store, Secret secret, T value, JsonTypeInfo<T> typeInfo, int session)
+    public void TrySave<T>(SecretStore store, Secret secret, T value, JsonTypeInfo<T> typeInfo, int session)
+    {
+        if (session != Current)
+            return;
+
+        store.Save(secret, value, typeInfo);
+        // Ended between the check and the save: erased again.
+        if (session != Current)
+            store.Delete(secret);
+    }
+
+    /// <summary>
+    /// Once the secret of <paramref name="session"/> is saved: fills the account's memory
+    /// (<paramref name="keep"/>: saved account, access token), unless the session ended. A
+    /// sign-out that falls while it is filled already cleared that memory: <paramref name="forget"/>
+    /// clears it again, rather than leaving a signed-out account connected. False then.
+    /// </summary>
+    public bool Keep(int session, Action keep, Action forget)
     {
         if (session != Current)
             return false;
-
-        store.Save(secret, value, typeInfo);
+        keep();
         if (session == Current)
             return true;
-        // Ended between the check and the save: erased again.
-        store.Delete(secret);
+        forget();
         return false;
     }
 }

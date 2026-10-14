@@ -52,7 +52,8 @@ public class SteamTagTests : IDisposable
         using var http = new HttpClient(new FakeHandler(uri =>
         {
             string input = Uri.UnescapeDataString(uri.Query);
-            requests.Add(uri.AbsolutePath.Contains("GetItems") ? "items" : "search:" + input);
+            lock (requests)
+                requests.Add(uri.AbsolutePath.Contains("GetItems") ? "items" : "search:" + input);
             if (uri.AbsolutePath.Contains("GetItems"))
                 return Items((1085660, "Destiny 2"));
             return input.Contains("Control") ? Items((870780, "Control")) : Items();
@@ -71,13 +72,15 @@ public class SteamTagTests : IDisposable
             Catalog("steam:1", title: "Steam Hit", steamAppId: "1", inGamePass: false) with { Tags = Weights(19, 1) } // known already
         };
 
-        var source = new SteamTagSource(new CacheStore(_folder.Path), TimeSpan.Zero);
+        var source = new SteamTagSource(new CacheStore(_folder.Path));
         await source.FetchMissingAsync(played, candidates, client);
 
         Assert.Equal(4, requests.Count);
         Assert.Contains("items", requests);
-        // The profile is learned on tags too: every game that counts, the favorites first.
-        Assert.True(requests.FindIndex(r => r.Contains("Control")) < requests.FindIndex(r => r.Contains("Half Played")));
+        // The profile is learned on tags too: every game that counts, the favorites first. Two
+        // searches leave at once (after the app ids): the played games, then the Game Pass one.
+        Assert.InRange(requests.FindIndex(r => r.Contains("Control")), 1, SteamTagSource.TitleSearchesAtOnce);
+        Assert.Equal(3, requests.FindIndex(r => r.Contains("Unknown On Steam")));
         Assert.DoesNotContain(requests, r => r.Contains("Dropped Game") || r.Contains("Steam Hit"));
 
         var index = source.LoadIndex(candidates);
@@ -88,7 +91,7 @@ public class SteamTagTests : IDisposable
 
         // A new session, same games: everything comes from the cache, even "not found".
         requests.Clear();
-        var reopened = new SteamTagSource(new CacheStore(_folder.Path), TimeSpan.Zero);
+        var reopened = new SteamTagSource(new CacheStore(_folder.Path));
         Assert.Equal(0, reopened.CountMissing(reopened.LoadIndex(candidates), played, candidates, DateTimeOffset.UtcNow));
         await reopened.FetchMissingAsync(played, candidates, client);
         Assert.Empty(requests);
@@ -97,14 +100,15 @@ public class SteamTagTests : IDisposable
     [Fact]
     public async Task FetchMissing_KeepsWhatWasFoundWhenSteamRefuses()
     {
-        int searches = 0;
-        using var http = new HttpClient(new FakeHandler(_ => ++searches == 1 ? Items((870780, "Control")) : null));
         var played = new[]
         {
             Played("x1", 100, PlayStatus.Mastered, name: "Control"),
             Played("x2", 100, PlayStatus.Mastered, name: "Alan Wake 2")
         };
-        var source = new SteamTagSource(new CacheStore(_folder.Path), TimeSpan.Zero);
+        var source = new SteamTagSource(new CacheStore(_folder.Path));
+        // Alan Wake is refused once Control's tags are kept: one found, then a refusal.
+        using var http = new HttpClient(new FakeHandler(uri => IsControl(uri) ? Items((870780, "Control"))
+            : RefusedOnce(() => source.LoadIndex([]).For(played[0]) is not null)));
 
         // The second search is refused (rate limit): no error, the first result stays.
         await source.FetchMissingAsync(played, [], new SteamTagClient(http));
@@ -117,21 +121,19 @@ public class SteamTagTests : IDisposable
     [Fact]
     public async Task FetchMissing_KeepsWhatWasFoundWhenTheNetworkFails()
     {
-        int searches = 0;
-        using var http = new HttpClient(new FakeHandler(_ => ++searches == 1
-            ? Items((870780, "Control"))
-            : throw new HttpRequestException("The Steam store cannot be reached.")));
         var played = new[]
         {
             Played("x1", 100, PlayStatus.Mastered, name: "Control"),
             Played("x2", 100, PlayStatus.Mastered, name: "Alan Wake 2")
         };
-        var source = new SteamTagSource(new CacheStore(_folder.Path), TimeSpan.Zero);
+        var source = new SteamTagSource(new CacheStore(_folder.Path));
+        using var http = new HttpClient(new FakeHandler(uri => IsControl(uri) ? Items((870780, "Control"))
+            : RefusedOnce(() => source.LoadIndex([]).For(played[0]) is not null) ?? throw new HttpRequestException("The Steam store cannot be reached.")));
 
         // Like a refusal: no error, the first result stays, the second waits.
         await source.FetchMissingAsync(played, [], new SteamTagClient(http));
 
-        var reopened = new SteamTagSource(new CacheStore(_folder.Path), TimeSpan.Zero);
+        var reopened = new SteamTagSource(new CacheStore(_folder.Path));
         var index = reopened.LoadIndex([]);
         Assert.NotNull(index.For(played[0]));
         Assert.Equal(1, reopened.CountMissing(index, played, [], DateTimeOffset.UtcNow));
@@ -148,7 +150,7 @@ public class SteamTagTests : IDisposable
         }));
         // Played on Switch, picked from the Steam search: its title may differ, its app id does not.
         var played = new[] { ManualGames.ToPlayed(new ManualGame("Hades (Switch)", ManualPlatform.Switch, ManualLevel.Completed, SteamAppId: "1145360")) };
-        var source = new SteamTagSource(new CacheStore(_folder.Path), TimeSpan.Zero);
+        var source = new SteamTagSource(new CacheStore(_folder.Path));
 
         await source.FetchMissingAsync(played, [], new SteamTagClient(http));
 
@@ -162,7 +164,7 @@ public class SteamTagTests : IDisposable
         // Played on Switch, so no Steam or Xbox id: found by its title.
         using var http = new HttpClient(new FakeHandler(_ => Items((1145360, "Hades"))));
         var played = new[] { ManualGames.ToPlayed(new ManualGame("Hades", ManualPlatform.Switch, ManualLevel.Completed)) };
-        var source = new SteamTagSource(new CacheStore(_folder.Path), TimeSpan.Zero);
+        var source = new SteamTagSource(new CacheStore(_folder.Path));
         Assert.Equal(1, source.CountMissing(source.LoadIndex([]), played, [], DateTimeOffset.UtcNow));
 
         await source.FetchMissingAsync(played, [], new SteamTagClient(http));
@@ -174,7 +176,7 @@ public class SteamTagTests : IDisposable
     public void CountMissing_LooksUpTheGamesOnlyGogSellsByTitle()
     {
         // A GOG game also on Steam takes the Steam entry's tags; one only on GOG has none.
-        var source = new SteamTagSource(new CacheStore(_folder.Path), TimeSpan.Zero);
+        var source = new SteamTagSource(new CacheStore(_folder.Path));
         var onlyOnGog = Catalog("gog:1", title: "Disco Elysium", inGamePass: false) with { GogStoreLink = "https://www.gog.com/en/game/1" };
 
         Assert.Equal(1, source.CountMissing(source.LoadIndex([onlyOnGog]), [], [onlyOnGog], DateTimeOffset.UtcNow));
@@ -226,7 +228,7 @@ public class SteamTagTests : IDisposable
             // By app id: not visible any more, no tags. By title: the edition still sold.
             return byAppId ? Items() : Items((475150, "Titan Quest Anniversary Edition"));
         }));
-        var source = new SteamTagSource(new CacheStore(_folder.Path), TimeSpan.Zero);
+        var source = new SteamTagSource(new CacheStore(_folder.Path));
         var played = new[] { Played("4540", progress: 60, name: "Titan Quest", platform: "Steam") with { SteamAppId = "4540" } };
 
         await source.FetchMissingAsync(played, [], new SteamTagClient(http));
@@ -249,7 +251,7 @@ public class SteamTagTests : IDisposable
             requests.Add(uri.AbsolutePath.Contains("GetItems") ? "items" : "search");
             return Items((475150, "Titan Quest Anniversary Edition"));
         }));
-        var source = new SteamTagSource(cache, TimeSpan.Zero);
+        var source = new SteamTagSource(cache);
         var played = new[] { Played("4540", progress: 60, name: "Titan Quest", platform: "Steam") with { SteamAppId = "4540" } };
 
         await source.FetchMissingAsync(played, [], new SteamTagClient(http));
@@ -265,7 +267,7 @@ public class SteamTagTests : IDisposable
     [Fact]
     public void ForGame_PutsTheAddedTagsFirstAtTheTopWeightWhateverThePlatform()
     {
-        var source = new SteamTagSource(new CacheStore(_folder.Path), TimeSpan.Zero);
+        var source = new SteamTagSource(new CacheStore(_folder.Path));
         var onSteam = Catalog("steam:1", title: "Hades", inGamePass: false) with { Tags = new Dictionary<int, double> { [1774] = 1.0, [19] = 0.5 } };
         // Keyed by title (GameTitle.Key): the game whatever its platform and case.
         var added = new Dictionary<string, List<int>> { ["hades"] = [122, 19] };
@@ -285,7 +287,7 @@ public class SteamTagTests : IDisposable
     [Fact]
     public void ForGame_UnknownToSteam_HasOnlyItsAddedTags()
     {
-        var source = new SteamTagSource(new CacheStore(_folder.Path), TimeSpan.Zero);
+        var source = new SteamTagSource(new CacheStore(_folder.Path));
         var index = source.LoadIndex([], new Dictionary<string, List<int>> { [GameTitle.Key("Gravity Rush")] = [3871] });
 
         Assert.Equal(new Dictionary<int, double> { [3871] = 1.0 }, index.ForGame([Played("1", name: "Gravity Rush")]));
@@ -295,7 +297,7 @@ public class SteamTagTests : IDisposable
     [Fact]
     public void ForGame_KeepsTheSteamTagsAnotherPlatformKnows()
     {
-        var source = new SteamTagSource(new CacheStore(_folder.Path), TimeSpan.Zero);
+        var source = new SteamTagSource(new CacheStore(_folder.Path));
         var onSteam = Catalog("steam:1", title: "Hades on Steam", inGamePass: false) with
             { SteamAppId = "1145360", Tags = new Dictionary<int, double> { [1774] = 1.0 } };
         var index = source.LoadIndex([onSteam], new Dictionary<string, List<int>> { ["hades"] = [122] });
@@ -309,7 +311,7 @@ public class SteamTagTests : IDisposable
     [Fact]
     public void CountMissing_StillLooksUpOnSteamAGameThePlayerTagged()
     {
-        var source = new SteamTagSource(new CacheStore(_folder.Path), TimeSpan.Zero);
+        var source = new SteamTagSource(new CacheStore(_folder.Path));
         var played = new[] { Played("1", name: "Gravity Rush", progress: 60) };
         var index = source.LoadIndex([], new Dictionary<string, List<int>> { [GameTitle.Key("Gravity Rush")] = [3871] });
 
@@ -319,7 +321,7 @@ public class SteamTagTests : IDisposable
     [Fact]
     public void LoadIndex_KeepsACopyOfTheAddedTags_WithAddedGivesNewOnes()
     {
-        var source = new SteamTagSource(new CacheStore(_folder.Path), TimeSpan.Zero);
+        var source = new SteamTagSource(new CacheStore(_folder.Path));
         var added = new Dictionary<string, List<int>> { [GameTitle.Key("Gravity Rush")] = [3871] };
         var index = source.LoadIndex([], added);
         var game = Played("1", name: "Gravity Rush");
@@ -350,7 +352,7 @@ public class SteamTagTests : IDisposable
     [Fact]
     public void CountMissing_LooksUpTheGamesOnlyEpicSellsByTitle()
     {
-        var source = new SteamTagSource(new CacheStore(_folder.Path), TimeSpan.Zero);
+        var source = new SteamTagSource(new CacheStore(_folder.Path));
         var onlyOnEpic = Catalog("epic:ns-aw2", title: "Alan Wake 2", inGamePass: false) with { EpicStoreLink = "https://store.epicgames.com/p/alan-wake-2" };
 
         Assert.Equal(1, source.CountMissing(source.LoadIndex([onlyOnEpic]), [], [onlyOnEpic], DateTimeOffset.UtcNow));
@@ -359,10 +361,118 @@ public class SteamTagTests : IDisposable
     [Fact]
     public void CountMissing_LooksUpTheGamesOnlyThePlayStationStoreSellsByTitle()
     {
-        var source = new SteamTagSource(new CacheStore(_folder.Path), TimeSpan.Zero);
+        var source = new SteamTagSource(new CacheStore(_folder.Path));
         var onlyOnPs = Catalog("psstore:EP-GOW", title: "God of War Ragnarök", inGamePass: false) with { PlayStationProductId = "EP-GOW" };
 
         Assert.Equal(1, source.CountMissing(source.LoadIndex([onlyOnPs]), [], [onlyOnPs], DateTimeOffset.UtcNow));
+    }
+
+    [Fact]
+    public async Task FetchMissing_SearchesTheTitlesTwoAtATimeAtMost()
+    {
+        // 10 Game Pass games, without Steam app id: one title search each.
+        var candidates = Enumerable.Range(1, 10).Select(i => Catalog($"gp:{i}", title: $"Game {i}")).ToList();
+        var steam = new OverlappingSearches();
+        using var http = new HttpClient(steam);
+        var source = new SteamTagSource(new CacheStore(_folder.Path));
+        var progress = new List<int>();
+
+        await source.FetchMissingAsync([], candidates, new SteamTagClient(http), new SyncProgress(p => progress.Add(p.Done)));
+
+        Assert.Equal(10, steam.Searches);
+        Assert.InRange(steam.Probe.MaxAtOnce, 2, SteamTagSource.TitleSearchesAtOnce);
+        // Never backwards, whatever order the searches end in.
+        Assert.Equal(progress.Order(), progress);
+    }
+
+    /// <summary>A Steam store whose title searches each wait (5 s at most) until another one runs too.</summary>
+    private sealed class OverlappingSearches : HttpMessageHandler
+    {
+        private int _searches;
+
+        public OverlapProbe Probe { get; } = new();
+        public int Searches => _searches;
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
+        {
+            Interlocked.Increment(ref _searches);
+            await Probe.WaitForAnotherAsync(ct);
+            return Json(Items((1, "Another game")));
+        }
+    }
+
+    /// <summary>An IProgress that reports on the calling thread (Progress&lt;T&gt; would post).</summary>
+    private sealed class SyncProgress(Action<(int Done, int Total)> report) : IProgress<(int Done, int Total)>
+    {
+        public void Report((int Done, int Total) value) => report(value);
+    }
+
+    [Fact]
+    public async Task FetchMissing_AfterARateLimit_AsksSteamNothingForFiveMinutes()
+    {
+        int searches = 0;
+        using var http = new HttpClient(new FakeHandler(_ => { Interlocked.Increment(ref searches); return null; }));   // 429
+        var time = new TestTime();
+        var played = new[] { Played("x1", 100, PlayStatus.Mastered, name: "Control") };
+        var source = new SteamTagSource(new CacheStore(_folder.Path), time);
+
+        Assert.True(await source.FetchMissingAsync(played, [], new SteamTagClient(http)));
+        time.Advance(TimeSpan.FromMinutes(4));
+        // Steam asked nothing: the caller has nothing to compute again.
+        Assert.False(await source.FetchMissingAsync(played, [], new SteamTagClient(http)));
+        Assert.Equal(1, searches);
+
+        // The pause is over: Steam is asked again.
+        time.Advance(TimeSpan.FromMinutes(2));
+        await source.FetchMissingAsync(played, [], new SteamTagClient(http));
+        Assert.Equal(2, searches);
+    }
+
+    [Fact]
+    public async Task FetchMissing_AfterTheStoreFails_AsksAgainAtOnce()
+    {
+        // Down (503), not a rate limit: no pause, the next computation tries again.
+        int searches = 0;
+        using var http = new HttpClient(new StatusHandler(HttpStatusCode.ServiceUnavailable, () => Interlocked.Increment(ref searches)));
+        var played = new[] { Played("x1", 100, PlayStatus.Mastered, name: "Control") };
+        var source = new SteamTagSource(new CacheStore(_folder.Path));
+
+        await source.FetchMissingAsync(played, [], new SteamTagClient(http));
+        await source.FetchMissingAsync(played, [], new SteamTagClient(http));
+
+        Assert.Equal(2, searches);
+    }
+
+    /// <summary>A clock the test moves.</summary>
+    private sealed class TestTime : TimeProvider
+    {
+        private DateTimeOffset _now = Now;
+
+        public override DateTimeOffset GetUtcNow() => _now;
+
+        public void Advance(TimeSpan by) => _now += by;
+    }
+
+    /// <summary>Answers every request with this status, counting them.</summary>
+    private sealed class StatusHandler(HttpStatusCode status, Action counted) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
+        {
+            counted();
+            return Task.FromResult(new HttpResponseMessage(status));
+        }
+    }
+
+    private static bool IsControl(Uri uri) => Uri.UnescapeDataString(uri.Query).Contains("Control");
+
+    /// <summary>
+    /// A search that fails once <paramref name="kept"/> holds (30 s at most): searches go two at a
+    /// time, so "the second one is refused" means "after the first result is kept".
+    /// </summary>
+    private static string? RefusedOnce(Func<bool> kept)
+    {
+        SpinWait.SpinUntil(kept, TimeSpan.FromSeconds(30));
+        return null;
     }
 
     /// <summary>Answers each request with the given JSON, or 429 for null.</summary>
@@ -373,7 +483,7 @@ public class SteamTagTests : IDisposable
             string? json = answer(request.RequestUri!);
             return Task.FromResult(json is null
                 ? new HttpResponseMessage(HttpStatusCode.TooManyRequests)
-                : new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(json, Encoding.UTF8, "application/json") });
+                : Json(json));
         }
     }
 }

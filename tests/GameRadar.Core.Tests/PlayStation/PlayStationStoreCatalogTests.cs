@@ -100,7 +100,7 @@ public class PlayStationStoreCatalogTests
     [Fact]
     public async Task The_best_sellers_are_asked_by_sales_and_full_games_only()
     {
-        var handler = new FakeStore(HttpStatusCode.OK, GridJson);
+        var handler = new PlayStationFakeStore(HttpStatusCode.OK, GridJson);
 
         var games = await new PlayStationStoreClient(new HttpClient(handler))
             .FetchGridAsync(PlayStationStoreClient.Ps5Games, preOrdersOnly: false);
@@ -121,7 +121,7 @@ public class PlayStationStoreCatalogTests
     [Fact]
     public async Task The_pre_orders_are_asked_by_their_filter()
     {
-        var handler = new FakeStore(HttpStatusCode.OK, GridJson);
+        var handler = new PlayStationFakeStore(HttpStatusCode.OK, GridJson);
 
         await new PlayStationStoreClient(new HttpClient(handler))
             .FetchGridAsync(PlayStationStoreClient.Ps4Games, preOrdersOnly: true);
@@ -134,7 +134,7 @@ public class PlayStationStoreCatalogTests
     [Fact]
     public async Task The_details_ask_for_one_product()
     {
-        var handler = new FakeStore(HttpStatusCode.OK, """{ "data": { "productRetrieve": { "starRating": { "averageRating": 3.5 } } } }""");
+        var handler = new PlayStationFakeStore(HttpStatusCode.OK, """{ "data": { "productRetrieve": { "starRating": { "averageRating": 3.5 } } } }""");
 
         var details = await new PlayStationStoreClient(new HttpClient(handler)).FetchDetailsAsync("EP9000-PPSA21567_00-0000000000000000");
 
@@ -142,16 +142,5 @@ public class PlayStationStoreCatalogTests
         string url = Uri.UnescapeDataString(handler.Request!.RequestUri!.AbsoluteUri);
         Assert.Contains("operationName=queryRetrieveTelemetryDataPDPProduct", url);
         Assert.Contains("EP9000-PPSA21567_00-0000000000000000", url);
-    }
-
-    private sealed class FakeStore(HttpStatusCode status, string body) : HttpMessageHandler
-    {
-        public HttpRequestMessage? Request { get; private set; }
-
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
-        {
-            Request = request;
-            return Task.FromResult(new HttpResponseMessage(status) { Content = new StringContent(body) });
-        }
     }
 }

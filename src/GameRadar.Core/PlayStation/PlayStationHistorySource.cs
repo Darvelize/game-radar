@@ -63,7 +63,7 @@ public sealed class PlayStationHistorySource
         await Task.WhenAll(trophyPagesTask, gamePagesTask).ConfigureAwait(false);
         // The raw pages, already checked, put side by side as they are: no
         // need to parse them into a document and write it back.
-        string json = $$"""{"trophyTitles":[{{string.Join(",", trophyPagesTask.Result)}}],"games":[{{string.Join(",", gamePagesTask.Result)}}]}""";
+        string json = $$"""{"trophyTitles":{{CacheStore.JoinRaw(trophyPagesTask.Result)}},"games":{{CacheStore.JoinRaw(gamePagesTask.Result)}}}""";
         var (trophyTitles, games) = ParseHistory(json);
 
         var known = LoadTrophySets();

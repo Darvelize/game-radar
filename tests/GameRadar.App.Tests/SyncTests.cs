@@ -34,4 +34,21 @@ public sealed class SyncTests : AppTest
         Assert.Equal(vm.Accounts.XboxSync.Error, vm.Accounts.XboxSync.Status);
         Assert.Equal(vm.Accounts.SteamSync.Error, vm.Accounts.SteamSync.Status);
     }
+
+    [AvaloniaFact]
+    public async Task A_platform_being_synced_still_says_so_when_a_catalog_rebuilds_the_lists()
+    {
+        var network = new HoldingNetwork("www.gog.com");
+        var vm = SampleData.Empty(TempFolder, network: network);
+        vm.Accounts.GogProfileInput = "Radar_Player";
+        var connecting = vm.Accounts.ConnectGogCommand.ExecuteAsync(null);
+        await network.Reached.Task;
+
+        // A catalog arrived meanwhile: the lists and the status lines are rebuilt.
+        vm.History.Rebuild();
+
+        Assert.Equal(vm.Accounts.GogSync.FetchingStatus, vm.Accounts.GogSync.Status);
+        network.Release();
+        await connecting;
+    }
 }

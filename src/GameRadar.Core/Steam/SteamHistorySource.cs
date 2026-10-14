@@ -138,21 +138,18 @@ public sealed class SteamHistorySource
             .Select(game =>
             {
                 var entry = achievements.GetValueOrDefault(game.AppId);
-                bool hasAchievements = entry is { Total: > 0 };
-                int unlocked = hasAchievements ? entry!.Unlocked : 0;
-                int? total = hasAchievements ? entry!.Total : null;
-                double percentage = hasAchievements ? 100.0 * unlocked / total!.Value : 0;
+                var progress = AchievementProgress.From(entry?.Unlocked ?? 0, entry?.Total ?? 0);
 
                 return new PlayedGame(
                     Platform: SteamClient.PlatformName,
                     PlatformId: game.AppId,
                     Name: game.Name,
-                    HasAchievements: hasAchievements,
-                    UnlockedAchievements: unlocked,
-                    TotalAchievements: total,
-                    ProgressPercentage: percentage,
+                    HasAchievements: progress.HasAchievements,
+                    UnlockedAchievements: progress.Unlocked,
+                    TotalAchievements: progress.Total,
+                    ProgressPercentage: progress.Percentage,
                     LastPlayed: game.LastPlayed,
-                    Status: StatusClassifier.FromAchievements(unlocked, total, percentage),
+                    Status: progress.Status,
                     PlaytimeMinutes: game.PlaytimeMinutes)
                 {
                     SteamAppId = game.AppId
@@ -164,6 +161,4 @@ public sealed class SteamHistorySource
 
     private Dictionary<string, AchievementEntry> LoadAchievements() => _cache.LoadDictionary(AchievementsKey, SteamJsonContext.Default.DictionaryStringAchievementEntry);
 
-    /// <summary>Achievements of one game at a given "last played" date. Total 0 = the game has none.</summary>
-    internal sealed record AchievementEntry(int Unlocked, int Total, DateTimeOffset? LastPlayed);
 }

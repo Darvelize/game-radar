@@ -57,6 +57,38 @@ public sealed class CatalogLinesTests : AppTest
     }
 
     [AvaloniaFact]
+    public void The_Data_blocks_are_shown_again_only_when_they_change()
+    {
+        // Checked at any change of the filter (a future catalog may hang on any setting),
+        // notified only when the blocks differ: the view rebuilds them all.
+        var vm = SampleData.Empty(TempFolder, network: new OfflineNetwork());
+        var shown = new List<string>();
+        vm.Catalogs.PropertyChanged += (_, e) => shown.Add(e.PropertyName!);
+
+        vm.SourceFilter.ShowGog = !vm.SourceFilter.ShowGog;
+        Assert.DoesNotContain(nameof(vm.Catalogs.ShownLines), shown);
+
+        vm.SourceFilter.ShowPlayStationStore = !vm.SourceFilter.ShowPlayStationStore;
+        Assert.Contains(nameof(vm.Catalogs.ShownLines), shown);
+    }
+
+    [AvaloniaFact]
+    public async Task An_error_kept_during_a_download_goes_with_its_success()
+    {
+        var release = new TaskCompletionSource<GameCatalog>();
+        var line = Line(rebuildsHistory: false, refresh: () => release.Task);
+        var vm = SampleData.Empty(TempFolder, network: new OfflineNetwork());
+        var fetching = line.FetchAsync(vm.Notices);
+
+        // A profile name refused while the sync runs (GOG).
+        line.KeepError("refused");
+        release.SetResult(new GameCatalog([SteamRpg], DateTimeOffset.UtcNow));
+
+        Assert.Equal(FetchResult.Done, await fetching);
+        Assert.Null(line.Error);
+    }
+
+    [AvaloniaFact]
     public async Task Only_the_stale_catalogs_are_downloaded_at_startup()
     {
         var cache = new CacheStore(Path.Combine(TempFolder, "cache"));
@@ -194,6 +226,23 @@ public sealed class CatalogLinesTests : AppTest
     }
 
     [AvaloniaFact]
+    public async Task A_refresh_whose_catalogs_are_all_already_downloading_recomputes_nothing()
+    {
+        var network = new CatalogNetwork { HoldGamePass = true };
+        var vm = SampleData.Empty(TempFolder, network: network);
+        var startup = vm.Catalogs.RefreshAsync([vm.Catalogs.GamePass]);
+        await network.GamePassReached.Task;
+        // A recomputation would rewrite it (no history: "waiting").
+        vm.Recommendations.Status = "untouched";
+
+        await vm.Catalogs.RefreshAsync([vm.Catalogs.GamePass]);
+
+        Assert.Equal("untouched", vm.Recommendations.Status);
+        network.Release();
+        await startup;
+    }
+
+    [AvaloniaFact]
     public async Task A_failed_Game_Pass_download_keeps_its_error_when_another_catalog_rebuilds_the_history()
     {
         var vm = SampleData.Empty(TempFolder, network: new CatalogNetwork());
@@ -204,6 +253,19 @@ public sealed class CatalogLinesTests : AppTest
         await vm.Catalogs.RefreshAsync([Line(rebuildsHistory: true)]);
 
         Assert.Equal(error, vm.Catalogs.GamePass.Status);
+    }
+
+    [AvaloniaFact]
+    public async Task Any_failed_catalog_keeps_its_error_when_the_lines_are_written_again()
+    {
+        var vm = SampleData.Empty(TempFolder, network: new CatalogNetwork());
+        await vm.Catalogs.RefreshAsync([vm.Catalogs.Steam]);
+        string error = vm.Catalogs.Steam.Status;
+        Assert.NotEqual(Strings.Status_SteamCatalogNotLoaded, error);
+
+        vm.Catalogs.ShowLoaded();
+
+        Assert.Equal(error, vm.Catalogs.Steam.Status);
     }
 
     [AvaloniaFact]
@@ -238,6 +300,27 @@ public sealed class CatalogLinesTests : AppTest
         Assert.NotNull(await vm.Catalogs.GetPsPlusCatalogForSearchAsync());
 
         Assert.StartsWith("1 ", vm.Catalogs.PsPlus.Status);
+    }
+
+    [AvaloniaFact]
+    public async Task A_search_during_a_PS_Plus_download_waits_for_it_instead_of_downloading_again()
+    {
+        const string psPlus = "www.playstation.com";
+        var network = new HoldingNetwork(psPlus);
+        var vm = SampleData.Empty(TempFolder, network: network);
+        var download = vm.Catalogs.RefreshAsync([vm.Catalogs.PsPlus]);
+        await network.Reached.Task;
+
+        var search = vm.Catalogs.GetPsPlusCatalogForSearchAsync();
+        network.Release();
+        await download;
+        // That download failed (404): the search does not try again at once.
+        Assert.Null(await search);
+        int asked = network.Count(psPlus);
+
+        // What one download asks, for comparison.
+        await vm.Catalogs.RefreshAsync([vm.Catalogs.PsPlus]);
+        Assert.Equal(network.Count(psPlus) - asked, asked);
     }
 
     private static Task SaveAsync(CacheStore cache, string key, TimeSpan age) =>

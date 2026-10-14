@@ -9,6 +9,7 @@ using GameRadar.Core.Manual;
 using GameRadar.Core.Models;
 using GameRadar.Core.PlayStation;
 using GameRadar.Core.Settings;
+using static GameRadar.App.Tests.CachedCatalogs;
 
 namespace GameRadar.App.Tests;
 
@@ -21,17 +22,12 @@ public sealed class PsPlusRecommendationTests : AppTest
 {
     private static readonly ManualGame Hero = new("Hero Quest", ManualPlatform.Switch, ManualLevel.Completed, SteamAppId: "100");
 
-    private static readonly CatalogGame HeroInGamePass =
-        new("GP-HERO", "Hero Quest", null, null, ["Role playing"], OnPc: true, OnConsole: true, LeavingSoon: false);
-
     // As the real lists give them: an Extra game is also in Premium, a classic only in Premium.
     private static readonly CatalogGame ExtraRpg = PsPlusGame("1", "Cozy Rpg", PsPlusTier.Extra | PsPlusTier.Premium);
     private static readonly CatalogGame ClassicRpg = PsPlusGame("2", "Old Rpg", PsPlusTier.Premium);
 
     private static CatalogGame PsPlusGame(string id, string title, PsPlusTier tiers) =>
         new($"psplus:{id}", title, null, null, ["Role playing"], OnPc: false, OnConsole: false, LeavingSoon: false, PsPlusTiers: tiers);
-
-    private static readonly TimeSpan Fresh = TimeSpan.FromHours(1);
 
     /// <summary>The history, the Game Pass and Steam caches, and the PS Plus one when an age is given.</summary>
     private async Task PrepareAsync(PsPlusTier plan, TimeSpan? psPlusAge, Action<AppSettings>? withSettings = null)
@@ -44,15 +40,10 @@ public sealed class PsPlusRecommendationTests : AppTest
         await store.SaveAsync(settings);
 
         var cache = new CacheStore(Path.Combine(TempFolder, "cache"));
-        await cache.SaveAsync("gamepass-catalog-fr-v6", TestJson.Serialize(new GameCatalog([HeroInGamePass], DateTimeOffset.UtcNow - Fresh)));
-        await cache.SaveAsync("steam-catalog-fr-v3", TestJson.Serialize(new GameCatalog([], DateTimeOffset.UtcNow - Fresh)));
+        await SaveGamePassAndSteamAsync(cache);
         if (psPlusAge is { } age)
-            await cache.SaveAsync("psplus-catalog-fr-fr-v1", TestJson.Serialize(new GameCatalog([ExtraRpg, ClassicRpg], DateTimeOffset.UtcNow - age)));
+            await cache.SaveAsync(new PsPlusCatalogSource(cache).CacheKey, TestJson.Serialize(new GameCatalog([ExtraRpg, ClassicRpg], DateTimeOffset.UtcNow - age)));
     }
-
-    private static IEnumerable<string> Cards(MainWindowViewModel vm) =>
-        vm.Recommendations.Sections.SelectMany(s => s.Games).Select(g => g.Title);
-
 
     [AvaloniaFact]
     public void Without_a_saved_plan_there_is_no_PS_Plus_box()
@@ -266,7 +257,7 @@ public sealed class PsPlusRecommendationTests : AppTest
                 : request.RequestUri.Query.Contains("plus-classics-list")
                     ? """[{ "games": [ { "conceptId": 10, "name": "Fresh Classic", "nameEn": "Fresh Classic", "genre": ["ACTION"] } ] }]"""
                     : "[]";
-            return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
+            return FakeStores.Json(body);
         }
     }
 }

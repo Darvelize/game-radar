@@ -169,8 +169,5 @@ public class StoreGenreSourceTests : IDisposable
             };
             return response;
         }
-
-        private static HttpResponseMessage Json(string body) =>
-            new(HttpStatusCode.OK) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
     }
 }

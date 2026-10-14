@@ -4,6 +4,20 @@ Source unique des notes de version : l'appli affiche ce fichier (page « Nouveau
 Format lu par `Changelog.Parse` : `## <version>` (suivi de ` — <AAAA-MM-JJ>` une fois publiée), puis les parties `### Évolutions` et `### Corrections` (depuis la 1.2.0), chacune avec une ligne `- ` par nouveauté, en français, écrite pour les joueurs.
 Traduction anglaise : `CHANGELOG.en.md` (`### Improvements`, `### Fixes`), mêmes versions, mêmes dates, mêmes parties, autant de lignes (vérifié par les tests).
 
+## 1.6.2 — 2026-10-14
+
+### Évolutions
+
+- Jaquettes : celles qui n'ont pas été affichées depuis 30 jours sont supprimées au démarrage (jeux sortis des catalogues, anciennes images en grand format) : le dossier des données ne grossit plus sans fin.
+- Historique EA : la synchronisation prend quelques secondes au lieu d'environ une minute (8 requêtes au lieu de 151, plusieurs à la fois).
+- « Pour toi » : le premier calcul, qui cherche les tags Steam des jeux du Game Pass, prend environ 2 minutes au lieu de 7.
+
+### Corrections
+
+- Réglages › Données : une plateforme en cours de synchronisation affiche « Récupération… » jusqu'au bout, même quand un catalogue arrive pendant ce temps ; l'erreur d'un catalogue reste affichée jusqu'à son prochain téléchargement.
+- « Ajouter un jeu » ne télécharge plus le catalogue PS Plus une deuxième fois quand il est déjà en cours de téléchargement.
+- Comptes Xbox, PlayStation et Epic : se déconnecter pile pendant qu'une synchronisation renouvelle la session ne laisse plus le compte connecté jusqu'à la fermeture de GameRadar.
+
 ## 1.6.1 — 2026-10-13
 
 ### Évolutions

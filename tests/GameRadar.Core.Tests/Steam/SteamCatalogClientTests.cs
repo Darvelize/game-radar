@@ -3,6 +3,8 @@ using System.Text;
 using GameRadar.Core.Models;
 using GameRadar.Core.Steam;
 
+using static GameRadar.Core.Tests.TestData;
+
 namespace GameRadar.Core.Tests.Steam;
 
 public class SteamCatalogClientTests
@@ -159,7 +161,7 @@ public class SteamCatalogClientTests
             string? json = answer(request.RequestUri!);
             return Task.FromResult(json is null
                 ? new HttpResponseMessage(HttpStatusCode.ServiceUnavailable)
-                : new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(json, Encoding.UTF8, "application/json") });
+                : Json(json));
         }
     }
 }

@@ -1,3 +1,5 @@
+using GameRadar.Core.Services;
+
 namespace GameRadar.Core.Xbox;
 
 /// <summary>
@@ -5,7 +7,7 @@ namespace GameRadar.Core.Xbox;
 /// explain to the user (no Xbox profile, expired session...). A dedicated
 /// type lets the UI catch it separately from unexpected bugs.
 /// </summary>
-public sealed class XboxLiveException : Exception
+public sealed class XboxLiveException : ServiceException
 {
     public XboxLiveException(string message, bool requiresSignIn = false, Exception? inner = null)
         : base(message, inner)

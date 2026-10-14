@@ -2,6 +2,8 @@ using System.Net;
 using System.Text.Json;
 using GameRadar.Core.Steam;
 
+using static GameRadar.Core.Tests.TestData;
+
 namespace GameRadar.Core.Tests.Steam;
 
 public class SteamWishlistTests : IDisposable
@@ -92,10 +94,7 @@ public class SteamWishlistTests : IDisposable
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
         {
             Urls.Add(request.RequestUri!.ToString());
-            return Task.FromResult(new HttpResponseMessage(Status)
-            {
-                Content = new StringContent(Body, System.Text.Encoding.UTF8, "application/json")
-            });
+            return Task.FromResult(Json(Body, Status));
         }
     }
 }

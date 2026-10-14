@@ -2,6 +2,8 @@ using System.Net;
 using System.Text;
 using GameRadar.Core.Updates;
 
+using static GameRadar.Core.Tests.TestData;
+
 namespace GameRadar.Core.Tests.Updates;
 
 public class UpdateCheckerTests
@@ -133,10 +135,7 @@ public class UpdateCheckerTests
                 throw new HttpRequestException("No such host is known.");
 
             UserAgent = request.Headers.UserAgent.ToString();
-            return Task.FromResult(new HttpResponseMessage(status)
-            {
-                Content = new StringContent(body, Encoding.UTF8, "application/json")
-            });
+            return Task.FromResult(Json(body, status));
         }
     }
 }

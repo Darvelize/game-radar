@@ -63,32 +63,20 @@ public sealed class EpicCatalogClient
         // A game in several collections: the first one keeps it.
         var unique = collections.SelectMany(c => c).DistinctBy(o => o.Namespace).ToList();
 
-        var ratings = new double?[unique.Count];
-        await Parallel.ForEachAsync(Enumerable.Range(0, unique.Count),
-            new ParallelOptions { MaxDegreeOfParallelism = MaxRatingsAtOnce, CancellationToken = ct },
-            async (i, token) => ratings[i] = await FetchRatingAsync(unique[i].Namespace, token).ConfigureAwait(false)).ConfigureAwait(false);
         // Not one rating among well-known games (206 of 218, measured): the rating
-        // query broke. Saved, the 3/5 filter would silently stop working: the old catalog stays.
-        if (unique.Count > 0 && ratings.All(r => r is null))
-            throw new EpicException(CoreStrings.Epic_Format);
+        // query broke, the old catalog stays.
+        var ratings = await StoreLookup.FetchAllAsync(unique, MaxRatingsAtOnce,
+            (offer, token) => FetchRatingAsync(offer.Namespace, token),
+            () => new EpicException(CoreStrings.Epic_Format), ct).ConfigureAwait(false);
 
         return unique.Select((offer, i) => ToCatalogGame(offer, ratings[i])).OfType<CatalogGame>().ToList();
     }
 
-    /// <summary>A game's rating; none when Epic fails to give it (the game is kept). The rate limit stops everything.</summary>
-    private async Task<double?> FetchRatingAsync(string @namespace, CancellationToken ct)
-    {
-        try
-        {
-            return ParseRating(await PostAsync(
-                new GraphQlRequest<SandboxVariables> { Query = RatingQuery, Variables = new() { SandboxId = @namespace } },
-                EpicJsonContext.Default.GraphQlRequestSandboxVariables, ct).ConfigureAwait(false));
-        }
-        catch (Exception ex) when (ex is EpicException { IsRateLimited: false } || StoreLookup.Transient(ex, ct))
-        {
-            return null;
-        }
-    }
+    /// <summary>A game's rating, null when Epic has none.</summary>
+    private async Task<double?> FetchRatingAsync(string @namespace, CancellationToken ct) =>
+        ParseRating(await PostAsync(
+            new GraphQlRequest<SandboxVariables> { Query = RatingQuery, Variables = new() { SandboxId = @namespace } },
+            EpicJsonContext.Default.GraphQlRequestSandboxVariables, ct).ConfigureAwait(false));
 
     /// <summary>A store GraphQL request, as the launcher and without any account.</summary>
     private async Task<string> PostAsync<T>(T body, JsonTypeInfo<T> typeInfo, CancellationToken ct)

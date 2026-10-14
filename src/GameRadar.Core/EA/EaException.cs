@@ -1,3 +1,5 @@
+using GameRadar.Core.Services;
+
 namespace GameRadar.Core.EA;
 
 /// <summary>
@@ -5,7 +7,7 @@ namespace GameRadar.Core.EA;
 /// (token expired, wrong text pasted...). A dedicated type lets the UI catch
 /// it separately from unexpected bugs.
 /// </summary>
-public sealed class EaException : Exception
+public sealed class EaException : ServiceException
 {
     public EaException(string message, Exception? inner = null)
         : base(message, inner)
@@ -14,7 +16,4 @@ public sealed class EaException : Exception
 
     /// <summary>EA refused the token (expired, or not a token): it must be pasted again.</summary>
     public bool IsTokenRefused { get; init; }
-
-    /// <summary>EA asks to wait: every other request would be refused too.</summary>
-    public bool IsRateLimited { get; init; }
 }

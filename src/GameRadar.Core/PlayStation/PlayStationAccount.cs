@@ -19,19 +19,12 @@ public sealed partial class PlayStationAccount
 {
     private readonly PlayStationAuth _auth;
     private readonly SecretStore _store;
-    // Tokens are renewed one caller at a time: two parallel renewals would
-    // each sign in again for nothing.
-    private readonly SemaphoreSlim _lock = new(1, 1);
+    // The access token (~1 h): see AccessTokenCache.
+    private readonly AccessTokenCache _tokens = new();
 
     private SavedPlayStationAccount? _saved;
-    // Memory only: it lasts ~1 h, and a new launch renews it silently. One
-    // object, replaced whole: read and written from several threads (both
-    // lists are fetched together), never half written.
-    private AccessToken? _accessToken;
     // Ended by each disconnect: a renewal or sign-in started before never saves.
     private readonly SessionGuard _session = new();
-
-    private sealed record AccessToken(string Token, DateTimeOffset ExpiresAt);
 
     /// <remarks>No HttpClient to give: the sign-in has its own (<see cref="PlayStationAuth.SignInHttp"/>).</remarks>
     public PlayStationAccount(SecretStore store)
@@ -60,15 +53,7 @@ public sealed partial class PlayStationAccount
 
         var tokens = await _auth.SignInAsync(npsso, ct).ConfigureAwait(false);
 
-        await _lock.WaitAsync(ct).ConfigureAwait(false);
-        try
-        {
-            Remember(session, npsso, tokens);
-        }
-        finally
-        {
-            _lock.Release();
-        }
+        await _tokens.RunLockedAsync(() => Remember(session, npsso, tokens), ct).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -88,8 +73,13 @@ public sealed partial class PlayStationAccount
     {
         _session.End();
         _store.Delete(Secret.PlayStationAccount);
+        ForgetMemory();
+    }
+
+    private void ForgetMemory()
+    {
         _saved = null;
-        _accessToken = null;
+        _tokens.Clear();
     }
 
     /// <summary>
@@ -98,47 +88,39 @@ public sealed partial class PlayStationAccount
     /// Throws <see cref="PlayStationException"/> with
     /// <see cref="PlayStationException.RequiresSignIn"/> when a new NPSSO is needed.
     /// </summary>
-    internal async Task<string> GetAccessTokenAsync(CancellationToken ct)
+    internal Task<string> GetAccessTokenAsync(CancellationToken ct) => _tokens.GetAsync(() => RenewAsync(ct), ct);
+
+    // Under the lock of _tokens.
+    private async Task<string> RenewAsync(CancellationToken ct)
     {
-        await _lock.WaitAsync(ct).ConfigureAwait(false);
-        try
+        // The refresh token too must outlive the call.
+        var soon = DateTimeOffset.UtcNow + AccessTokenCache.Margin;
+        if (_saved is not { } saved)
+            throw new PlayStationException(CoreStrings.PlayStation_NotConnected, requiresSignIn: true);
+
+        int session = _session.Current;
+        PlayStationTokens tokens;
+        // Its date unknown (Sony did not give it): tried until refused.
+        if (saved.RefreshToken is { } refreshToken && (saved.RefreshExpiresAt is null || saved.RefreshExpiresAt > soon))
         {
-            // A margin, so the token cannot expire between here and the call.
-            var soon = DateTimeOffset.UtcNow.AddMinutes(5);
-            if (_accessToken is { } current && current.ExpiresAt > soon)
-                return current.Token;
-
-            if (_saved is not { } saved)
-                throw new PlayStationException(CoreStrings.PlayStation_NotConnected, requiresSignIn: true);
-
-            int session = _session.Current;
-            PlayStationTokens tokens;
-            // Its date unknown (Sony did not give it): tried until refused.
-            if (saved.RefreshToken is { } refreshToken && (saved.RefreshExpiresAt is null || saved.RefreshExpiresAt > soon))
+            try
             {
-                try
-                {
-                    tokens = await _auth.RefreshAsync(refreshToken, ct).ConfigureAwait(false);
-                }
-                catch (PlayStationException)
-                {
-                    // Refused before its date, or failing for any reason of
-                    // its own: the NPSSO may still sign in.
-                    tokens = await SignInAgainAsync(saved.Npsso, ct).ConfigureAwait(false);
-                }
+                tokens = await _auth.RefreshAsync(refreshToken, ct).ConfigureAwait(false);
             }
-            else
+            catch (PlayStationException)
             {
+                // Refused before its date, or failing for any reason of
+                // its own: the NPSSO may still sign in.
                 tokens = await SignInAgainAsync(saved.Npsso, ct).ConfigureAwait(false);
             }
-
-            Remember(session, saved.Npsso, tokens);
-            return tokens.AccessToken;
         }
-        finally
+        else
         {
-            _lock.Release();
+            tokens = await SignInAgainAsync(saved.Npsso, ct).ConfigureAwait(false);
         }
+
+        Remember(session, saved.Npsso, tokens);
+        return tokens.AccessToken;
     }
 
     /// <summary>
@@ -146,12 +128,7 @@ public sealed partial class PlayStationAccount
     /// still the current one: both lists are fetched together, and a 401 on
     /// an old token must not wipe the one the other list just renewed.
     /// </summary>
-    internal void ForgetAccessToken(string refusedToken)
-    {
-        var current = Volatile.Read(ref _accessToken);
-        if (current?.Token == refusedToken)
-            Interlocked.CompareExchange(ref _accessToken, null, current);
-    }
+    internal void ForgetAccessToken(string refusedToken) => _tokens.Forget(refusedToken);
 
     private async Task<PlayStationTokens> SignInAgainAsync(string npsso, CancellationToken ct)
     {
@@ -179,10 +156,9 @@ public sealed partial class PlayStationAccount
         var saved = tokens.RefreshToken is null && previous is not null
             ? previous
             : new SavedPlayStationAccount(npsso, tokens.RefreshToken, tokens.RefreshExpiresAt);
-        if (!_session.TrySave(_store, Secret.PlayStationAccount, saved, PlayStationJsonContext.Default.SavedPlayStationAccount, session))
+        _session.TrySave(_store, Secret.PlayStationAccount, saved, PlayStationJsonContext.Default.SavedPlayStationAccount, session);
+        if (!_session.Keep(session, () => { _saved = saved; _tokens.Set(tokens.AccessToken, tokens.ExpiresAt); }, ForgetMemory))
             throw new PlayStationException(CoreStrings.PlayStation_NotConnected, requiresSignIn: true);
-        _saved = saved;
-        Volatile.Write(ref _accessToken, new AccessToken(tokens.AccessToken, tokens.ExpiresAt));
     }
 
     // {"npsso":"…"}: the page's answer, copied whole.

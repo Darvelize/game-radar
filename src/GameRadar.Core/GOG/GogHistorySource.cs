@@ -67,7 +67,7 @@ public sealed class GogHistorySource
             games.AddRange(parsed.Games);
         }
 
-        await _cache.SaveAsync(HistoryKey, $"[{string.Join(",", pages)}]", ct).ConfigureAwait(false);
+        await _cache.SaveAsync(HistoryKey, CacheStore.JoinRaw(pages), ct).ConfigureAwait(false);
         return new GameHistory(ToPlayedGames(games), DateTimeOffset.UtcNow);
     }
 

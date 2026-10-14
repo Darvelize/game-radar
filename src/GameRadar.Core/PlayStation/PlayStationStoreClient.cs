@@ -160,14 +160,10 @@ public sealed class PlayStationStoreClient
             .DistinctBy(g => GameTitle.Key(g.Title))
             .ToList();
 
-        var details = new StoreDetails?[unique.Count];
-        await Parallel.ForEachAsync(Enumerable.Range(0, unique.Count),
-            new ParallelOptions { MaxDegreeOfParallelism = MaxDetailsAtOnce, CancellationToken = ct },
-            async (i, token) => details[i] = await TryFetchDetailsAsync(unique[i].ProductId, token).ConfigureAwait(false)).ConfigureAwait(false);
-        // Not one page among well-known games: the details query broke. Saved, the
-        // 3/5 filter would silently stop working: the old catalog stays.
-        if (unique.Count > 0 && details.All(d => d is null))
-            throw new PlayStationException(CoreStrings.PlayStation_StoreRefused);
+        // Not one page among well-known games: the details query broke, the old catalog stays.
+        var details = await StoreLookup.FetchAllAsync(unique, MaxDetailsAtOnce,
+            async (game, token) => await FetchDetailsAsync(game.ProductId, token).ConfigureAwait(false),
+            () => new PlayStationException(CoreStrings.PlayStation_StoreRefused), ct).ConfigureAwait(false);
 
         return unique.Select((game, i) => ToCatalogGame(game, details[i])).OfType<CatalogGame>().ToList();
     }
@@ -180,19 +176,6 @@ public sealed class PlayStationStoreClient
                 yield return first[i];
             if (i < second.Count)
                 yield return second[i];
-        }
-    }
-
-    /// <summary>A product page; none when the store fails to give it (the game is kept). The rate limit stops everything.</summary>
-    private async Task<StoreDetails?> TryFetchDetailsAsync(string productId, CancellationToken ct)
-    {
-        try
-        {
-            return await FetchDetailsAsync(productId, ct).ConfigureAwait(false);
-        }
-        catch (Exception ex) when (ex is PlayStationException { IsRateLimited: false } || StoreLookup.Transient(ex, ct))
-        {
-            return null;
         }
     }
 

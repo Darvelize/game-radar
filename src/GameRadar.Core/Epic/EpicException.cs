@@ -1,3 +1,5 @@
+using GameRadar.Core.Services;
+
 namespace GameRadar.Core.Epic;
 
 /// <summary>
@@ -5,7 +7,7 @@ namespace GameRadar.Core.Epic;
 /// (code expired, wrong text pasted...). A dedicated type lets the UI catch
 /// it separately from unexpected bugs.
 /// </summary>
-public sealed class EpicException : Exception
+public sealed class EpicException : ServiceException
 {
     public EpicException(string message, Exception? inner = null)
         : base(message, inner)
@@ -14,9 +16,6 @@ public sealed class EpicException : Exception
 
     /// <summary>Epic refused the session (expired, revoked): a new code must be pasted.</summary>
     public bool IsTokenRefused { get; init; }
-
-    /// <summary>Epic asks to wait: every other request would be refused too.</summary>
-    public bool IsRateLimited { get; init; }
 
     /// <summary>The session is gone (expired a year unused, revoked): a new code must be pasted.</summary>
     internal static EpicException SessionExpired() => new(CoreStrings.Epic_SessionExpired) { IsTokenRefused = true };

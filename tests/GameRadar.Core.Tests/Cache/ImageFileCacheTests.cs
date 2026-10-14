@@ -100,6 +100,64 @@ public class ImageFileCacheTests
         }
     }
 
+    [Fact]
+    public async Task RemoveUnused_DeletesPicturesNotShownForAMonth_KeepsTheOthers()
+    {
+        using var folder = new TempFolder();
+        var cache = new ImageFileCache(new HttpClient(new FakeImageHandler()), folder.Path);
+        string shownLately = (await cache.GetAsync("https://img/recent"))!;
+        string shownAgain = (await cache.GetAsync("https://img/shown-again"))!;
+        string forgotten = (await cache.GetAsync("https://img/forgotten"))!;
+        string crashedDownload = Path.Combine(folder.Path, "x.img.abc.tmp");
+        string recentDownload = Path.Combine(folder.Path, "y.img.abc.tmp");
+        File.WriteAllBytes(crashedDownload, PictureBytes);
+        File.WriteAllBytes(recentDownload, PictureBytes);
+        var longAgo = DateTime.UtcNow - ImageFileCache.UnusedLifetime - TimeSpan.FromDays(1);
+        foreach (string old in new[] { shownAgain, forgotten, crashedDownload })
+            File.SetLastWriteTimeUtc(old, longAgo);
+
+        // Shown on a card today: marked as used, so it stays.
+        ImageFileCache.MarkShown(shownAgain);
+        cache.RemoveUnused();
+
+        Assert.True(File.Exists(shownLately));
+        Assert.True(File.Exists(shownAgain));
+        Assert.True(File.Exists(recentDownload));
+        Assert.False(File.Exists(forgotten));
+        Assert.False(File.Exists(crashedDownload));
+    }
+
+    [Fact]
+    public async Task RemoveUnused_PlayerAwayForTwoMonths_KeepsEveryPicture()
+    {
+        using var folder = new TempFolder();
+        var cache = new ImageFileCache(new HttpClient(new FakeImageHandler()), folder.Path);
+        string a = (await cache.GetAsync("https://img/a"))!;
+        string b = (await cache.GetAsync("https://img/b"))!;
+        // Both shown on the last day the app was opened, two months ago.
+        File.SetLastWriteTimeUtc(a, DateTime.UtcNow - TimeSpan.FromDays(60));
+        File.SetLastWriteTimeUtc(b, DateTime.UtcNow - TimeSpan.FromDays(61));
+
+        cache.RemoveUnused();
+
+        Assert.True(File.Exists(a));
+        Assert.True(File.Exists(b));
+    }
+
+    [Fact]
+    public async Task MarkShown_AtMostOnceADay()
+    {
+        using var folder = new TempFolder();
+        var cache = new ImageFileCache(new HttpClient(new FakeImageHandler()), folder.Path);
+        string path = (await cache.GetAsync("https://img/a"))!;
+        var halfADayAgo = DateTime.UtcNow - TimeSpan.FromHours(12);
+        File.SetLastWriteTimeUtc(path, halfADayAgo);
+
+        ImageFileCache.MarkShown(path);
+
+        Assert.Equal(halfADayAgo, File.GetLastWriteTimeUtc(path));
+    }
+
     /// <summary>A body whose bytes never come (until the read is cancelled).</summary>
     private sealed class NeverEndingStream : Stream
     {

@@ -4,6 +4,8 @@ using Avalonia.Threading;
 using GameRadar.App.ViewModels;
 using GameRadar.Core.Cache;
 using GameRadar.Core.Epic;
+using GameRadar.Core.GOG;
+using GameRadar.Core.GamePass;
 using GameRadar.Core.Manual;
 using GameRadar.Core.PlayStation;
 using GameRadar.Core.Models;
@@ -41,9 +43,9 @@ public sealed class RecommendationComputationTests : AppTest
 
         var cache = new CacheStore(Path.Combine(TempFolder, "cache"));
         if (gamePassAge is { } gp)
-            await cache.SaveAsync("gamepass-catalog-fr-v6", TestJson.Serialize(new GameCatalog([HeroInGamePass, PassRpg], DateTimeOffset.UtcNow - gp)));
+            await cache.SaveAsync(new GamePassCatalogSource(cache).CacheKey, TestJson.Serialize(new GameCatalog([HeroInGamePass, PassRpg], DateTimeOffset.UtcNow - gp)));
         if (steamAge is { } steam)
-            await cache.SaveAsync("steam-catalog-fr-v3", TestJson.Serialize(new GameCatalog([SteamRpg], DateTimeOffset.UtcNow - steam)));
+            await cache.SaveAsync(SteamCatalogSource.CacheKey, TestJson.Serialize(new GameCatalog([SteamRpg], DateTimeOffset.UtcNow - steam)));
     }
 
     private static readonly TimeSpan Fresh = TimeSpan.FromHours(1);
@@ -60,7 +62,7 @@ public sealed class RecommendationComputationTests : AppTest
     private async Task SeedFrenchCatalogAsync()
     {
         var cache = new CacheStore(Path.Combine(TempFolder, "cache"));
-        await cache.SaveAsync("gamepass-catalog-fr-v5", TestJson.Serialize(
+        await cache.SaveAsync(EnglishTitlesMigration.FrenchGamePassKey, TestJson.Serialize(
             new GameCatalog([PassRpg with { Title = "RPG Passe" }], DateTimeOffset.UtcNow.AddDays(-20))));
     }
 
@@ -224,7 +226,7 @@ public sealed class RecommendationComputationTests : AppTest
     {
         await PrepareAsync(Fresh, Fresh);
         var cache = new CacheStore(Path.Combine(TempFolder, "cache"));
-        await cache.SaveAsync("gamepass-catalog-fr-v6", TestJson.Serialize(
+        await cache.SaveAsync(new GamePassCatalogSource(cache).CacheKey, TestJson.Serialize(
             new GameCatalog([HeroInGamePass, PassRpg with { ImageUrl = "https://images.example/rpg.png" }], DateTimeOffset.UtcNow - Fresh)));
     }
 
@@ -283,7 +285,7 @@ public sealed class RecommendationComputationTests : AppTest
         await PrepareAsync(Fresh, Fresh);
         var gogRpg = Game("gog:300", "Rpg Gog", inGamePass: false) with { GogStoreLink = "https://www.gog.com/en/game/rpg_gog" };
         var cache = new CacheStore(Path.Combine(TempFolder, "cache"));
-        await cache.SaveAsync("gog-catalog-fr-v1", TestJson.Serialize(new GameCatalog([gogRpg], DateTimeOffset.UtcNow - Fresh)));
+        await cache.SaveAsync(GogCatalogSource.CacheKey, TestJson.Serialize(new GameCatalog([gogRpg], DateTimeOffset.UtcNow - Fresh)));
         var vm = SampleData.Empty(TempFolder, network: new FakeStores());
 
         await vm.InitializeAsync();
@@ -300,7 +302,7 @@ public sealed class RecommendationComputationTests : AppTest
         await PrepareAsync(Fresh, Fresh);
         var gogRpg = Game("gog:300", "Rpg Gog", inGamePass: false) with { GogStoreLink = "https://www.gog.com/en/game/rpg_gog" };
         var cache = new CacheStore(Path.Combine(TempFolder, "cache"));
-        await cache.SaveAsync("gog-catalog-fr-v1", TestJson.Serialize(new GameCatalog([gogRpg], DateTimeOffset.UtcNow - Fresh)));
+        await cache.SaveAsync(GogCatalogSource.CacheKey, TestJson.Serialize(new GameCatalog([gogRpg], DateTimeOffset.UtcNow - Fresh)));
         var vm = SampleData.Empty(TempFolder, network: new FakeStores());
 
         await vm.InitializeAsync();

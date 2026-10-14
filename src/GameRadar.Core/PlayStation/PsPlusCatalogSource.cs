@@ -34,8 +34,6 @@ public sealed class PsPlusCatalogSource
     /// </summary>
     public GameCatalog? LoadCached() => _cache.Load();
 
-    public static bool IsStale(GameCatalog catalog, DateTimeOffset now) => CompactCatalogCache.IsStale(catalog, now);
-
     /// <summary>Fetches the whole catalog from playstation.com and replaces the cache.</summary>
     public async Task<GameCatalog> RefreshAsync(PsPlusCatalogClient client, CancellationToken ct = default)
     {
@@ -45,16 +43,14 @@ public sealed class PsPlusCatalogSource
 
         // An empty catalog means the answer was not what we expected:
         // better keep the previous cache than overwrite it with nothing.
-        if (games.Count == 0)
-            throw new PlayStationException(CoreStrings.PsPlus_EmptyCatalog);
-        // Same for a plan that had games and has none now (a list renamed or
-        // emptied): saved, every game only that plan has would be out of PS
-        // Plus for a week. Plans nest, so each combination of plans is a plan
-        // of its own here (Extra + Premium, Premium alone).
-        if (LoadCached() is { } previous && Combinations(previous.Games).Except(Combinations(games)).Any())
-            throw new PlayStationException(CoreStrings.PsPlus_MissingPlan);
-
-        return await _cache.SaveAsync(games, ct).ConfigureAwait(false);
+        // Same for a plan that lost its games (as for the Game Pass, see
+        // GamePassCatalogSource). Plans nest, so each combination of plans is
+        // a plan of its own here (Extra + Premium, Premium alone).
+        return await _cache.SaveAsync(games,
+            () => new PlayStationException(CoreStrings.PsPlus_EmptyCatalog),
+            previous => Combinations(previous.Games).Except(Combinations(games)).Any()
+                ? new PlayStationException(CoreStrings.PsPlus_MissingPlan) : null,
+            ct).ConfigureAwait(false);
     }
 
     private static HashSet<PsPlusTier> Combinations(IEnumerable<CatalogGame> games) =>

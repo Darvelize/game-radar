@@ -1,9 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using GameRadar.Core.Cache;
-using GameRadar.Core.GamePass;
-using GameRadar.Core.PlayStation;
-using GameRadar.Core.Steam;
 
 namespace GameRadar.Core.Services;
 
@@ -15,11 +12,11 @@ namespace GameRadar.Core.Services;
 public static class StoreLookup
 {
     /// <summary>
-    /// A store refused (rate limit, PlayStation Store down), or <see cref="Transient"/>. Only a
-    /// cancellation by <paramref name="ct"/> is not a failure: it goes up.
+    /// A store refused (rate limit, PlayStation Store down: any <see cref="ServiceException"/>), or
+    /// <see cref="Transient"/>. Only a cancellation by <paramref name="ct"/> is not a failure: it goes up.
     /// </summary>
     public static bool Failed(Exception ex, CancellationToken ct) =>
-        ex is SteamException or GamePassException or PlayStationException || Transient(ex, ct);
+        ex is ServiceException || Transient(ex, ct);
 
     /// <summary>
     /// The network, not the service: unreachable, an unexpected answer, or
@@ -28,6 +25,34 @@ public static class StoreLookup
     public static bool Transient(Exception ex, CancellationToken ct) =>
         ex is HttpRequestException or JsonException
         || (ex is OperationCanceledException && !ct.IsCancellationRequested);
+
+    /// <summary>
+    /// One request per item, <paramref name="maxAtOnce"/> at a time, answers in the items'
+    /// order. An answer that does not come (the service fails for it, the network) is
+    /// null and the item is kept; the rate limit stops everything. Not one answer: the
+    /// query broke, <paramref name="whenNoneRead"/> is thrown.
+    /// </summary>
+    internal static async Task<TResult?[]> FetchAllAsync<TItem, TResult>(
+        IReadOnlyList<TItem> items, int maxAtOnce, Func<TItem, CancellationToken, Task<TResult?>> fetchOne,
+        Func<Exception> whenNoneRead, CancellationToken ct)
+    {
+        var answers = new TResult?[items.Count];
+        await Parallel.ForEachAsync(Enumerable.Range(0, items.Count),
+            new ParallelOptions { MaxDegreeOfParallelism = maxAtOnce, CancellationToken = ct },
+            async (i, token) =>
+            {
+                try
+                {
+                    answers[i] = await fetchOne(items[i], token).ConfigureAwait(false);
+                }
+                catch (Exception ex) when (ex is ServiceException { IsRateLimited: false } || Transient(ex, token))
+                {
+                }
+            }).ConfigureAwait(false);
+        if (items.Count > 0 && answers.All(a => a is null))
+            throw whenNoneRead();
+        return answers;
+    }
 
     /// <summary>
     /// Runs a lookup that fills <c>answers</c>, stopped quietly when a store

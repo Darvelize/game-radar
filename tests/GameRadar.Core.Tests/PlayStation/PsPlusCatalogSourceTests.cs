@@ -15,7 +15,7 @@ public class PsPlusCatalogSourceTests
 
     /// <summary>A client whose lists answer what the test says.</summary>
     private static PsPlusCatalogClient ClientWith(string games, string classics) =>
-        new(new HttpClient(new FakeHandler(uri => uri.Query.Contains("plus-classics-list") ? classics
+        new(new HttpClient(new JsonHandler(uri => uri.Query.Contains("plus-classics-list") ? classics
             : uri.Query.Contains("plus-games-list") ? games : "[]")));
 
     [Fact]
@@ -82,24 +82,5 @@ public class PsPlusCatalogSourceTests
         var catalog = await source.RefreshAsync(ClientWith(Block((1, "Extra Game")), "[]"));
 
         Assert.Single(catalog.Games);
-    }
-
-    [Fact]
-    public void IsStale_AfterSevenDays()
-    {
-        var fetched = new DateTimeOffset(2026, 10, 1, 12, 0, 0, TimeSpan.Zero);
-        var catalog = new GameCatalog([], fetched);
-
-        Assert.False(PsPlusCatalogSource.IsStale(catalog, fetched.AddDays(6)));
-        Assert.True(PsPlusCatalogSource.IsStale(catalog, fetched.AddDays(8)));
-    }
-
-    private sealed class FakeHandler(Func<Uri, string> answer) : HttpMessageHandler
-    {
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct) =>
-            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent(answer(request.RequestUri!), Encoding.UTF8, "application/json")
-            });
     }
 }

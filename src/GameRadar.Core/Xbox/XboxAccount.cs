@@ -97,6 +97,11 @@ public sealed class XboxAccount
     {
         _session.End();
         _store.Delete(Secret.XboxAccount);
+        ForgetMemory();
+    }
+
+    private void ForgetMemory()
+    {
         _saved = null;
         _credentials = null;
     }
@@ -158,10 +163,8 @@ public sealed class XboxAccount
     private void Remember(int session, string refreshToken, string? gamertag, XboxCredentials? credentials)
     {
         var saved = new SavedXboxAccount(refreshToken, gamertag);
-        if (!_session.TrySave(_store, Secret.XboxAccount, saved, XboxJsonContext.Default.SavedXboxAccount, session))
+        _session.TrySave(_store, Secret.XboxAccount, saved, XboxJsonContext.Default.SavedXboxAccount, session);
+        if (!_session.Keep(session, () => { _saved = saved; _credentials = credentials ?? _credentials; }, ForgetMemory))
             throw new XboxLiveException(CoreStrings.Xbox_SignInToLoad, requiresSignIn: true);
-        _saved = saved;
-        if (credentials is not null)
-            _credentials = credentials;
     }
 }

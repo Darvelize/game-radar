@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using GameRadar.Core.Services;
 
 namespace GameRadar.Core.EA;
 
@@ -20,5 +21,5 @@ namespace GameRadar.Core.EA;
 [JsonSerializable(typeof(GraphQlEnvelope<GamesData>))]
 [JsonSerializable(typeof(GraphQlEnvelope<AchievementsData>))]
 // Compact cache
-[JsonSerializable(typeof(Dictionary<string, EaHistorySource.AchievementEntry>))]
+[JsonSerializable(typeof(Dictionary<string, AchievementEntry>))]
 internal sealed partial class EaJsonContext : JsonSerializerContext;

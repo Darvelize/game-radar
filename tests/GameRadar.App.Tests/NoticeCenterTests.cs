@@ -1,7 +1,9 @@
 using System.Text.Json;
 using GameRadar.App.Resources;
 using GameRadar.App.ViewModels;
+using GameRadar.Core.Epic;
 using GameRadar.Core.Logging;
+using GameRadar.Core.Steam;
 
 namespace GameRadar.App.Tests;
 
@@ -58,9 +60,14 @@ public sealed class NoticeCenterTests : AppTest
     public void The_service_message_goes_from_the_most_specific_to_the_most_generic()
     {
         string Message(Exception ex, string? badAnswer = null) =>
-            NoticeCenter.ServiceErrorMessage<InvalidOperationException>(ex, "unreachable", "slow", badAnswer);
+            NoticeCenter.ServiceErrorMessage(ex, "unreachable", "slow", badAnswer);
 
-        Assert.Equal("own message", Message(new InvalidOperationException("own message")));
+        // Any connector: its own message, already translated.
+        Assert.Equal("own message", Message(new SteamException("own message")));
+        Assert.Equal("own message", Message(new EpicException("own message")));
+        // Not a service error: unexpected.
+        Assert.Contains("own message", Message(new InvalidOperationException("own message")));
+        Assert.NotEqual("own message", Message(new InvalidOperationException("own message")));
         Assert.Equal("unreachable", Message(new HttpRequestException()));
         Assert.Equal("slow", Message(new TaskCanceledException()));
         Assert.Equal("bad answer", Message(new JsonException(), badAnswer: "bad answer"));

@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using GameRadar.Core.Services;
 
 namespace GameRadar.Core.Steam;
 
@@ -30,5 +31,5 @@ namespace GameRadar.Core.Steam;
 [JsonSerializable(typeof(IReadOnlyDictionary<int, string>))]
 [JsonSerializable(typeof(Dictionary<string, TagEntry>))]
 [JsonSerializable(typeof(Dictionary<string, SteamGenreSource.GenreEntry>))]
-[JsonSerializable(typeof(Dictionary<string, SteamHistorySource.AchievementEntry>))]
+[JsonSerializable(typeof(Dictionary<string, AchievementEntry>))]
 internal sealed partial class SteamJsonContext : JsonSerializerContext;

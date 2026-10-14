@@ -63,9 +63,6 @@ public class EpicCatalogSourceTests : IDisposable
                 ? Json("""{"data":{"RatingsPolls":{"getProductResult":{"averageRating":4.5}}}}""")
                 : new HttpResponseMessage(RatingStatus) { Content = new StringContent("") };
         }
-
-        private static HttpResponseMessage Json(string json) =>
-            new(HttpStatusCode.OK) { Content = new StringContent(json, Encoding.UTF8, "application/json") };
     }
 
     private EpicCatalogSource Source() => new(new CacheStore(_folder.Path));

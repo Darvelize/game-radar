@@ -17,6 +17,8 @@ public sealed class ImageFileCache
     // A picture is small: one that takes longer is stalled (the server sent
     // its headers, then nothing). HttpClient.Timeout stops at the headers.
     private static readonly TimeSpan DefaultDownloadTimeout = TimeSpan.FromSeconds(30);
+    // Pictures, and downloads not finished (or cut short by a crash).
+    private static readonly string[] OwnFiles = ["*.img", "*.tmp"];
 
     private readonly HttpClient _http;
     private readonly string _folder;
@@ -42,11 +44,59 @@ public sealed class ImageFileCache
         _guard = guard ?? new EraseGuard();
     }
 
+    /// <summary>A picture not shown for this long is deleted at the next start (<see cref="RemoveUnused"/>).</summary>
+    public static readonly TimeSpan UnusedLifetime = TimeSpan.FromDays(30);
+
     /// <summary>The picture already on disk, or null: no download, no wait.</summary>
     public string? CachedPath(string url)
     {
         string path = PathFor(url);
         return File.Exists(path) ? path : null;
+    }
+
+    /// <summary>
+    /// Marks a picture as shown, for <see cref="RemoveUnused"/>: its write time
+    /// (NTFS often does not update the access time). At most once a day: one
+    /// disk write, not one per click. A disk call: off the UI thread. Never throws.
+    /// </summary>
+    public static void MarkShown(string path)
+    {
+        try
+        {
+            var now = DateTime.UtcNow;
+            if (now - File.GetLastWriteTimeUtc(path) > TimeSpan.FromDays(1))
+                File.SetLastWriteTimeUtc(path, now);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // Not marked: at worst downloaded again after RemoveUnused.
+        }
+    }
+
+    /// <summary>
+    /// Deletes the pictures not shown for <see cref="UnusedLifetime"/> before
+    /// the last one shown (games gone from the catalogs, changed addresses):
+    /// a player back after two months keeps theirs. Called at start, before
+    /// any download. Never throws.
+    /// </summary>
+    public void RemoveUnused()
+    {
+        try
+        {
+            var folder = new DirectoryInfo(_folder);
+            if (!folder.Exists)
+                return;
+            var files = OwnFiles.SelectMany(folder.EnumerateFiles).ToList();
+            if (files.Count == 0)
+                return;
+            var limit = files.Max(f => f.LastWriteTimeUtc) - UnusedLifetime;
+            foreach (var file in files.Where(f => f.LastWriteTimeUtc < limit))
+                LocalFiles.TryDelete(file.FullName);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // Folder unreadable: nothing deleted, the app starts anyway.
+        }
     }
 
     /// <summary>
@@ -108,7 +158,7 @@ public sealed class ImageFileCache
     public void EraseAll()
     {
         _guard.Trip();
-        LocalFiles.DeleteMatching(_folder, "*.img", "*.tmp");
+        LocalFiles.DeleteMatching(_folder, OwnFiles);
         LocalFiles.DeleteFolderIfEmpty(_folder);
     }
 

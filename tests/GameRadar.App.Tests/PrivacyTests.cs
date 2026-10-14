@@ -2,6 +2,7 @@ using System.Text.Json;
 using Avalonia.Headless.XUnit;
 using GameRadar.App.ViewModels;
 using GameRadar.Core.Cache;
+using GameRadar.Core.GamePass;
 using GameRadar.Core.Models;
 using GameRadar.Core.Settings;
 
@@ -35,6 +36,28 @@ public sealed class PrivacyTests : AppTest
 
         Assert.True(quit);
         Assert.False(Directory.Exists(TempFolder));
+    }
+
+    [AvaloniaFact]
+    public async Task A_failed_erase_leaves_the_app_saving_its_choices()
+    {
+        bool quit = false;
+        var vm = SampleData.Empty(TempFolder, quit: () => quit = true);
+        await new CacheStore(Path.Combine(TempFolder, "cache")).SaveAsync("steam-library", "{}");
+        bool showSteam = vm.SourceFilter.ShowSteam;
+
+        // A cache file opened by another program: the erase fails, the app stays open.
+        using (File.Open(Path.Combine(TempFolder, "cache", "steam-library.json"), FileMode.Open, FileAccess.Read, FileShare.None))
+        {
+            vm.Privacy.AskEraseAllDataCommand.Execute(null);
+            vm.Privacy.EraseAllDataCommand.Execute(null);
+        }
+        Assert.False(quit);
+
+        // The shared guard was lifted: a choice made now is saved.
+        vm.SourceFilter.ShowSteam = !showSteam;
+        await vm.WhenSettingsSavedAsync();
+        Assert.Equal(!showSteam, new SettingsStore(TempFolder).Load().ShowSteam);
     }
 
     [AvaloniaFact]
@@ -80,7 +103,7 @@ public sealed class PrivacyTests : AppTest
         // An old Game Pass catalog is downloaded again at startup: the download is held.
         var cache = new CacheStore(Path.Combine(TempFolder, "cache"));
         var hades = new CatalogGame("9NBLGGH4R315", "Hades", null, null, ["Action"], OnPc: true, OnConsole: true, LeavingSoon: false);
-        await cache.SaveAsync("gamepass-catalog-fr-v6",
+        await cache.SaveAsync(new GamePassCatalogSource(cache).CacheKey,
             TestJson.Serialize(new GameCatalog([hades], DateTimeOffset.UtcNow.AddDays(-10))));
         var network = new FakeStores { HoldGamePass = true };
         bool quit = false;

@@ -87,6 +87,21 @@ jobs:
         with:
           subject-path: publish/GameRadar.exe
 
+      # The notes link to the VirusTotal scan by SHA-256: the exe must be sent there.
+      # Never blocks a release: without the secret or if VirusTotal fails, a warning
+      # says to upload it by hand.
+      # ponytail: direct upload is limited to 32 MB (exe ~22 MB); past that, ask /files/upload_url first.
+      - name: Send the exe to VirusTotal
+        if: github.event_name == 'push' || inputs.dry-run == false
+        shell: pwsh
+        env:
+          VT_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
+        run: |
+          if (-not $env:VT_API_KEY) { Write-Host '::warning::No VIRUSTOTAL_API_KEY secret: upload GameRadar.exe to virustotal.com by hand.'; exit 0 }
+          curl.exe -sS --fail -X POST https://www.virustotal.com/api/v3/files -H "x-apikey: $env:VT_API_KEY" -F "file=@publish/GameRadar.exe"
+          if ($LASTEXITCODE -ne 0) { Write-Host '::warning::VirusTotal upload failed: upload GameRadar.exe to virustotal.com by hand.' }
+          exit 0
+
       - name: Create the release
         if: github.event_name == 'push' || inputs.dry-run == false
         shell: pwsh

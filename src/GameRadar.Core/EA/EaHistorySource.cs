@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.Text.Json;
 using GameRadar.Core.Cache;
@@ -46,37 +47,48 @@ public sealed class EaHistorySource
     }
 
     /// <summary>
-    /// Finds the played games among every EA game (5 slugs per request, ~150
-    /// requests), names them, reads the achievements of the games played since
+    /// Finds the played games among every EA game (~10 requests of
+    /// <see cref="EaClient.RecentGamesBatchSize"/> slugs, <see cref="EaClient.RequestsAtOnce"/>
+    /// at a time), names them, reads the achievements of the games played since
     /// the last refresh, and replaces the cache. Throws <see cref="EaException"/>
     /// (token expired...): the old cache is kept.
     /// </summary>
-    /// <param name="progress">Receives (done, total) while the played games are looked for.</param>
+    /// <param name="progress">Receives (done, total) while the played games are looked for, in order.</param>
     public async Task<GameHistory> RefreshAsync(EaClient client, IProgress<(int Done, int Total)>? progress = null, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(client);
 
         var slugs = await client.FetchGameSlugsAsync(ct).ConfigureAwait(false);
         var batches = slugs.Chunk(EaClient.RecentGamesBatchSize).ToList();
-        var recentAnswers = new List<string>();
-        var played = new List<EaPlayedGame>();
-        for (int i = 0; i < batches.Count; i++)
-        {
-            string json = await client.FetchRecentGamesJsonAsync(batches[i], ct).ConfigureAwait(false);
-            // Parsed BEFORE saving: an unexpected answer throws here and the
-            // previous, valid cache is kept. Only the answers with games are kept.
-            var found = EaClient.ParseRecentGames(json);
-            if (found.Count > 0)
+        // A few at a time (EaClient.RequestsAtOnce), each answer at its batch's
+        // place: the cache is the same as one by one. Each answer is parsed BEFORE
+        // saving, as it arrives: an unexpected one, or any error, stops the sync and
+        // the previous, valid cache is kept (an incomplete history is never saved).
+        var answers = new (string Json, IReadOnlyList<EaPlayedGame> Found)[batches.Count];
+        int done = 0;
+        var progressLock = new object();
+        await Parallel.ForEachAsync(Enumerable.Range(0, batches.Count),
+            new ParallelOptions { MaxDegreeOfParallelism = EaClient.RequestsAtOnce, CancellationToken = ct },
+            async (i, token) =>
             {
-                recentAnswers.Add(json);
-                played.AddRange(found);
-            }
-            progress?.Report((i + 1, batches.Count));
-        }
+                string json = await client.FetchRecentGamesJsonAsync(batches[i], token).ConfigureAwait(false);
+                var found = EaClient.ParseRecentGames(json);
+                // A full page may have been cut (EA gives no total): never save an incomplete history.
+                if (found.Count >= EaClient.RecentGamesBatchSize)
+                    throw new EaException(CoreStrings.Ea_Format);
+                answers[i] = (json, found);
+                // Counted and reported together: the progress never goes back.
+                lock (progressLock)
+                    progress?.Report((++done, batches.Count));
+            }).ConfigureAwait(false);
+
+        // Only the answers with games are kept.
+        var recentAnswers = answers.Where(a => a.Found.Count > 0).Select(a => a.Json).ToList();
+        var played = answers.SelectMany(a => a.Found).ToList();
 
         var gamesAnswers = new List<string>();
         var products = new List<EaGameProduct>();
-        foreach (var batch in played.Select(g => g.Slug).Distinct().Chunk(EaClient.RecentGamesBatchSize))
+        foreach (var batch in played.Select(g => g.Slug).Distinct().Chunk(EaClient.GamesBatchSize))
         {
             string json = await client.FetchGamesJsonAsync(batch, ct).ConfigureAwait(false);
             products.AddRange(EaClient.ParseGames(json));
@@ -87,13 +99,13 @@ public sealed class EaHistorySource
         await FetchAchievementsAsync(client, played, products, known, ct).ConfigureAwait(false);
 
         await _cache.SaveAsync(HistoryKey,
-            $$"""{"recentGames":[{{string.Join(",", recentAnswers)}}],"games":[{{string.Join(",", gamesAnswers)}}]}""", ct).ConfigureAwait(false);
+            $$"""{"recentGames":{{CacheStore.JoinRaw(recentAnswers)}},"games":{{CacheStore.JoinRaw(gamesAnswers)}}}""", ct).ConfigureAwait(false);
         return new GameHistory(ToPlayedGames(played, products, known), DateTimeOffset.UtcNow);
     }
 
     /// <summary>
     /// The achievements of the games played since their entry was saved, one
-    /// request each. One game failing (network, odd answer) is asked again next
+    /// request each, several at a time. One game failing (network, odd answer) is asked again next
     /// time; an expired token or the rate limit stop everything. What was read
     /// is saved whatever happens.
     /// </summary>
@@ -109,21 +121,26 @@ public sealed class EaHistorySource
         if (toFetch.Count == 0)
             return;
 
-        var fetched = new Dictionary<string, AchievementEntry>();
+        // Several at a time, as many as recentGames (EaClient.RequestsAtOnce; not measured for achievements).
+        var fetched = new ConcurrentDictionary<string, AchievementEntry>();
         try
         {
             string playerId = await client.FetchPlayerIdAsync(ct).ConfigureAwait(false);
-            foreach (var game in toFetch)
-            {
-                try
+            await Parallel.ForEachAsync(toFetch,
+                new ParallelOptions { MaxDegreeOfParallelism = EaClient.RequestsAtOnce, CancellationToken = ct },
+                async (game, token) =>
                 {
-                    var achievements = await client.FetchAchievementsAsync(offers[game.Slug], playerId, ct).ConfigureAwait(false);
-                    fetched[game.Slug] = new AchievementEntry(achievements?.Unlocked ?? 0, achievements?.Total ?? 0, game.LastPlayed);
-                }
-                catch (Exception ex) when (StoreLookup.Transient(ex, ct) || ex is EaException { IsTokenRefused: false, IsRateLimited: false })
-                {
-                }
-            }
+                    try
+                    {
+                        var achievements = await client.FetchAchievementsAsync(offers[game.Slug], playerId, token).ConfigureAwait(false);
+                        fetched[game.Slug] = new AchievementEntry(achievements?.Unlocked ?? 0, achievements?.Total ?? 0, game.LastPlayed);
+                    }
+                    // Skipped, asked again next time. Against ct, not token: the requests a refused
+                    // one stops are skipped too, so only that refusal goes up.
+                    catch (Exception ex) when (StoreLookup.Transient(ex, ct) || ex is EaException { IsTokenRefused: false, IsRateLimited: false })
+                    {
+                    }
+                }).ConfigureAwait(false);
         }
         finally
         {
@@ -155,10 +172,7 @@ public sealed class EaHistorySource
             .Select(game =>
             {
                 var entry = achievements.GetValueOrDefault(game.Slug);
-                bool hasAchievements = entry is { Total: > 0 };
-                int unlocked = hasAchievements ? entry!.Unlocked : 0;
-                int? total = hasAchievements ? entry!.Total : null;
-                double percentage = hasAchievements ? 100.0 * unlocked / total!.Value : 0;
+                var progress = AchievementProgress.From(entry?.Unlocked ?? 0, entry?.Total ?? 0);
 
                 return new PlayedGame(
                     Platform: EaClient.PlatformName,
@@ -166,12 +180,12 @@ public sealed class EaHistorySource
                     // No product found: the slug, readable ("battlefield-4" → "Battlefield 4").
                     Name: names.GetValueOrDefault(game.Slug)
                         ?? CultureInfo.InvariantCulture.TextInfo.ToTitleCase(game.Slug.Replace('-', ' ')),
-                    HasAchievements: hasAchievements,
-                    UnlockedAchievements: unlocked,
-                    TotalAchievements: total,
-                    ProgressPercentage: percentage,
+                    HasAchievements: progress.HasAchievements,
+                    UnlockedAchievements: progress.Unlocked,
+                    TotalAchievements: progress.Total,
+                    ProgressPercentage: progress.Percentage,
                     LastPlayed: game.LastPlayed,
-                    Status: StatusClassifier.FromAchievements(unlocked, total, percentage),
+                    Status: progress.Status,
                     PlaytimeMinutes: game.PlaytimeMinutes);
             })
             .OrderByDescending(g => g.LastPlayed)
@@ -181,6 +195,4 @@ public sealed class EaHistorySource
     private Dictionary<string, AchievementEntry> LoadAchievements() =>
         _cache.LoadDictionary(AchievementsKey, EaJsonContext.Default.DictionaryStringAchievementEntry);
 
-    /// <summary>Achievements of one game at a given "last played" date. Total 0 = the game has none.</summary>
-    internal sealed record AchievementEntry(int Unlocked, int Total, DateTimeOffset? LastPlayed);
 }

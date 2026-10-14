@@ -43,8 +43,6 @@ public sealed class GamePassCatalogSource
                 .Where(plan => (plan.Pc ? g.PcTiers : g.ConsoleTiers).HasFlag(plan.Tier)))
             .ToHashSet();
 
-    public static bool IsStale(GameCatalog catalog, DateTimeOffset now) => CompactCatalogCache.IsStale(catalog, now);
-
     /// <summary>Fetches the whole catalog from Microsoft and replaces the cache.</summary>
     public async Task<GameCatalog> RefreshAsync(GamePassClient client, CancellationToken ct = default)
     {
@@ -54,14 +52,13 @@ public sealed class GamePassCatalogSource
 
         // An empty catalog means the answer was not what we expected:
         // better keep the previous cache than overwrite it with nothing.
-        if (games.Count == 0)
-            throw new GamePassException(CoreStrings.GamePass_EmptyCatalog);
         // Same for a plan that had games and has none now: its list answered
         // only its header (an id or a subscription changed). Saved, every
         // game of that plan would be out of the Game Pass for a week.
-        if (LoadCached() is { } previous && PlansWithGames(previous.Games).Except(PlansWithGames(games)).Any())
-            throw new GamePassException(CoreStrings.GamePass_MissingPlan);
-
-        return await _cache.SaveAsync(games, ct).ConfigureAwait(false);
+        return await _cache.SaveAsync(games,
+            () => new GamePassException(CoreStrings.GamePass_EmptyCatalog),
+            previous => PlansWithGames(previous.Games).Except(PlansWithGames(games)).Any()
+                ? new GamePassException(CoreStrings.GamePass_MissingPlan) : null,
+            ct).ConfigureAwait(false);
     }
 }

@@ -86,7 +86,7 @@ public sealed class EpicHistorySource
         await FetchDetailsAsync(client, Played(library, playtime), titles, achievements, ct).ConfigureAwait(false);
 
         await _cache.SaveAsync(HistoryKey,
-            $$"""{"library":[{{string.Join(",", pages)}}],"playtime":{{playtimeJson}}}""", ct).ConfigureAwait(false);
+            $$"""{"library":{{CacheStore.JoinRaw(pages)}},"playtime":{{playtimeJson}}}""", ct).ConfigureAwait(false);
         return new GameHistory(ToPlayedGames(library, playtime, titles, achievements), DateTimeOffset.UtcNow);
     }
 
@@ -99,10 +99,10 @@ public sealed class EpicHistorySource
     /// </summary>
     private async Task FetchDetailsAsync(
         EpicClient client, IReadOnlyList<(EpicLibraryEntry Entry, int Minutes)> played,
-        Dictionary<string, EpicTitle> titles, Dictionary<string, AchievementEntry> achievements, CancellationToken ct)
+        Dictionary<string, EpicTitle> titles, Dictionary<string, EpicAchievementEntry> achievements, CancellationToken ct)
     {
         var newTitles = new Dictionary<string, EpicTitle>();
-        var newAchievements = new Dictionary<string, AchievementEntry>();
+        var newAchievements = new Dictionary<string, EpicAchievementEntry>();
         try
         {
             foreach (var (entry, minutes) in played)
@@ -121,7 +121,7 @@ public sealed class EpicHistorySource
 
                     int? total = await client.FetchAchievementsTotalAsync(entry.Namespace, ct).ConfigureAwait(false);
                     int unlocked = total is > 0 ? await client.FetchAchievementsUnlockedAsync(entry.Namespace, ct).ConfigureAwait(false) : 0;
-                    achievements[entry.AppName] = newAchievements[entry.AppName] = new AchievementEntry(unlocked, total ?? 0, minutes);
+                    achievements[entry.AppName] = newAchievements[entry.AppName] = new EpicAchievementEntry(unlocked, total ?? 0, minutes);
                 }
                 catch (EpicException ex) when (ex is { IsTokenRefused: false, IsRateLimited: false })
                 {
@@ -138,7 +138,7 @@ public sealed class EpicHistorySource
         finally
         {
             await _cache.MergeDictionaryAsync(TitlesKey, newTitles, EpicJsonContext.Default.DictionaryStringEpicTitle).ConfigureAwait(false);
-            await _cache.MergeDictionaryAsync(AchievementsKey, newAchievements, EpicJsonContext.Default.DictionaryStringAchievementEntry).ConfigureAwait(false);
+            await _cache.MergeDictionaryAsync(AchievementsKey, newAchievements, EpicJsonContext.Default.DictionaryStringEpicAchievementEntry).ConfigureAwait(false);
         }
     }
 
@@ -171,26 +171,24 @@ public sealed class EpicHistorySource
         IEnumerable<EpicLibraryEntry> library,
         IEnumerable<EpicPlaytime> playtime,
         IReadOnlyDictionary<string, EpicTitle> titles,
-        IReadOnlyDictionary<string, AchievementEntry> achievements) =>
+        IReadOnlyDictionary<string, EpicAchievementEntry> achievements) =>
         Played(library, playtime)
             .Where(p => titles.GetValueOrDefault(p.Entry.CatalogItemId) is { IsGame: true })
             .Select(p =>
             {
-                // Total 0: the game has none.
-                var (unlocked, total) = achievements.GetValueOrDefault(p.Entry.AppName) is { Total: > 0 } entry
-                    ? (entry.Unlocked, (int?)entry.Total) : (0, null);
-                double percentage = total is { } count ? 100.0 * unlocked / count : 0;
+                var entry = achievements.GetValueOrDefault(p.Entry.AppName);
+                var progress = AchievementProgress.From(entry?.Unlocked ?? 0, entry?.Total ?? 0);
 
                 return new PlayedGame(
                     Platform: EpicClient.PlatformName,
                     PlatformId: p.Entry.AppName,
                     Name: titles[p.Entry.CatalogItemId].Title,
-                    HasAchievements: total is not null,
-                    UnlockedAchievements: unlocked,
-                    TotalAchievements: total,
-                    ProgressPercentage: percentage,
+                    HasAchievements: progress.HasAchievements,
+                    UnlockedAchievements: progress.Unlocked,
+                    TotalAchievements: progress.Total,
+                    ProgressPercentage: progress.Percentage,
                     LastPlayed: null,
-                    Status: StatusClassifier.FromAchievements(unlocked, total, percentage),
+                    Status: progress.Status,
                     PlaytimeMinutes: p.Minutes);
             })
             .ToList();
@@ -198,9 +196,9 @@ public sealed class EpicHistorySource
     private Dictionary<string, EpicTitle> LoadTitles() =>
         _cache.LoadDictionary(TitlesKey, EpicJsonContext.Default.DictionaryStringEpicTitle);
 
-    private Dictionary<string, AchievementEntry> LoadAchievements() =>
-        _cache.LoadDictionary(AchievementsKey, EpicJsonContext.Default.DictionaryStringAchievementEntry);
+    private Dictionary<string, EpicAchievementEntry> LoadAchievements() =>
+        _cache.LoadDictionary(AchievementsKey, EpicJsonContext.Default.DictionaryStringEpicAchievementEntry);
 
     /// <summary>Achievements of one game at a given play time. Total 0 = the game has none.</summary>
-    internal sealed record AchievementEntry(int Unlocked, int Total, int Minutes);
+    internal sealed record EpicAchievementEntry(int Unlocked, int Total, int Minutes);
 }

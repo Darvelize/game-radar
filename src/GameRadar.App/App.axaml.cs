@@ -74,6 +74,8 @@ public partial class App : Application
             // useless: removed now, before any source reads its own.
             CacheCleanup.RemoveObsolete(cache);
             var images = new ImageFileCache(Http, data.Images, guard: data.Guard);
+            // Pictures of games no longer shown: the folder would only grow.
+            images.RemoveUnused();
             var viewModel = new MainWindowViewModel(
                 Http,
                 settings,

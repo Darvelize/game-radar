@@ -25,23 +25,20 @@ public sealed class EpicTests : AppTest
             string path = uri.AbsolutePath;
             if (path.EndsWith("/oauth/token"))
                 return Task.FromResult(tokenStatus == HttpStatusCode.OK
-                    ? Json($$"""{"access_token":"eg1~access","expires_in":129600,"refresh_token":"{{RefreshToken}}","account_id":"acc"}""")
+                    ? FakeStores.Json($$"""{"access_token":"eg1~access","expires_in":129600,"refresh_token":"{{RefreshToken}}","account_id":"acc"}""")
                     : new HttpResponseMessage(tokenStatus) { Content = new StringContent("""{"errorCode":"errors.com.epicgames.account.oauth.authorization_code_not_found"}""") });
             if (path.EndsWith("/library/api/public/items"))
-                return Task.FromResult(Json("""{"records":[{"appName":"Bianca","namespace":"ns-aw2","catalogItemId":"i-aw2"},{"appName":"Dlc","namespace":"ns-aw2","catalogItemId":"i-dlc"}],"responseMetadata":{}}"""));
+                return Task.FromResult(FakeStores.Json("""{"records":[{"appName":"Bianca","namespace":"ns-aw2","catalogItemId":"i-aw2"},{"appName":"Dlc","namespace":"ns-aw2","catalogItemId":"i-dlc"}],"responseMetadata":{}}"""));
             if (path.Contains("/playtime/"))
-                return Task.FromResult(Json("""[{"artifactId":"Bianca","totalTime":90000},{"artifactId":"Dlc","totalTime":90000}]"""));
+                return Task.FromResult(FakeStores.Json("""[{"artifactId":"Bianca","totalTime":90000},{"artifactId":"Dlc","totalTime":90000}]"""));
             if (path.Contains("/bulk/items"))
-                return Task.FromResult(Json(uri.Query.Contains("i-dlc")
+                return Task.FromResult(FakeStores.Json(uri.Query.Contains("i-dlc")
                     ? """{"i-dlc":{"title":"Alan Wake 2: Night Springs","categories":[{"path":"addons"}]}}"""
                     : """{"i-aw2":{"title":"Alan Wake 2","categories":[{"path":"games"}]}}"""));
             if (uri.Host == "launcher.store.epicgames.com")
-                return Task.FromResult(Json("""{"data":{"Achievement":{"productAchievementsRecordBySandbox":{"totalAchievements":null}}}}"""));
+                return Task.FromResult(FakeStores.Json("""{"data":{"Achievement":{"productAchievementsRecordBySandbox":{"totalAchievements":null}}}}"""));
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound));
         }
-
-        private static HttpResponseMessage Json(string json) =>
-            new(HttpStatusCode.OK) { Content = new StringContent(json, Encoding.UTF8, "application/json") };
     }
 
     [AvaloniaFact]

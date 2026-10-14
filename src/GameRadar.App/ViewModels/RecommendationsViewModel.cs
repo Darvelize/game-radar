@@ -267,12 +267,12 @@ public sealed partial class RecommendationsViewModel : ObservableObject
             // First with the tags already known: shown right away.
             Show(await Compute(index));
 
-            // Then the missing tags (a few minutes the first time), and again.
-            if (_tagSource.CountMissing(index, playedGames, pool, DateTimeOffset.UtcNow) > 0)
+            // Then the missing tags (a few minutes the first time), and again. Steam asked
+            // nothing (none missing, or paused after a rate limit): the same tags, no second computation.
+            var tagProgress = new Progress<(int Done, int Total)>(p =>
+                Status = Localization.Format(Strings.Reco_Tags, p.Done, p.Total));
+            if (await _tagSource.FetchMissingAsync(playedGames, pool, tagClient, tagProgress, cts.Token))
             {
-                var tagProgress = new Progress<(int Done, int Total)>(p =>
-                    Status = Localization.Format(Strings.Reco_Tags, p.Done, p.Total));
-                await _tagSource.FetchMissingAsync(playedGames, pool, tagClient, tagProgress, cts.Token);
                 var found = _tagSource.LoadIndex(pool, _saver.Settings.AddedTags);
                 ShareTags(found);
                 Show(await Compute(found));
@@ -287,7 +287,7 @@ public sealed partial class RecommendationsViewModel : ObservableObject
         // Not our cancellation (filtered above): a timeout is "too slow".
         catch (Exception ex)
         {
-            ReportRecommendationError(NoticeCenter.ServiceErrorMessage<GamePassException>(
+            ReportRecommendationError(NoticeCenter.ServiceErrorMessage(
                 ex, Strings.Error_GenresUnreachable, Strings.Error_CatalogSlow), ex);
         }
 
@@ -462,6 +462,7 @@ public sealed partial class RecommendationsViewModel : ObservableObject
                 // keeps only the pixels the card needs in memory.
                 var bitmap = await Task.Run(() =>
                 {
+                    ImageFileCache.MarkShown(path);
                     using var stream = File.OpenRead(path);
                     return Bitmap.DecodeToWidth(stream, RecommendationRow.ImageDecodeWidth);
                 });

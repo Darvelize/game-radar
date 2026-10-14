@@ -12,15 +12,23 @@ namespace GameRadar.Core.Steam;
 /// platform, and the Game Pass candidates (the Steam store candidates carry
 /// theirs already). By app id for Steam games, by title for the others. Cached for good (tags hardly move); games not found on
 /// Steam are retried after 30 days. The first run costs ~1 request per Game
-/// Pass game (a few minutes), later runs only the new games.
+/// Pass game (~2 min, two at a time), later runs only the new games.
 /// </summary>
 public sealed class SteamTagSource
 {
     internal static readonly TimeSpan RetryNotFoundAfter = TimeSpan.FromDays(30);
     private static readonly TimeSpan TagNamesMaxAge = TimeSpan.FromDays(30);
 
-    // Between two title searches: gentle with the Steam store.
-    private static readonly TimeSpan DefaultSearchDelay = TimeSpan.FromMilliseconds(250);
+    /// <summary>
+    /// Title searches at once. Measured (14/10/2026, SearchSuggestions, 240 requests, no
+    /// rate limit): one at a time with a 250 ms pause 547 ms per title (812 Game Pass
+    /// titles: ~7 min), without the pause 258 ms, 2 at a time 145 ms (~2 min), 4 at a time
+    /// 132 ms, 8 at a time 146 ms. A rate limit stops the lookup; the rest comes next time.
+    /// </summary>
+    internal const int TitleSearchesAtOnce = 2;
+
+    /// <summary>After a rate limit, Steam is asked nothing for this long (the cached tags still recommend).</summary>
+    internal static readonly TimeSpan RateLimitPause = TimeSpan.FromMinutes(5);
 
     // Saved along the way: closing the app during the first run keeps what was found.
     private const int SaveEvery = 50;
@@ -33,8 +41,6 @@ public sealed class SteamTagSource
 
 
     private readonly CacheStore _cache;
-    private readonly TimeSpan _searchDelay;
-
     // Loaded once, shared by every computation; "lock (_entries)" around each
     // access, since a lookup may run while another computation reads.
     private Dictionary<string, TagEntry>? _entries;
@@ -43,17 +49,18 @@ public sealed class SteamTagSource
     // one to stop, then goes on where it stopped.
     private readonly SemaphoreSlim _fetchLock = new(1, 1);
 
-    public SteamTagSource(CacheStore cache)
-        : this(cache, DefaultSearchDelay)
-    {
-    }
+    private readonly TimeProvider _time;
+    // Set by a rate limit: no request to Steam before then (UTC ticks, read from any thread).
+    private long _pausedUntilTicks;
 
-    /// <summary>Tests pass no delay: they talk to a fake server.</summary>
-    internal SteamTagSource(CacheStore cache, TimeSpan searchDelay)
+    private bool IsPaused => _time.GetUtcNow().UtcTicks < Interlocked.Read(ref _pausedUntilTicks);
+
+    /// <param name="time">The clock (tests move their own). Null = the system's.</param>
+    public SteamTagSource(CacheStore cache, TimeProvider? time = null)
     {
         ArgumentNullException.ThrowIfNull(cache);
         _cache = cache;
-        _searchDelay = searchDelay;
+        _time = time ?? TimeProvider.System;
     }
 
     /// <summary>What is known now (cache + Steam store candidates), without any request.</summary>
@@ -82,9 +89,11 @@ public sealed class SteamTagSource
     /// Looks up the missing tags on Steam. Never throws when the store fails
     /// (rate limit, network: <see cref="StoreLookup"/>): what was not reached
     /// is looked up next time. Only a cancellation by <paramref name="ct"/> throws.
+    /// Returns false when Steam was asked nothing (nothing missing, or the pause after
+    /// a rate limit): the tags known are the same.
     /// </summary>
     /// <param name="progress">Receives (done, total) during the lookups.</param>
-    public async Task FetchMissingAsync(
+    public async Task<bool> FetchMissingAsync(
         IEnumerable<PlayedGame> played,
         IEnumerable<CatalogGame> candidates,
         SteamTagClient client,
@@ -97,12 +106,14 @@ public sealed class SteamTagSource
         await _fetchLock.WaitAsync(ct).ConfigureAwait(false);
         try
         {
-            var now = DateTimeOffset.UtcNow;
+            if (IsPaused)
+                return false;
+            var now = _time.GetUtcNow();
             // Computed inside the lock: a cancelled run may have found some meanwhile.
             var (appIds, titles, titleIfNoTags) = Missing(LoadIndex(candidateList), playedList, candidateList, now);
             int total = appIds.Count + titles.Count;
             if (total == 0)
-                return;
+                return false;
 
             int done = 0;
             try
@@ -126,31 +137,41 @@ public sealed class SteamTagSource
                     done += batch.Length;
                 }
 
-                // The others by title: one search each, slowly.
-                bool first = true;
-                foreach (var (key, title) in titles)
-                {
-                    progress?.Report((done, total));
-                    if (!first)
-                        await Task.Delay(_searchDelay, ct).ConfigureAwait(false);
-                    first = false;
-                    var found = await client.SearchByTitleAsync(title, ct).ConfigureAwait(false);
-                    // Remembered even when not found, to be retried in 30 days only.
-                    Set(key, new TagEntry(found?.Tags ?? new Dictionary<int, double>(), now));
-                    if (++done % SaveEvery == 0)
-                        await SaveAsync().ConfigureAwait(false);
-                }
+                // The others by title: one search each, TitleSearchesAtOnce at a time.
+                // Counted, reported and saved along under one lock: the progress never goes back.
+                var progressLock = new object();
+                progress?.Report((done, total));
+                await Parallel.ForEachAsync(titles,
+                    new ParallelOptions { MaxDegreeOfParallelism = TitleSearchesAtOnce, CancellationToken = ct },
+                    async (entry, token) =>
+                    {
+                        var found = await client.SearchByTitleAsync(entry.Title, token).ConfigureAwait(false);
+                        // Remembered even when not found, to be retried in 30 days only.
+                        Set(entry.Key, new TagEntry(found?.Tags ?? new Dictionary<int, double>(), now));
+                        bool save;
+                        lock (progressLock)
+                        {
+                            progress?.Report((++done, total));
+                            save = done % SaveEvery == 0;
+                        }
+                        if (save)
+                            await SaveAsync().ConfigureAwait(false);
+                    }).ConfigureAwait(false);
                 progress?.Report((total, total));
             }
             catch (Exception ex) when (StoreLookup.Failed(ex, ct))
             {
-                // Rate limit or store down: the rest waits for the next time.
+                // Rate limit or store down: the rest waits for the next time; after a rate
+                // limit, not before a pause (asked again at once, it would only refuse again).
+                if (ex is ServiceException { IsRateLimited: true })
+                    Interlocked.Exchange(ref _pausedUntilTicks, (_time.GetUtcNow() + RateLimitPause).UtcTicks);
             }
             finally
             {
                 // Saved even after an error or a cancellation: nothing found is lost.
                 await SaveAsync().ConfigureAwait(false);
             }
+            return true;
         }
         finally
         {
@@ -182,6 +203,9 @@ public sealed class SteamTagSource
         }
         if (names is not null && DateTimeOffset.UtcNow - cached!.SavedAt < TagNamesMaxAge)
             return names;
+        // Paused after a rate limit: the old names (or none), Steam is asked nothing.
+        if (IsPaused)
+            return names ?? new Dictionary<int, string>();
 
         try
         {

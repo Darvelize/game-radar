@@ -33,9 +33,6 @@ public sealed class EpicCatalogSource
         var games = await client.FetchCatalogAsync(ct).ConfigureAwait(false);
 
         // Nothing left after parsing: the format changed. Keep the old cache.
-        if (games.Count == 0)
-            throw new EpicException(CoreStrings.Epic_EmptyCatalog);
-
-        return await _cache.SaveAsync(games, ct).ConfigureAwait(false);
+        return await _cache.SaveAsync(games, () => new EpicException(CoreStrings.Epic_EmptyCatalog), ct: ct).ConfigureAwait(false);
     }
 }

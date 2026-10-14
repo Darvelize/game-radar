@@ -29,7 +29,7 @@ public class LocalDataEraserTests : IDisposable
         secrets = new SecretStore(Local);
         var images = new ImageFileCache(_http, Path.Combine(Local, "images"));
         var log = new ErrorLog(Path.Combine(Local, "logs"), "1.0.0");
-        return new LocalDataEraser(settings, cache, secrets, images, log);
+        return new LocalDataEraser(settings, cache, secrets, images, log, new DataFolder(Local));
     }
 
     private async Task FillAsync(SettingsStore settings, CacheStore cache, SecretStore secrets, string? root = null)

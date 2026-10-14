@@ -25,8 +25,6 @@ public sealed class GogCatalogSource
     /// <summary>The last saved catalog, or null. No network call; never throws.</summary>
     public GameCatalog? LoadCached() => _cache.Load();
 
-    public static bool IsStale(GameCatalog catalog, DateTimeOffset now) => CompactCatalogCache.IsStale(catalog, now);
-
     /// <summary>Fetches the best sellers from GOG and replaces the cache.</summary>
     public async Task<GameCatalog> RefreshAsync(GogCatalogClient client, CancellationToken ct = default)
     {
@@ -35,9 +33,6 @@ public sealed class GogCatalogSource
         var games = await client.FetchCatalogAsync(ct).ConfigureAwait(false);
 
         // Nothing left after parsing: the format changed. Keep the old cache.
-        if (games.Count == 0)
-            throw new GogException(CoreStrings.Gog_EmptyCatalog);
-
-        return await _cache.SaveAsync(games, ct).ConfigureAwait(false);
+        return await _cache.SaveAsync(games, () => new GogException(CoreStrings.Gog_EmptyCatalog), ct: ct).ConfigureAwait(false);
     }
 }

@@ -40,6 +40,7 @@ internal sealed class FakeStores : HttpMessageHandler
         return new HttpResponseMessage(HttpStatusCode.NotFound);
     }
 
-    private static HttpResponseMessage Json(string body) =>
+    /// <summary>A fake server's JSON answer (every fake network of the App tests).</summary>
+    internal static HttpResponseMessage Json(string body) =>
         new(HttpStatusCode.OK) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
 }

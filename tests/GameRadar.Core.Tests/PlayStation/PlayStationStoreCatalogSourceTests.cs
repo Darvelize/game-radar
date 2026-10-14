@@ -63,9 +63,6 @@ public class PlayStationStoreCatalogSourceTests : IDisposable
             string star = rating is null ? "null" : $$"""{ "averageRating": {{rating.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}} }""";
             return Json($$"""{ "data": { "productRetrieve": { "localizedGenres": [ { "value": "Action" } ], "starRating": {{star}} } } }""");
         }
-
-        private static HttpResponseMessage Json(string json) =>
-            new(HttpStatusCode.OK) { Content = new StringContent(json, Encoding.UTF8, "application/json") };
     }
 
     private PlayStationStoreCatalogSource Source() => new(new CacheStore(_folder.Path));

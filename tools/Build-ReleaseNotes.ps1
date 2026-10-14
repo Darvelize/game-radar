@@ -97,6 +97,8 @@ By using GameRadar, you accept its [terms of use](https://github.com/Darvelize/g
 ```
 PowerShell : `Get-FileHash .\GameRadar.exe`
 
+[VirusTotal](https://www.virustotal.com/gui/file/{SHA})
+
 Construit par GitHub à partir du code de ce dépôt (licence MIT), avec une attestation de provenance / Built by GitHub from the code of this repository (MIT license), with a provenance attestation:
 ```
 gh attestation verify GameRadar.exe -R Darvelize/game-radar

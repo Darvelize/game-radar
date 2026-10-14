@@ -1,3 +1,5 @@
+using GameRadar.Core.Services;
+
 namespace GameRadar.Core.Steam;
 
 /// <summary>
@@ -5,7 +7,7 @@ namespace GameRadar.Core.Steam;
 /// (key refused, private profile...). A dedicated type lets the UI catch it
 /// separately from unexpected bugs.
 /// </summary>
-public sealed class SteamException : Exception
+public sealed class SteamException : ServiceException
 {
     public SteamException(string message, Exception? inner = null)
         : base(message, inner)

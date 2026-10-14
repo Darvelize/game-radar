@@ -24,12 +24,25 @@ public sealed class CompactCatalogCache(CacheStore cache, string key)
         now - catalog.FetchedAt > MaxAge;
 
     /// <summary>
-    /// Replaces the cache with these games, fetched now. The caller checks them
-    /// first (empty, a plan missing): never save over a valid cache what an
-    /// unexpected answer gave.
+    /// Replaces the cache with these games, fetched now, unless the answer was
+    /// not what we expected: never save over a valid cache what it gave.
     /// </summary>
-    public async Task<GameCatalog> SaveAsync(IReadOnlyList<CatalogGame> games, CancellationToken ct = default)
+    /// <param name="whenEmpty">The connector's error for an empty catalog (the format changed).</param>
+    /// <param name="refuseAgainst">
+    /// Checked after the emptiness, against the saved catalog (if any): the error
+    /// for an answer that lost part of it (a plan with no game left), or null.
+    /// </param>
+    public async Task<GameCatalog> SaveAsync(
+        IReadOnlyList<CatalogGame> games,
+        Func<Exception> whenEmpty,
+        Func<GameCatalog, Exception?>? refuseAgainst = null,
+        CancellationToken ct = default)
     {
+        if (games.Count == 0)
+            throw whenEmpty();
+        if (refuseAgainst is not null && Load() is { } previous && refuseAgainst(previous) is { } refused)
+            throw refused;
+
         var catalog = new GameCatalog(games, DateTimeOffset.UtcNow);
         await cache.SaveAsync(Key, JsonSerializer.Serialize(catalog, CoreJsonContext.Default.GameCatalog), ct).ConfigureAwait(false);
         return catalog;

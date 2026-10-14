@@ -141,7 +141,7 @@ public sealed partial class AccountsViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ReportSyncError(XboxSync, NoticeCenter.ServiceErrorMessage<XboxLiveException>(
+            ReportSyncError(XboxSync, NoticeCenter.ServiceErrorMessage(
                 ex, Strings.Error_MicrosoftUnreachable, Strings.Error_MicrosoftSlow, unexpected: Strings.Error_UnexpectedSignIn), ex);
             return;
         }
@@ -193,7 +193,7 @@ public sealed partial class AccountsViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ReportSyncError(SteamSync, NoticeCenter.ServiceErrorMessage<SteamException>(ex, Strings.Error_SteamUnreachable, Strings.Error_SteamSlow), ex);
+            ReportSyncError(SteamSync, NoticeCenter.ServiceErrorMessage(ex, Strings.Error_SteamUnreachable, Strings.Error_SteamSlow), ex);
             return;
         }
 
@@ -244,7 +244,7 @@ public sealed partial class AccountsViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ReportSyncError(PlayStationSync, NoticeCenter.ServiceErrorMessage<PlayStationException>(
+            ReportSyncError(PlayStationSync, NoticeCenter.ServiceErrorMessage(
                 ex, Strings.Error_PlayStationUnreachable, Strings.Error_PlayStationSlow), ex);
             return;
         }
@@ -301,7 +301,7 @@ public sealed partial class AccountsViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ReportSyncError(EpicSync, NoticeCenter.ServiceErrorMessage<EpicException>(
+            ReportSyncError(EpicSync, NoticeCenter.ServiceErrorMessage(
                 ex, Strings.Error_EpicUnreachable, Strings.Error_EpicSlow), ex);
             return;
         }
@@ -360,8 +360,9 @@ public sealed partial class AccountsViewModel : ObservableObject
         }
         catch (GogException ex)
         {
-            GogSync.Error = GogSync.ErrorMessage(ex);
-            ReportSyncError(GogSync, GogSync.Error, ex);
+            string message = GogSync.ErrorMessage(ex);
+            GogSync.KeepError(message);
+            _notices.Report(GogSync.LogContext, message, ex);
             return;
         }
 
@@ -369,7 +370,14 @@ public sealed partial class AccountsViewModel : ObservableObject
         _pendingGogUser = user;
         try
         {
-            if (!await FetchAsync(GogSync))
+            var result = await GogSync.FetchAsync(_notices);
+            // A sync was running under the former name: this one, once it ends.
+            if (result == FetchResult.AlreadyRunning)
+            {
+                await GogSync.WhenFetchedAsync();
+                result = await GogSync.FetchAsync(_notices);
+            }
+            if (result != FetchResult.Done)
                 return;
         }
         finally
@@ -477,50 +485,14 @@ public sealed partial class AccountsViewModel : ObservableObject
     /// </summary>
     private async Task RefreshPlatformsAsync(IEnumerable<SyncedPlatform> platforms)
     {
-        bool[] fetched = await Task.WhenAll(platforms.Select(FetchAsync));
-        if (fetched.Contains(true))
+        var fetched = await Task.WhenAll(platforms.Select(p => p.FetchAsync(_notices)));
+        if (fetched.Contains(FetchResult.Done))
             await _historyFetched();
     }
 
     /// <summary>Reads the cached histories, all at once (separate files).</summary>
     public Task LoadCachedAsync() =>
         Task.WhenAll(SyncedPlatforms.Select(async platform => platform.History = await Task.Run(platform.LoadCached)));
-
-    // The platforms being fetched: a platform asked again meanwhile (the
-    // general sync, then EA's Update) is not fetched twice at once.
-    private readonly HashSet<SyncedPlatform> _fetching = [];
-
-    /// <summary>Fetches a platform's history. Returns false (error shown, or already being fetched) otherwise.</summary>
-    private async Task<bool> FetchAsync(SyncedPlatform platform)
-    {
-        if (!_fetching.Add(platform))
-            return false;
-
-        platform.Error = null;
-        platform.Status = platform.FetchingStatus;
-
-        try
-        {
-            // No ConfigureAwait(false) here: we must come back on the UI
-            // thread to update the platform. The fetches of several
-            // platforms run at once, their ends come back here one by one.
-            platform.History = await platform.Fetch(platform);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            platform.Error = platform.ErrorMessage(ex);
-            ReportSyncError(platform, platform.Error, ex);
-            return false;
-        }
-        finally
-        {
-            _fetching.Remove(platform);
-            // A renewal may have updated the gamertag, a dropped session
-            // shows the sign-in again.
-            platform.AfterFetch?.Invoke();
-        }
-    }
 
     // ============ The synced platforms ============
 
@@ -545,7 +517,7 @@ public sealed partial class AccountsViewModel : ObservableObject
                 NoHistoryStatus = Strings.Status_NoXboxHistory,
                 LoadCached = xbox.LoadCached,
                 Fetch = _ => xbox.RefreshAsync(new XboxLiveClient(_http, _account)),
-                ErrorMessage = ex => NoticeCenter.ServiceErrorMessage<XboxLiveException>(
+                ErrorMessage = ex => NoticeCenter.ServiceErrorMessage(
                     ex, Strings.Error_XboxUnreachable, Strings.Error_XboxSlow, Strings.Error_XboxFormat),
                 AfterFetch = UpdateAccount,
                 Describe = h => Localization.Format(Strings.Status_XboxHistory, h.Games.Count,
@@ -563,7 +535,7 @@ public sealed partial class AccountsViewModel : ObservableObject
                 Fetch = platform => steam.RefreshAsync(_steamAccount.CreateClient(_http), _steamAccount.SteamId!,
                     new Progress<(int Done, int Total)>(p =>
                         platform.Status = Localization.Format(Strings.Status_FetchingSteamAchievements, p.Done, p.Total))),
-                ErrorMessage = ex => NoticeCenter.ServiceErrorMessage<SteamException>(
+                ErrorMessage = ex => NoticeCenter.ServiceErrorMessage(
                     ex, Strings.Error_SteamUnreachable, Strings.Error_SteamSlow, Strings.Error_SteamFormat),
                 Describe = h => Localization.Format(Strings.Status_SteamHistory, h.Games.Count,
                     h.Games.Count(g => !g.NeverPlayed), h.Games.Count(g => g.Status == PlayStatus.Mastered),
@@ -578,7 +550,7 @@ public sealed partial class AccountsViewModel : ObservableObject
                 NoHistoryStatus = Strings.Status_NoPlayStationHistory,
                 LoadCached = playStation.LoadCached,
                 Fetch = _ => playStation.RefreshAsync(new PlayStationClient(_http, _playStationAccount)),
-                ErrorMessage = ex => NoticeCenter.ServiceErrorMessage<PlayStationException>(
+                ErrorMessage = ex => NoticeCenter.ServiceErrorMessage(
                     ex, Strings.Error_PlayStationUnreachable, Strings.Error_PlayStationSlow, Strings.Error_PlayStationFormat),
                 // The saved NPSSO may have been dropped: the field to paste a new one.
                 AfterFetch = UpdatePlayStationAccount,
@@ -595,7 +567,7 @@ public sealed partial class AccountsViewModel : ObservableObject
                 LoadCached = _gogSource.LoadCached,
                 // A public profile: its name is all it takes (the one being added, or the saved one).
                 Fetch = _ => _gogSource.RefreshAsync(new GogClient(_http), _pendingGogUser ?? _saver.Settings.GogUser!),
-                ErrorMessage = ex => NoticeCenter.ServiceErrorMessage<GogException>(
+                ErrorMessage = ex => NoticeCenter.ServiceErrorMessage(
                     ex, Strings.Error_GogUnreachable, Strings.Error_GogSlow),
                 // Only the games GOG Galaxy followed have a play time.
                 Describe = h => Localization.Format(Strings.Status_GogHistory, h.Games.Count,
@@ -626,7 +598,7 @@ public sealed partial class AccountsViewModel : ObservableObject
                         throw;
                     }
                 },
-                ErrorMessage = ex => NoticeCenter.ServiceErrorMessage<EaException>(
+                ErrorMessage = ex => NoticeCenter.ServiceErrorMessage(
                     ex, Strings.Error_EaUnreachable, Strings.Error_EaSlow),
                 AfterFetch = UpdateEaAccount,
                 Describe = h => Localization.Format(Strings.Status_EaHistory, h.Games.Count,
@@ -641,7 +613,7 @@ public sealed partial class AccountsViewModel : ObservableObject
                 NoHistoryStatus = Strings.Status_NoEpicHistory,
                 LoadCached = _epicSource.LoadCached,
                 Fetch = _ => _epicSource.RefreshAsync(new EpicClient(_http, _epicAccount)),
-                ErrorMessage = ex => NoticeCenter.ServiceErrorMessage<EpicException>(
+                ErrorMessage = ex => NoticeCenter.ServiceErrorMessage(
                     ex, Strings.Error_EpicUnreachable, Strings.Error_EpicSlow),
                 // A session Epic refused is dropped: the card asks for a new code.
                 AfterFetch = UpdateEpicAccount,

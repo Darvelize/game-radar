@@ -3,6 +3,20 @@
 English translation of `CHANGELOG.md` (the French file comes first): same versions, same dates, same parts (`### Improvements` for `### Évolutions`, `### Fixes` for `### Corrections`), as many lines (checked by the tests).
 Shown by the app when it runs in English, and used for the English part of the GitHub release notes.
 
+## 1.6.2 — 2026-10-14
+
+### Improvements
+
+- Covers: those not shown for 30 days are deleted at startup (games that left the catalogs, former full-size pictures): the data folder no longer grows forever.
+- EA history: syncing takes a few seconds instead of about a minute (8 requests instead of 151, several at a time).
+- "For you": the first computation, which looks up the Steam tags of the Game Pass games, takes about 2 minutes instead of 7.
+
+### Fixes
+
+- Settings › Data: a platform being synced says "Fetching…" until the end, even when a catalog arrives meanwhile; a catalog's error stays shown until its next download.
+- "Add a game" no longer downloads the PS Plus catalog a second time while it is already downloading.
+- Xbox, PlayStation and Epic accounts: signing out right while a sync renews the session no longer leaves the account connected until GameRadar is closed.
+
 ## 1.6.1 — 2026-10-13
 
 ### Improvements

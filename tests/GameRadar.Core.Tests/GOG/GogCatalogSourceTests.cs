@@ -22,7 +22,7 @@ public class GogCatalogSourceTests
     public async Task FetchCatalogAsync_ReadsTenPagesOfBestSellingGames()
     {
         var asked = new List<Uri>();
-        var client = new GogCatalogClient(new HttpClient(new FakeHandler(uri =>
+        var client = new GogCatalogClient(new HttpClient(new JsonHandler(uri =>
         {
             asked.Add(uri);
             // Page n holds game n; page 2 repeats game 1 (it moved between two requests).
@@ -51,7 +51,7 @@ public class GogCatalogSourceTests
     [InlineData(HttpStatusCode.BadRequest)]
     public async Task FetchCatalogAsync_AnErrorStatus_ThrowsGogException(HttpStatusCode status)
     {
-        var client = new GogCatalogClient(new HttpClient(new FakeHandler(_ => "", status)));
+        var client = new GogCatalogClient(new HttpClient(new JsonHandler(_ => "", status)));
 
         await Assert.ThrowsAsync<GogException>(() => client.FetchCatalogAsync());
     }
@@ -83,26 +83,7 @@ public class GogCatalogSourceTests
         Assert.Single(source.LoadCached()!.Games);
     }
 
-    [Fact]
-    public void IsStale_AfterSevenDays()
-    {
-        var fetched = new DateTimeOffset(2026, 10, 1, 12, 0, 0, TimeSpan.Zero);
-        var catalog = new GameCatalog([], fetched);
-
-        Assert.False(GogCatalogSource.IsStale(catalog, fetched.AddDays(6)));
-        Assert.True(GogCatalogSource.IsStale(catalog, fetched.AddDays(8)));
-    }
-
     private static string PageOf(Uri uri) => uri.Query.TrimStart('?').Split('&').Single(p => p.StartsWith("page="))["page=".Length..];
 
-    private static GogCatalogClient ClientAnswering(string page) => new(new HttpClient(new FakeHandler(_ => page)));
-
-    private sealed class FakeHandler(Func<Uri, string> answer, HttpStatusCode status = HttpStatusCode.OK) : HttpMessageHandler
-    {
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct) =>
-            Task.FromResult(new HttpResponseMessage(status)
-            {
-                Content = new StringContent(answer(request.RequestUri!), Encoding.UTF8, "application/json")
-            });
-    }
+    private static GogCatalogClient ClientAnswering(string page) => new(new HttpClient(new JsonHandler(_ => page)));
 }

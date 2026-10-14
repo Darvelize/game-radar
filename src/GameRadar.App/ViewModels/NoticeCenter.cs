@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GameRadar.App.Resources;
 using GameRadar.Core.Logging;
+using GameRadar.Core.Services;
 
 namespace GameRadar.App.ViewModels;
 
@@ -33,6 +34,9 @@ public sealed partial class NoticeCenter(ErrorLog log) : ObservableObject
         log.Write(context, message, ex);
     }
 
+    /// <summary>Writes <paramref name="message"/> to the log only: an error the page in use already explains.</summary>
+    public void Log(string context, string message, Exception? ex = null) => log.Write(context, message, ex);
+
     /// <summary>
     /// An error no code path expected (see the global handlers in App): it
     /// is written to the log and the user is told where to find it.
@@ -50,11 +54,10 @@ public sealed partial class NoticeCenter(ErrorLog log) : ObservableObject
     /// reads one: without <paramref name="badAnswer"/>, it is unexpected).
     /// </summary>
     /// <param name="unexpected">The sentence of an unexpected error ({0} = its message), when more precise than the general one.</param>
-    public static string ServiceErrorMessage<TServiceException>(
-        Exception ex, string unreachable, string slow, string? badAnswer = null, string? unexpected = null)
-        where TServiceException : Exception => ex switch
+    public static string ServiceErrorMessage(
+        Exception ex, string unreachable, string slow, string? badAnswer = null, string? unexpected = null) => ex switch
     {
-        TServiceException => ex.Message,
+        ServiceException => ex.Message,
         HttpRequestException => unreachable,
         TaskCanceledException => slow,
         JsonException when badAnswer is not null => badAnswer,

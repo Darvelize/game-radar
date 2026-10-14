@@ -114,15 +114,12 @@ public class SteamWishlistSourceTests : IDisposable
         {
             string path = request.RequestUri!.AbsolutePath;
             if (path.Contains("GetWishlist"))
-                return Task.FromResult(Json(WishlistStatus, Wishlist));
+                return Task.FromResult(Json(status: WishlistStatus, body: Wishlist));
             if (path.Contains("GetOwnedGames"))
-                return Task.FromResult(Json(HttpStatusCode.OK, """
+                return Task.FromResult(Json(status: HttpStatusCode.OK, body: """
                     { "response": { "game_count": 1, "games": [ { "appid": 30, "name": "Owned", "playtime_forever": 0, "rtime_last_played": 0 } ] } }
                     """));
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound));
         }
-
-        private static HttpResponseMessage Json(HttpStatusCode status, string body) =>
-            new(status) { Content = new StringContent(body, System.Text.Encoding.UTF8, "application/json") };
     }
 }

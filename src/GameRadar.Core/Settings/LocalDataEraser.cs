@@ -11,7 +11,7 @@ namespace GameRadar.Core.Settings;
 /// else there (even GameRadar.exe itself).
 /// </summary>
 public sealed class LocalDataEraser(
-    SettingsStore settings, CacheStore cache, SecretStore secrets, ImageFileCache images, ErrorLog log, DataFolder? data = null)
+    SettingsStore settings, CacheStore cache, SecretStore secrets, ImageFileCache images, ErrorLog log, DataFolder data)
 {
     /// <summary>
     /// The secrets first (Xbox session, Steam key, NPSSO: the most sensitive),
@@ -27,7 +27,7 @@ public sealed class LocalDataEraser(
     {
         // Before the first deletion: from now on no store of the app writes
         // a file back, whichever thread it runs on.
-        data?.Guard.Trip();
+        data.Guard.Trip();
         Exception? firstFailure = null;
         foreach (Action erase in new Action[] { secrets.EraseAll, cache.EraseAll, images.EraseAll, log.EraseAll, settings.EraseAll, KeepPortableFolder })
         {
@@ -44,14 +44,14 @@ public sealed class LocalDataEraser(
         {
             // The app stays open (it reports the failure, the player retries):
             // it must keep saving what they choose meanwhile.
-            data?.Guard.Reset();
+            data.Guard.Reset();
             ExceptionDispatchInfo.Throw(firstFailure);
         }
     }
 
     private void KeepPortableFolder()
     {
-        if (data is { IsPortable: true })
+        if (data.IsPortable)
             Directory.CreateDirectory(data.Root);
     }
 }

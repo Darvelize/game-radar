@@ -318,9 +318,12 @@ public sealed class AddGameTests : AppTest
     private Routed RefusingStore(string? psPlusLists = null) => new(
         steam: """{ "response": { "store_items": [] } }""", store: """{ "Results": [] }""", playStation: null, psPlusLists: psPlusLists);
 
-    private Task SeedPsPlusCacheAsync() =>
-        new CacheStore(Path.Combine(TempFolder, "cache")).SaveAsync("psplus-catalog-fr-fr-v1",
+    private Task SeedPsPlusCacheAsync()
+    {
+        var cache = new CacheStore(Path.Combine(TempFolder, "cache"));
+        return cache.SaveAsync(new PsPlusCatalogSource(cache).CacheKey,
             TestJson.Serialize(new GameCatalog(PlusCatalog, DateTimeOffset.UtcNow.AddDays(-30))));
+    }
 
     [AvaloniaFact]
     public async Task A_store_that_refuses_searches_the_premium_catalog_even_for_an_extra_subscriber()
@@ -490,7 +493,7 @@ public sealed class AddGameTests : AppTest
     private static HttpResponseMessage Answer(string? json, HttpStatusCode failure = HttpStatusCode.ServiceUnavailable) =>
         json is null
             ? new HttpResponseMessage(failure)
-            : new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(json, Encoding.UTF8, "application/json") };
+            : FakeStores.Json(json);
 
     /// <summary>
     /// The Steam search, the Microsoft Store search and the PlayStation Store search each answer

@@ -7,7 +7,6 @@ using GameRadar.Core.GamePass;
 using GameRadar.Core.Logging;
 using GameRadar.Core.Models;
 using GameRadar.Core.PlayStation;
-using GameRadar.Core.Services;
 using GameRadar.Core.Settings;
 using GameRadar.Core.Steam;
 
@@ -67,7 +66,7 @@ public sealed partial class CatalogsViewModel : ObservableObject
             Refresh = () => gamePass.RefreshAsync(new GamePassClient(_http)),
             // ~47 MB.
             SlowDownload = true,
-            ErrorMessage = ex => NoticeCenter.ServiceErrorMessage<GamePassException>(
+            ErrorMessage = ex => NoticeCenter.ServiceErrorMessage(
                 ex, Strings.Error_CatalogUnreachable, Strings.Error_CatalogSlow, Strings.Error_CatalogFormat)
             // No Describe: UpdateGamePassStatus writes its line once the history is built.
         };
@@ -79,7 +78,7 @@ public sealed partial class CatalogsViewModel : ObservableObject
             NotLoadedStatus = Strings.Status_PsPlusCatalogNotLoaded,
             LoadCached = psPlus.LoadCached,
             Refresh = () => psPlus.RefreshAsync(new PsPlusCatalogClient(_http)),
-            ErrorMessage = ex => NoticeCenter.ServiceErrorMessage<PlayStationException>(
+            ErrorMessage = ex => NoticeCenter.ServiceErrorMessage(
                 ex, Strings.Error_PsPlusUnreachable, Strings.Error_PsPlusSlow, Strings.Error_PsPlusFormat),
             Describe = c => Localization.Format(Strings.Status_PsPlusCatalog, c.Games.Count, c.FetchedAt.ToLocalTime()),
             // Nothing is asked of playstation.com (nor reported as an error) for someone without PS Plus.
@@ -95,7 +94,7 @@ public sealed partial class CatalogsViewModel : ObservableObject
             NotLoadedStatus = Strings.Status_SteamCatalogNotLoaded,
             LoadCached = steam.LoadCached,
             Refresh = () => steam.RefreshAsync(new SteamCatalogClient(_http)),
-            ErrorMessage = ex => NoticeCenter.ServiceErrorMessage<SteamException>(
+            ErrorMessage = ex => NoticeCenter.ServiceErrorMessage(
                 ex, Strings.Error_SteamStoreUnreachable, Strings.Error_SteamStoreSlow, Strings.Error_SteamStoreFormat),
             Describe = c => Localization.Format(Strings.Status_SteamCatalog, c.Games.Count, c.FetchedAt.ToLocalTime())
         };
@@ -107,7 +106,7 @@ public sealed partial class CatalogsViewModel : ObservableObject
             NotLoadedStatus = Strings.Status_GogCatalogNotLoaded,
             LoadCached = gog.LoadCached,
             Refresh = () => gog.RefreshAsync(new GogCatalogClient(_http)),
-            ErrorMessage = ex => NoticeCenter.ServiceErrorMessage<GogException>(
+            ErrorMessage = ex => NoticeCenter.ServiceErrorMessage(
                 ex, Strings.Error_GogStoreUnreachable, Strings.Error_GogStoreSlow, Strings.Error_GogStoreFormat),
             Describe = c => Localization.Format(Strings.Status_GogCatalog, c.Games.Count, c.FetchedAt.ToLocalTime())
         };
@@ -119,7 +118,7 @@ public sealed partial class CatalogsViewModel : ObservableObject
             NotLoadedStatus = Strings.Status_EpicCatalogNotLoaded,
             LoadCached = epic.LoadCached,
             Refresh = () => epic.RefreshAsync(new EpicCatalogClient(_http)),
-            ErrorMessage = ex => NoticeCenter.ServiceErrorMessage<EpicException>(
+            ErrorMessage = ex => NoticeCenter.ServiceErrorMessage(
                 ex, Strings.Error_EpicStoreUnreachable, Strings.Error_EpicStoreSlow),
             Describe = c => Localization.Format(Strings.Status_EpicCatalog, c.Games.Count, c.FetchedAt.ToLocalTime())
         };
@@ -131,7 +130,7 @@ public sealed partial class CatalogsViewModel : ObservableObject
             NotLoadedStatus = Strings.Status_PsStoreCatalogNotLoaded,
             LoadCached = psStore.LoadCached,
             Refresh = () => psStore.RefreshAsync(new PlayStationStoreClient(_http)),
-            ErrorMessage = ex => NoticeCenter.ServiceErrorMessage<PlayStationException>(
+            ErrorMessage = ex => NoticeCenter.ServiceErrorMessage(
                 ex, Strings.Error_PsStoreUnreachable, Strings.Error_PsStoreSlow),
             Describe = c => Localization.Format(Strings.Status_PsStoreCatalog, c.Games.Count, c.FetchedAt.ToLocalTime()),
             // Nothing is asked of the store while its box is unticked.
@@ -142,13 +141,22 @@ public sealed partial class CatalogsViewModel : ObservableObject
             SlowDownload = true
         };
         Lines = [GamePass, PsPlus, Steam, Gog, Epic, PsStore];
-        // The PS Plus block comes and goes with the plan, the PlayStation Store one with its box.
-        _filter.PropertyChanged += (_, e) =>
+        // The PS Plus block comes and goes with the plan, the PlayStation Store one with its box:
+        // checked at any change of the filter, so that a catalog wanted under another setting
+        // needs nothing here; notified only when the blocks change (the view rebuilds them all).
+        _shownLines = ShownLines;
+        _filter.PropertyChanged += (_, _) =>
         {
-            if (e.PropertyName is nameof(SourceFilterViewModel.HasPsPlusPlan) or nameof(SourceFilterViewModel.ShowPlayStationStore))
-                OnPropertyChanged(nameof(ShownLines));
+            var shown = ShownLines;
+            if (shown.SequenceEqual(_shownLines))
+                return;
+            _shownLines = shown;
+            OnPropertyChanged(nameof(ShownLines));
         };
     }
+
+    // The blocks last notified.
+    private IReadOnlyList<CatalogLine> _shownLines;
 
     public CatalogLine GamePass { get; }
 
@@ -214,28 +222,36 @@ public sealed partial class CatalogsViewModel : ObservableObject
         var recomputations = new List<Task>();
 
         // No ConfigureAwait(false): each line comes back on the UI thread to update itself.
-        async Task FetchAndShowAsync(CatalogLine line)
+        async Task<FetchResult> FetchAndShowAsync(CatalogLine line)
         {
-            if (!await line.FetchAsync(_notices))
-                return;
+            var result = await line.FetchAsync(_notices);
+            if (result != FetchResult.Done)
+                return result;
             // Status lines rewritten only after a success: an error stays readable.
             if (line.RebuildsHistory)
                 _rebuildHistory();
             recomputations.Add(_catalogsChanged());
+            return result;
         }
 
         // Refreshes may overlap (a PS Plus plan chosen during the startup one):
         // the button comes back once the last one ends.
         _refreshes++;
         IsRefreshing = true;
+        FetchResult[] results;
         try
         {
-            await Task.WhenAll(chosen.Select(FetchAndShowAsync));
+            results = await Task.WhenAll(chosen.Select(FetchAndShowAsync));
         }
         finally
         {
             IsRefreshing = --_refreshes > 0;
         }
+
+        // Every one asked was already downloading: that refresh will move the
+        // titles and recompute when it ends; nothing more to do here.
+        if (results.Length > 0 && results.All(r => r == FetchResult.AlreadyRunning))
+            return;
 
         // Settings saved with the former French titles (refusals, games added
         // by hand): moved once to the English titles of the new catalogs.
@@ -285,9 +301,9 @@ public sealed partial class CatalogsViewModel : ObservableObject
     /// </summary>
     public void UpdateGamePassStatus(int playedGames, int inGamePass)
     {
-        // A failed download keeps its error readable (a running one: see ShowStatus): another
-        // catalog's success rebuilds the history, which must not write the old catalog over it.
-        if (GamePass.Catalog is not { } catalog || GamePass.Failed)
+        // Another catalog's success rebuilds the history: ShowStatus keeps a failed
+        // or running download's line, never the old catalog written over it.
+        if (GamePass.Catalog is not { } catalog)
             return;
 
         // The player's plan first: that is what the recommendations use.
@@ -304,28 +320,38 @@ public sealed partial class CatalogsViewModel : ObservableObject
 
     /// <summary>
     /// The PS Plus catalog for the search of "Ajouter un jeu" when the PlayStation Store is in trouble:
-    /// the loaded one, else the one on disk (whatever its age: a game name does not go stale), else
-    /// downloaded once. The player's own search is what asks for it, so this is the one case where a
-    /// player without a plan reaches playstation.com; it is then kept on disk. Either is kept loaded,
-    /// as the next start would (without a plan, its games are never recommended): read once, not at
-    /// each search. Null when none can be had.
-    /// Nothing is shown on the status line or the banner: the search says the store is down.
+    /// the one being downloaded (waited for, never asked twice at once: if it fails, not again at
+    /// once either), else the loaded one, else the one on disk (whatever its age: a game name does
+    /// not go stale), else downloaded once. The player's own search is what asks for it, so this is
+    /// the one case where a player without a plan reaches playstation.com; it is then kept on disk.
+    /// Either is kept loaded, as the next start would (without a plan, its games are never
+    /// recommended): read once, not at each search. Null when none can be had.
+    /// A failure is on its line (shown with a plan) and in the log, not in the banner: the search
+    /// says the store is down.
     /// </summary>
     public async Task<GameCatalog?> GetPsPlusCatalogForSearchAsync()
     {
-        if (PsPlus.Catalog is { } loaded)
-            return loaded;
-        try
+        // Downloading, or loaded: that one (the wait ends at once when nothing runs).
+        if (PsPlus.IsFetching || PsPlus.Catalog is not null)
         {
-            PsPlus.Catalog = await Task.Run(PsPlus.LoadCached) ?? await PsPlus.Refresh();
-            // Its block in Settings › Data says so (shown once a plan is chosen).
-            PsPlus.ShowLoaded();
+            await PsPlus.WhenFetchedAsync();
             return PsPlus.Catalog;
         }
-        catch (Exception ex) when (StoreLookup.Failed(ex, CancellationToken.None))
+
+        var cached = await Task.Run(PsPlus.LoadCached);
+        // Downloaded (or still downloading) meanwhile: that one, never overwritten.
+        if (PsPlus.Catalog is not null || PsPlus.IsFetching)
+            return await GetPsPlusCatalogForSearchAsync();
+        if (cached is not null)
         {
-            _log.Write(PsPlus.LogContext, "Could not download the PS Plus catalog for the search", ex);
-            return null;
+            PsPlus.Catalog = cached;
+            // Its block in Settings › Data says so (shown once a plan is chosen).
+            PsPlus.ShowLoaded();
         }
+        // A plan chosen during this download found it running and left the recomputation
+        // to it (RefreshAsync): its games count now.
+        else if (await PsPlus.FetchAsync(_notices, banner: false) == FetchResult.Done && PsPlus.IsWanted())
+            _ = _catalogsChanged();
+        return PsPlus.Catalog;
     }
 }
