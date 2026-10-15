@@ -1,5 +1,11 @@
 # GameRadar
 
+<p align="center">
+  <a href="docs/screenshots/for-you.png"><img src="docs/screenshots/for-you.png" width="32%" alt="Pour toi / For you"></a>
+  <a href="docs/screenshots/history.png"><img src="docs/screenshots/history.png" width="32%" alt="Historique / History"></a>
+  <a href="docs/screenshots/settings.png"><img src="docs/screenshots/settings.png" width="32%" alt="Réglages / Settings"></a>
+</p>
+
 **Français** · [English below](#english)
 
 Une appli Windows qui te recommande des jeux d'après ce que tu as vraiment joué : jeux finis, platinés, temps de jeu sur Xbox, Steam, PlayStation, GOG, EA et Epic. Elle pioche dans **ton** palier Game Pass ou PS Plus, ou dans les meilleures ventes Steam, GOG, Epic et PlayStation Store.
