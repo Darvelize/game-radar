@@ -92,4 +92,8 @@
   <data name="Epic_Down" xml:space="preserve"><value>Epic ne répond pas pour le moment. Réessaie plus tard.</value></data>
   <data name="Epic_StoreDown" xml:space="preserve"><value>Le catalogue Epic ne répond pas pour le moment. Les recommandations se passent de lui.</value></data>
   <data name="Epic_EmptyCatalog" xml:space="preserve"><value>Le catalogue Epic reçu est vide (le format a peut-être changé).</value></data>
+  <data name="Amazon_Format" xml:space="preserve"><value>La réponse d'Amazon a un format inattendu (le site a peut-être changé).</value></data>
+  <data name="Amazon_Refused" xml:space="preserve"><value>Amazon a refusé la demande des jeux offerts (le site a peut-être changé).</value></data>
+  <data name="Amazon_RateLimited" xml:space="preserve"><value>Amazon limite les requêtes pour le moment. Réessaie dans quelques minutes.</value></data>
+  <data name="Amazon_Down" xml:space="preserve"><value>Amazon ne répond pas pour le moment. Réessaie plus tard.</value></data>
 </root>

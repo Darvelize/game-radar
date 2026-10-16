@@ -48,6 +48,14 @@
                         <TextBlock Text="{x:Static res:Strings.Nav_ForYou}" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
+                <Button Classes="nav" Classes.selected="{Binding IsFreeGamesPage}"
+                        Command="{Binding NavigateCommand}"
+                        CommandParameter="{x:Static vm:AppPage.FreeGames}">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Path Classes="icon" Data="{StaticResource IconGift}" />
+                        <TextBlock Text="{x:Static res:Strings.Nav_FreeGames}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
                 <Button Classes="nav" Classes.selected="{Binding IsHistoryPage}"
                         Command="{Binding NavigateCommand}"
                         CommandParameter="{x:Static vm:AppPage.History}">
@@ -179,6 +187,7 @@
                      its scroll position; the switch cross-fades (PageTransition). -->
                 <TabbedPage Classes="hiddenTabs" SelectedIndex="{Binding CurrentPageIndex, Mode=TwoWay}">
                     <views:RecommendationsView />
+                    <views:FreeGamesView />
                     <views:HistoryView />
                     <views:SettingsView />
                     <views:WhatsNewView />

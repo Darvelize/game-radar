@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using GameRadar.Core.Models;
 using GameRadar.Core.Services;
 
@@ -55,42 +56,44 @@ public sealed class SteamCatalogClient
     /// <summary>Fetches the tag names then the best sellers, filtered and translated.</summary>
     public async Task<IReadOnlyList<CatalogGame>> FetchCatalogAsync(CancellationToken ct = default)
     {
-        var tagNames = ParseTagList(await GetStringAsync(TagListUrl, ct).ConfigureAwait(false));
+        var tagNames = ParseTagList(await GetStringAsync(_http, TagListUrl, ct).ConfigureAwait(false));
 
-        var games = new List<CatalogGame>();
-        for (int page = 0; page < PageCount; page++)
-        {
-            string json = await GetStringAsync(QueryUrlFor(page * PageSize), ct).ConfigureAwait(false);
-            games.AddRange(ParseQuery(json, tagNames));
-        }
+        var pages = await TopSellerPagesAsync(_http,
+            new DataRequestDto { IncludeTagCount = 20, IncludeReviews = true, IncludeAssets = true }, PageCount, ct).ConfigureAwait(false);
         // A game may move from one page to the next between the two requests.
-        return games.DistinctBy(g => g.ProductId).ToList();
+        return pages.SelectMany(json => ParseQuery(json, tagNames)).DistinctBy(g => g.ProductId).ToList();
     }
 
-    private async Task<string> GetStringAsync(string url, CancellationToken ct)
+    /// <summary>The first <paramref name="pageCount"/> pages of best sellers, asked at once, in their order.</summary>
+    internal static Task<string[]> TopSellerPagesAsync(HttpClient http, DataRequestDto data, int pageCount, CancellationToken ct) =>
+        Task.WhenAll(Enumerable.Range(0, pageCount).Select(page => GetStringAsync(http, TopSellersUrl(page * PageSize, data), ct)));
+
+    internal static async Task<string> GetStringAsync(HttpClient http, string url, CancellationToken ct)
     {
-        using var response = await _http.GetAsync(url, ct).ConfigureAwait(false);
+        using var response = await http.GetAsync(url, ct).ConfigureAwait(false);
         if (HttpOutcomes.Classify(response) != HttpOutcome.Ok)
             throw new SteamException(CoreStrings.Steam_StoreDown);
         return await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
     }
 
-    private static string QueryUrlFor(int start)
-    {
+    /// <summary>A page of games, best sellers first.</summary>
+    internal static string TopSellersUrl(int start, DataRequestDto data, PriceFiltersDto? price = null) =>
         // The names of the JSON are the API's own (see CatalogQueryRequest).
-        string input = JsonSerializer.Serialize(new CatalogQueryRequest
+        InputUrl(QueryUrl, new CatalogQueryRequest
         {
             Query = new CatalogQueryDto
             {
                 Start = start,
                 Count = PageSize,
                 Sort = SortTopSellers,
-                Filters = new CatalogFiltersDto { TypeFilters = new TypeFiltersDto { IncludeGames = true } }
+                Filters = new CatalogFiltersDto { TypeFilters = new TypeFiltersDto { IncludeGames = true }, PriceFilters = price }
             },
-            DataRequest = new DataRequestDto { IncludeTagCount = 20, IncludeReviews = true, IncludeAssets = true }
+            DataRequest = data
         }, SteamJsonContext.Default.CatalogQueryRequest);
-        return $"{QueryUrl}?input_json={Uri.EscapeDataString(input)}";
-    }
+
+    /// <summary>A store service's address with its request, the way they all take it (input_json).</summary>
+    internal static string InputUrl<T>(string url, T input, JsonTypeInfo<T> typeInfo) =>
+        $"{url}?input_json={Uri.EscapeDataString(JsonSerializer.Serialize(input, typeInfo))}";
 
     /// <summary>Tag id → English tag name.</summary>
     internal static IReadOnlyDictionary<int, string> ParseTagList(string json)
@@ -118,7 +121,7 @@ public sealed class SteamCatalogClient
         {
             if (item is not { Success: 1, AppId: int appId, Name: { Length: > 0 } name }
                 || item.Reviews?.Summary is not { ReviewCount: >= MinReviewCount, PercentPositive: >= MinPositivePercent } reviews
-                || item.ContentDescriptorIds?.Intersect(AdultDescriptors).Any() == true)
+                || IsAdult(item))
                 continue;
 
             // Most voted tags first, translated; the first genre found is the main one.
@@ -158,8 +161,10 @@ public sealed class SteamCatalogClient
         return games;
     }
 
+    internal static bool IsAdult(StoreItemDto item) => item.ContentDescriptorIds?.Intersect(AdultDescriptors).Any() == true;
+
     // "main_capsule" is 616 × 353: close to the 16:9 of the cards.
-    private static string? ImageUrlOf(AssetsDto? assets) =>
+    internal static string? ImageUrlOf(AssetsDto? assets) =>
         assets is { UrlFormat: { } format, MainCapsule: { } capsule }
             ? AssetBaseUrl + format.Replace("${FILENAME}", capsule, StringComparison.Ordinal)
             : null;
@@ -277,6 +282,33 @@ public sealed class SteamCatalogClient
 
         [JsonPropertyName("assets")]
         public AssetsDto? Assets { get; set; }
+
+        [JsonPropertyName("best_purchase_option")]
+        public PurchaseOptionDto? BestPurchaseOption { get; set; }
+
+        [JsonPropertyName("free_weekend")]
+        public FreeWeekendDto? FreeWeekend { get; set; }
+    }
+
+    internal sealed class PurchaseOptionDto
+    {
+        // Given away: free now and kept for good.
+        [JsonPropertyName("is_free_to_keep")]
+        public bool IsFreeToKeep { get; set; }
+
+        // Unix seconds.
+        [JsonPropertyName("free_to_keep_ends")]
+        public long? FreeToKeepEnds { get; set; }
+    }
+
+    internal sealed class FreeWeekendDto
+    {
+        // Unix seconds.
+        [JsonPropertyName("start_time")]
+        public long? StartTime { get; set; }
+
+        [JsonPropertyName("end_time")]
+        public long? EndTime { get; set; }
     }
 
     internal sealed class CategoriesDto

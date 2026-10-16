@@ -13,4 +13,9 @@ public sealed class SteamException : ServiceException
         : base(message, inner)
     {
     }
+
+    /// <summary>Steam refused the API key: it must be entered again.</summary>
+    public bool IsKeyRefused { get; init; }
+
+    public override bool EndsSession => IsSignInError || IsKeyRefused;
 }

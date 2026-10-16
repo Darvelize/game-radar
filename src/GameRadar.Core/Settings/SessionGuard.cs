@@ -23,12 +23,26 @@ internal sealed class SessionGuard
     /// Saves the secret of <paramref name="session"/>, unless that session
     /// ended: then nothing stays on disk (and <see cref="Keep"/> refuses).
     /// </summary>
-    public void TrySave<T>(SecretStore store, Secret secret, T value, JsonTypeInfo<T> typeInfo, int session)
+    /// <param name="renewal">
+    /// A renewal: a disk that refuses the save (a backup, an antivirus) is let
+    /// go, the service may have replaced the old token already, so the new one
+    /// stays in memory and is saved again at the next renewal rather than lost.
+    /// A sign-in fails instead: kept in memory only, the session would be lost
+    /// without a word at the next launch.
+    /// </param>
+    public void TrySave<T>(SecretStore store, Secret secret, T value, JsonTypeInfo<T> typeInfo, int session, bool renewal)
     {
         if (session != Current)
             return;
 
-        store.Save(secret, value, typeInfo);
+        try
+        {
+            store.Save(secret, value, typeInfo);
+        }
+        catch (Exception ex) when (renewal && ex is IOException or UnauthorizedAccessException)
+        {
+            return;
+        }
         // Ended between the check and the save: erased again.
         if (session != Current)
             store.Delete(secret);

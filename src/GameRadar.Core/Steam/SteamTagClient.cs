@@ -13,7 +13,7 @@ namespace GameRadar.Core.Steam;
 /// </summary>
 public sealed class SteamTagClient
 {
-    private const string GetItemsUrl = "https://api.steampowered.com/IStoreBrowseService/GetItems/v1/";
+    internal const string GetItemsUrl = "https://api.steampowered.com/IStoreBrowseService/GetItems/v1/";
     private const string SearchUrl = "https://api.steampowered.com/IStoreQueryService/SearchSuggestions/v1/";
     private const string TagListUrl = "https://api.steampowered.com/IStoreService/GetTagList/v1/";
 
@@ -86,8 +86,7 @@ public sealed class SteamTagClient
 
     private async Task<string> GetAsync<T>(string url, T input, JsonTypeInfo<T> typeInfo, CancellationToken ct)
     {
-        string query = Uri.EscapeDataString(JsonSerializer.Serialize(input, typeInfo));
-        using var response = await _http.GetAsync($"{url}?input_json={query}", ct).ConfigureAwait(false);
+        using var response = await _http.GetAsync(SteamCatalogClient.InputUrl(url, input, typeInfo), ct).ConfigureAwait(false);
         ThrowIfRefused(response);
         return await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
     }

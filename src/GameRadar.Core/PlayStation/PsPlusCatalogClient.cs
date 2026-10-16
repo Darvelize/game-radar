@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using GameRadar.Core.Models;
 using GameRadar.Core.Resources;
+using GameRadar.Core.Services;
 
 namespace GameRadar.Core.PlayStation;
 
@@ -26,6 +27,9 @@ public sealed class PsPlusCatalogClient
         ("ubisoft-classics-list", PsPlusTier.Extra | PsPlusTier.Premium),
         ("plus-classics-list", PsPlusTier.Premium)
     ];
+
+    // PS Plus Essential's games of the month (no catalog: the "Jeux gratuits" page).
+    private const string MonthlyList = "plus-monthly-games-list";
 
 
     private readonly HttpClient _http;
@@ -61,23 +65,8 @@ public sealed class PsPlusCatalogClient
 
     /// <summary>The games of one list, all in the plans <paramref name="tiers"/>.</summary>
     /// <exception cref="PlayStationException">The answer is not a list of blocks of games.</exception>
-    internal static IReadOnlyList<CatalogGame> ParseJson(string json, PsPlusTier tiers)
-    {
-        List<PsPlusBlockDto>? blocks;
-        try
-        {
-            blocks = JsonSerializer.Deserialize(json, PlayStationJsonContext.Default.ListPsPlusBlockDto);
-        }
-        catch (JsonException ex)
-        {
-            throw new PlayStationException(CoreStrings.PlayStation_Format, inner: ex);
-        }
-        if (blocks is null)
-            throw new PlayStationException(CoreStrings.PlayStation_Format);
-
-        return blocks
-            .SelectMany(b => b.Games ?? [])
-            .Where(g => g.ConceptId is not null && !string.IsNullOrWhiteSpace(g.NameEn ?? g.Name))
+    internal static IReadOnlyList<CatalogGame> ParseJson(string json, PsPlusTier tiers) =>
+        ReadGames(json)
             .Select(g => new CatalogGame(
                 // Like "steam:<appid>" for a Steam game: unique among the candidates.
                 ProductId: $"psplus:{g.ConceptId}",
@@ -94,6 +83,45 @@ public sealed class PsPlusCatalogClient
                 PsPlusTiers: tiers,
                 PlayStationConceptId: g.ConceptId.ToString()))
             .ToList();
+
+    /// <summary>The PS Plus Essential games of the month (one request), for the "Jeux gratuits" page.</summary>
+    public async Task<IReadOnlyList<FreeGame>> FetchMonthlyGamesAsync(CancellationToken ct = default) =>
+        ParseMonthlyJson(await GetStringAsync(MonthlyList, ct).ConfigureAwait(false));
+
+    /// <summary>
+    /// The games of the month, one per concept: a game's PS Plus starter pack shares
+    /// its concept and came out later, so the oldest entry is the game. No end date
+    /// in the list (usually the first Tuesday of the next month): none is guessed.
+    /// </summary>
+    /// <exception cref="PlayStationException">The answer is not a list of blocks of games.</exception>
+    internal static IReadOnlyList<FreeGame> ParseMonthlyJson(string json) =>
+        ReadGames(json)
+            .GroupBy(g => g.ConceptId)
+            .Select(concept => concept.OrderBy(g => g.ReleaseDate ?? DateTimeOffset.MaxValue).First())
+            .Select(g => new FreeGame(
+                GameTitle.Clean((g.NameEn ?? g.Name)!),
+                // Without language: the page adds the app's, like the cards of "Pour toi".
+                $"https://store.playstation.com/concept/{g.ConceptId}",
+                ImageUrl: g.ImageUrl))
+            .ToList();
+
+    // The games of a list (an entry with a concept and a title), its letter blocks flattened.
+    /// <exception cref="PlayStationException">The answer is not a list of blocks of games.</exception>
+    private static IEnumerable<PsPlusGameDto> ReadGames(string json)
+    {
+        List<PsPlusBlockDto>? blocks;
+        try
+        {
+            blocks = JsonSerializer.Deserialize(json, PlayStationJsonContext.Default.ListPsPlusBlockDto);
+        }
+        catch (JsonException ex)
+        {
+            throw new PlayStationException(CoreStrings.PlayStation_Format, inner: ex);
+        }
+        if (blocks is null)
+            throw new PlayStationException(CoreStrings.PlayStation_Format);
+
+        return blocks.SelectMany(b => b.Games ?? []).Where(g => g.ConceptId is not null && !string.IsNullOrWhiteSpace(g.NameEn ?? g.Name));
     }
 
     private async Task<string> GetStringAsync(string list, CancellationToken ct)

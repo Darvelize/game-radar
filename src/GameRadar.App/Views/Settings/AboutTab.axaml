@@ -61,6 +61,10 @@
                                 <Run Text="{x:Static res:Strings.Common_SteamCatalog}" FontWeight="SemiBold" />
                                 <Run Text="{x:Static res:Strings.About_SteamStore}" />
                             </TextBlock>
+                            <TextBlock Classes="secondary" TextWrapping="Wrap">
+                                <Run Text="{x:Static res:Strings.Common_SteamFreeGames}" FontWeight="SemiBold" />
+                                <Run Text="{x:Static res:Strings.About_SteamFreeGames}" />
+                            </TextBlock>
                         </StackPanel>
 
                         <!-- PlayStation -->
@@ -77,6 +81,10 @@
                             <TextBlock Classes="secondary" TextWrapping="Wrap">
                                 <Run Text="{x:Static res:Strings.Common_PsStoreCatalog}" FontWeight="SemiBold" />
                                 <Run Text="{x:Static res:Strings.About_PsStoreCatalog}" />
+                            </TextBlock>
+                            <TextBlock Classes="secondary" TextWrapping="Wrap">
+                                <Run Text="{x:Static res:Strings.Common_PsPlusMonthly}" FontWeight="SemiBold" />
+                                <Run Text="{x:Static res:Strings.About_PsPlusMonthly}" />
                             </TextBlock>
                         </StackPanel>
 
@@ -100,6 +108,10 @@
                                 <Run Text="{x:Static res:Strings.Common_EpicCatalog}" FontWeight="SemiBold" />
                                 <Run Text="{x:Static res:Strings.About_EpicCatalog}" />
                             </TextBlock>
+                            <TextBlock Classes="secondary" TextWrapping="Wrap">
+                                <Run Text="{x:Static res:Strings.Common_EpicFreeGames}" FontWeight="SemiBold" />
+                                <Run Text="{x:Static res:Strings.About_EpicFreeGames}" />
+                            </TextBlock>
                         </StackPanel>
 
                         <!-- GOG -->
@@ -112,6 +124,15 @@
                             <TextBlock Classes="secondary" TextWrapping="Wrap">
                                 <Run Text="{x:Static res:Strings.Common_GogCatalog}" FontWeight="SemiBold" />
                                 <Run Text="{x:Static res:Strings.About_GogCatalog}" />
+                            </TextBlock>
+                        </StackPanel>
+
+                        <!-- Amazon (brand names, never translated) -->
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Amazon (Amazon.com, Inc.)" FontWeight="SemiBold" />
+                            <TextBlock Classes="secondary" TextWrapping="Wrap">
+                                <Run Text="Amazon Prime (Luna)" FontWeight="SemiBold" />
+                                <Run Text="{x:Static res:Strings.About_AmazonFreeGames}" />
                             </TextBlock>
                         </StackPanel>
 

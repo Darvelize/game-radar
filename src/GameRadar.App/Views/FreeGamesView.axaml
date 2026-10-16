@@ -1,0 +1,75 @@
+<ContentPage xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GameRadar.App.ViewModels"
+             xmlns:res="using:GameRadar.App.Resources"
+             x:Class="GameRadar.App.Views.FreeGamesView"
+             x:DataType="vm:MainWindowViewModel">
+
+    <ScrollViewer>
+        <StackPanel Margin="32,28,32,32" Spacing="24">
+
+            <StackPanel Spacing="4">
+                <TextBlock Classes="display" Text="{x:Static res:Strings.Nav_FreeGames}" />
+                <TextBlock Classes="secondary" Text="{x:Static res:Strings.FreeGames_Intro}" TextWrapping="Wrap" />
+            </StackPanel>
+
+            <!-- One block per source: Epic Games, PlayStation Plus, Amazon Prime -->
+            <ItemsControl ItemsSource="{Binding FreeGames.Sections}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:FreeGameSection">
+                        <StackPanel Spacing="12" Margin="0,0,0,32">
+                            <TextBlock Classes="title" Text="{Binding Title}" />
+                            <!-- Fetching, or why the last download failed (the list it had stays) -->
+                            <TextBlock Classes="secondary" Text="{Binding Status}" TextWrapping="Wrap"
+                                       IsVisible="{Binding Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                            <TextBlock Classes="secondary" Text="{x:Static res:Strings.FreeGames_PsPlusHint}" TextWrapping="Wrap"
+                                       IsVisible="{Binding ShowsHint}" />
+                            <TextBlock Classes="secondary" Text="{x:Static res:Strings.FreeGames_None}"
+                                       IsVisible="{Binding ShowsNone}" />
+
+                            <!-- Cards wrap to the window width, like those of "Pour toi" -->
+                            <ItemsControl ItemsSource="{Binding Games}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel ItemSpacing="16" LineSpacing="16" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:FreeGameRow">
+                                        <Border Classes="card media" Width="280">
+                                            <DockPanel>
+                                                <!-- Picture: placeholder first, picture fades in once loaded -->
+                                                <Border DockPanel.Dock="Top" Classes="cover">
+                                                    <Panel>
+                                                        <Path Classes="icon accent" Data="{StaticResource IconGift}"
+                                                              HorizontalAlignment="Center" Opacity="0.5" />
+                                                        <Image Classes="cover" Classes.loaded="{Binding HasImage}"
+                                                               Source="{Binding Image}" />
+                                                    </Panel>
+                                                </Border>
+
+                                                <StackPanel Margin="{StaticResource PaddingCardBody}" Spacing="6">
+                                                    <TextBlock Classes="subtitle" Text="{Binding Title}"
+                                                               TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock Classes="accent" FontSize="{StaticResource FontSizeCaption}"
+                                                               Text="{Binding OfferLabel}" TextWrapping="Wrap" />
+                                                    <TextBlock Classes="caption" Text="{Binding RedeemLabel}" TextWrapping="Wrap"
+                                                               IsVisible="{Binding RedeemLabel, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                                    <!-- The window's command, reached through the page (the card's DataContext is the row) -->
+                                                    <Button Content="{x:Static res:Strings.FreeGames_Open}" Margin="0,6,0,0"
+                                                            Command="{Binding $parent[ContentPage].((vm:MainWindowViewModel)DataContext).OpenPageCommand}"
+                                                            CommandParameter="{Binding Page}" />
+                                                </StackPanel>
+                                            </DockPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+        </StackPanel>
+    </ScrollViewer>
+</ContentPage>

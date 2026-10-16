@@ -1,6 +1,6 @@
 GameRadar — Conditions d'utilisation / Terms of use
 Copyright (c) 2026 Darvelize. Code sous licence MIT. Code under the MIT license.
-Version du 12 octobre 2026 / Version of October 12, 2026
+Version du 15 octobre 2026 / Version of October 15, 2026
 
 English below.
 
@@ -66,8 +66,9 @@ En téléchargeant ou en utilisant GameRadar, tu acceptes ces conditions.
    marque de Valve Corporation ; PlayStation et PlayStation Plus sont des
    marques de Sony Interactive Entertainment ; GOG et GOG.com sont des marques
    de GOG sp. z o.o. ; EA et EA Play sont des marques d'Electronic Arts Inc. ;
-   Epic Games et Epic Games Store sont des marques d'Epic Games, Inc.
-   Les jaquettes et noms des jeux appartiennent à leurs éditeurs.
+   Epic Games et Epic Games Store sont des marques d'Epic Games, Inc. ;
+   Amazon, Prime et Luna sont des marques d'Amazon.com, Inc. ou de ses
+   filiales. Les jaquettes et noms des jeux appartiennent à leurs éditeurs.
 
 10. Droit applicable
     Ces conditions sont régies par le droit français, sous réserve des
@@ -129,8 +130,9 @@ By downloading or using GameRadar, you accept these terms.
    trademark of Valve Corporation; PlayStation and PlayStation Plus are
    trademarks of Sony Interactive Entertainment; GOG and GOG.com are trademarks
    of GOG sp. z o.o.; EA and EA Play are trademarks of Electronic Arts Inc.;
-   Epic Games and Epic Games Store are trademarks of Epic Games, Inc.
-   Game covers and names belong to their publishers.
+   Epic Games and Epic Games Store are trademarks of Epic Games, Inc.;
+   Amazon, Prime and Luna are trademarks of Amazon.com, Inc. or its
+   affiliates. Game covers and names belong to their publishers.
 
 10. Governing law
     These terms are governed by French law, subject to the mandatory

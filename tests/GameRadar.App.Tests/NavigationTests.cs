@@ -15,6 +15,7 @@ public sealed class NavigationTests : AppTest
 {
     [AvaloniaTheory]
     [InlineData(AppPage.Recommendations, typeof(RecommendationsView))]
+    [InlineData(AppPage.FreeGames, typeof(FreeGamesView))]
     [InlineData(AppPage.History, typeof(HistoryView))]
     [InlineData(AppPage.Settings, typeof(SettingsView))]
     [InlineData(AppPage.WhatsNew, typeof(WhatsNewView))]

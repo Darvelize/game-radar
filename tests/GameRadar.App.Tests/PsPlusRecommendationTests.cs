@@ -51,7 +51,7 @@ public sealed class PsPlusRecommendationTests : AppTest
         var vm = SampleData.Empty(TempFolder);
 
         Assert.Equal(PsPlusTier.None, vm.SourceFilter.PsPlusPlan);
-        Assert.False(vm.SourceFilter.HasPsPlusPlan);
+        Assert.False(vm.SourceFilter.HasPsPlusCatalog);
         Assert.True(vm.SourceFilter.ShowPsPlus);
     }
 
@@ -64,7 +64,7 @@ public sealed class PsPlusRecommendationTests : AppTest
 
         Assert.Equal(PsPlusTier.Premium, vm.SourceFilter.PsPlusPlan);
         Assert.Equal("PlayStation Plus Premium", vm.SourceFilter.PsPlusLabel);
-        Assert.True(vm.SourceFilter.HasPsPlusPlan);
+        Assert.True(vm.SourceFilter.HasPsPlusCatalog);
         Assert.False(vm.SourceFilter.ShowPsPlus);
     }
 
@@ -234,6 +234,43 @@ public sealed class PsPlusRecommendationTests : AppTest
         await vm.Catalogs.RefreshAllCommand.ExecuteAsync(null);
 
         Assert.Empty(network.PsPlusRequests);
+    }
+
+    [AvaloniaFact]
+    public async Task An_Essential_player_has_no_PS_Plus_box_nor_catalog()
+    {
+        // Essential has no catalog, only the games of the month ("Jeux gratuits").
+        await PrepareAsync(PsPlusTier.Essential, psPlusAge: null);
+        var network = new PsPlusNetwork();
+        var vm = SampleData.Empty(TempFolder, network: network);
+
+        await vm.InitializeAsync();
+
+        Assert.Equal("PlayStation Plus Essential", vm.SourceFilter.PsPlusLabel);
+        Assert.False(vm.SourceFilter.HasPsPlusCatalog);
+        Assert.True(vm.SourceFilter.HasAnyPsPlus);
+        Assert.Empty(network.PsPlusRequests);
+    }
+
+    [AvaloniaFact]
+    public async Task An_Essential_player_with_a_cached_catalog_gets_none_of_its_games()
+    {
+        await PrepareAsync(PsPlusTier.Essential, Fresh);
+        var vm = SampleData.Empty(TempFolder);
+
+        await vm.InitializeAsync();
+
+        Assert.DoesNotContain("Cozy Rpg", Cards(vm));
+    }
+
+    [AvaloniaFact]
+    public void Essential_comes_right_after_no_subscription()
+    {
+        var vm = SampleData.Empty(TempFolder);
+
+        Assert.Equal([PsPlusTier.None, PsPlusTier.Essential, PsPlusTier.Extra, PsPlusTier.Premium],
+            vm.SourceFilter.PsPlusPlans.Select(o => o.Plan));
+        Assert.False(vm.SourceFilter.HasAnyPsPlus);
     }
 
     /// <summary>Answers the PS Plus lists with one game, the other stores like <see cref="FakeStores"/>, and notes who asked playstation.com.</summary>

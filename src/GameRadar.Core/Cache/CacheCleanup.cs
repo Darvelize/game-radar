@@ -40,6 +40,10 @@ public static partial class CacheCleanup
         GogCatalogSource.CacheKey,
         EpicCatalogSource.CacheKey,
         PlayStationStoreCatalogSource.CacheKey,
+        FreeGameCache.EpicKey,
+        FreeGameCache.PsPlusKey,
+        FreeGameCache.AmazonKey,
+        FreeGameCache.SteamKey,
     ];
 
     /// <summary>

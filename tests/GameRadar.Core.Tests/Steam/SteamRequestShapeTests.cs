@@ -32,6 +32,31 @@ public class SteamRequestShapeTests
     }
 
     [Fact]
+    public async Task TheFreeGames_SendTheGivenAwayThenTheTopSellersRequests()
+    {
+        var inputs = new List<string>();
+        using var http = new HttpClient(new CapturingHandler(inputs, _ => """{"response":{"store_items":[]}}"""));
+
+        await new SteamFreeGamesClient(http).FetchAsync(TestData.Now);
+
+        // Given away: 100 % off is ignored by the API (measured), 99 % gives exactly those.
+        Assert.Equal(
+            "{\"query\":{\"start\":0,\"count\":" + SteamCatalogClient.PageSize + ",\"sort\":11,"
+            + "\"filters\":{\"type_filters\":{\"include_games\":true},\"price_filters\":{\"min_discount_percent\":99}}},"
+            + Context + ",\"data_request\":{\"include_assets\":true}}",
+            inputs[0]);
+        // Free weekends: no filter for them, read in the best sellers, without pictures (half the weight).
+        Assert.Equal(
+            "{\"query\":{\"start\":0,\"count\":" + SteamCatalogClient.PageSize + ",\"sort\":11,"
+            + "\"filters\":{\"type_filters\":{\"include_games\":true}}},"
+            + Context + ",\"data_request\":{}}",
+            inputs[1]);
+        Assert.Contains("\"start\":" + SteamCatalogClient.PageSize + ",", inputs[2]);
+        // No free weekend found: no picture asked.
+        Assert.Equal(3, inputs.Count);
+    }
+
+    [Fact]
     public async Task SuggestGames_SendsTheSearchRequest()
     {
         var inputs = new List<string>();

@@ -71,6 +71,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         Accounts.AccountChanged += RefreshRelativeTimes;
         History = new HistoryViewModel(Accounts, Library, _saver, SourceFilter, OnChoicesChanged);
         Recommendations = new RecommendationsViewModel(http, cache, imageCache, log, openBrowser, Library, Accounts, _saver, SourceFilter, _work);
+        FreeGames = new FreeGamesViewModel(http, cache, imageCache, Notices, SourceFilter, _work);
         SourceFilter.PlanChanged += RebuildAndRecompute;
         // The download is heard once the caches are read (InitializeAsync).
         SourceFilter.PsPlusPlanChanged += RebuildAndRecompute;
@@ -150,6 +151,9 @@ public sealed partial class MainWindowViewModel : ObservableObject
     /// <summary>The "Pour toi" page: the computation, the cards and their pictures.</summary>
     public RecommendationsViewModel Recommendations { get; }
 
+    /// <summary>The "Jeux gratuits" page: what Epic, Steam, PS Plus and Amazon Prime give away now.</summary>
+    public FreeGamesViewModel FreeGames { get; }
+
     /// <summary>The "Ajouter un jeu" page.</summary>
     public AddGameViewModel AddGame { get; }
 
@@ -181,7 +185,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CurrentPageIndex),
-        nameof(IsRecommendationsPage), nameof(IsHistoryPage), nameof(IsSettingsPage), nameof(IsWhatsNewPage),
+        nameof(IsRecommendationsPage), nameof(IsFreeGamesPage), nameof(IsHistoryPage), nameof(IsSettingsPage), nameof(IsWhatsNewPage),
         nameof(IsSidePage))]
     [NotifyCanExecuteChangedFor(nameof(GoBackCommand))]
     public partial AppPage CurrentPage { get; set; }
@@ -204,6 +208,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     // The sidebar buttons are lit by these (Classes.selected).
     public bool IsRecommendationsPage => CurrentPage == AppPage.Recommendations;
+    public bool IsFreeGamesPage => CurrentPage == AppPage.FreeGames;
     public bool IsHistoryPage => CurrentPage == AppPage.History;
     public bool IsSettingsPage => CurrentPage == AppPage.Settings;
     public bool IsWhatsNewPage => CurrentPage == AppPage.WhatsNew;
@@ -225,6 +230,9 @@ public sealed partial class MainWindowViewModel : ObservableObject
     {
         if (IsSide(newValue) && !IsSide(oldValue))
             _pageBeforeSidePage = oldValue;
+        // Its lists are asked only now, at most once a day (tracked by the page itself).
+        if (newValue == AppPage.FreeGames)
+            _ = FreeGames.OpenAsync();
     }
 
     // Only on a side page: Escape, bound on the whole window, does nothing elsewhere.
@@ -292,6 +300,10 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     [RelayCommand]
     private void DismissUpdate() => AvailableUpdate = null;
+
+    /// <summary>Opens a game's page (the "Voir l'offre" buttons of "Jeux gratuits").</summary>
+    [RelayCommand]
+    private void OpenPage(Uri page) => _openBrowser(page);
 
     private async Task CheckForUpdateAsync()
     {

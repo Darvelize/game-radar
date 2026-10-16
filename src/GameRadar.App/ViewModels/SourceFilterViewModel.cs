@@ -91,7 +91,7 @@ public sealed partial class SourceFilterViewModel : ObservableObject
     public IReadOnlyList<CatalogSource> Ticked => Enum.GetValues<CatalogSource>().Where(source => source switch
     {
         CatalogSource.GamePass => ShowGamePass && HasGamePassPlan,
-        CatalogSource.PsPlus => ShowPsPlus && HasPsPlusPlan,
+        CatalogSource.PsPlus => ShowPsPlus && HasPsPlusCatalog,
         CatalogSource.Steam => ShowSteam,
         CatalogSource.Gog => ShowGog,
         CatalogSource.Epic => ShowEpic,
@@ -184,19 +184,23 @@ public sealed partial class SourceFilterViewModel : ObservableObject
     public IReadOnlyList<PsPlusPlanOption> PsPlusPlans { get; } =
     [
         new(PsPlusTier.None, Strings.Plan_None),
+        new(PsPlusTier.Essential, "PlayStation Plus Essential"),
         new(PsPlusTier.Extra, "PlayStation Plus Extra"),
         new(PsPlusTier.Premium, "PlayStation Plus Premium")
     ];
 
     /// <summary>Two-way bound to the "Mon PS Plus" list of the settings.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasPsPlusPlan), nameof(PsPlusLabel))]
+    [NotifyPropertyChangedFor(nameof(HasPsPlusCatalog), nameof(HasAnyPsPlus), nameof(PsPlusLabel))]
     public partial PsPlusPlanOption SelectedPsPlusPlan { get; set; }
 
     public PsPlusTier PsPlusPlan => SelectedPsPlusPlan.Plan;
 
-    /// <summary>No subscription: no "PS Plus" box.</summary>
-    public bool HasPsPlusPlan => PsPlusPlan != PsPlusTier.None;
+    /// <summary>A plan with a catalog (Extra, Premium): the "PS Plus" box, and its catalog downloaded.</summary>
+    public bool HasPsPlusCatalog => PsPlusPlan is PsPlusTier.Extra or PsPlusTier.Premium;
+
+    /// <summary>Any plan, Essential included: the games of the month on "Jeux gratuits".</summary>
+    public bool HasAnyPsPlus => PsPlusPlan != PsPlusTier.None;
 
     /// <summary>Label of the "PS Plus" box, with the plan: "PlayStation Plus Extra".</summary>
     public string PsPlusLabel => SelectedPsPlusPlan.Label;

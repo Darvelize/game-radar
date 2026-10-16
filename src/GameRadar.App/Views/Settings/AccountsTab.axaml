@@ -123,14 +123,8 @@
 
                         <!-- Not connected: three steps to the NPSSO -->
                         <StackPanel Spacing="10" IsVisible="{Binding !Accounts.PlayStationSync.IsConnected}">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Classes="caption" Text="{x:Static res:Strings.Settings_PlayStation_Step1}" VerticalAlignment="Center" />
-                                <HyperlinkButton Content="playstation.com" Command="{Binding Accounts.OpenPlayStationSignInCommand}" Padding="2,0" />
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Classes="caption" Text="{x:Static res:Strings.Settings_PlayStation_Step2}" VerticalAlignment="Center" />
-                                <HyperlinkButton Content="{x:Static res:Strings.Settings_PlayStation_OpenNpsso}" Command="{Binding Accounts.OpenNpssoPageCommand}" Padding="2,0" />
-                            </StackPanel>
+                            <HyperlinkButton Classes="step" Content="{x:Static res:Strings.Settings_PlayStation_Step1}" Command="{Binding Accounts.OpenPlayStationSignInCommand}" />
+                            <HyperlinkButton Classes="step" Content="{x:Static res:Strings.Settings_PlayStation_Step2}" Command="{Binding Accounts.OpenNpssoPageCommand}" />
                             <TextBlock Classes="caption" TextWrapping="Wrap" Text="{x:Static res:Strings.Settings_PlayStation_Step3}" />
                             <TextBox Text="{Binding Accounts.NpssoInput}" PasswordChar="•"
                                      PlaceholderText="{x:Static res:Strings.Settings_PlayStation_NpssoPlaceholder}" />
@@ -177,14 +171,8 @@
 
                         <!-- Three steps to EA's page, whether a token is in memory or not: it lasts 4 h -->
                         <StackPanel Spacing="10">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Classes="caption" Text="{x:Static res:Strings.Settings_Ea_Step1}" VerticalAlignment="Center" />
-                                <HyperlinkButton Content="ea.com" Command="{Binding Accounts.OpenEaSignInCommand}" Padding="2,0" />
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Classes="caption" Text="{x:Static res:Strings.Settings_Ea_Step2}" VerticalAlignment="Center" />
-                                <HyperlinkButton Content="{x:Static res:Strings.Settings_Ea_OpenPage}" Command="{Binding Accounts.OpenEaPageCommand}" Padding="2,0" />
-                            </StackPanel>
+                            <HyperlinkButton Classes="step" Content="{x:Static res:Strings.Settings_Ea_Step1}" Command="{Binding Accounts.OpenEaSignInCommand}" />
+                            <HyperlinkButton Classes="step" Content="{x:Static res:Strings.Settings_Ea_Step2}" Command="{Binding Accounts.OpenEaPageCommand}" />
                             <TextBlock Classes="caption" TextWrapping="Wrap" Text="{x:Static res:Strings.Settings_Ea_Step3}" />
                             <TextBox Text="{Binding Accounts.EaTokenInput}" PasswordChar="•"
                                      PlaceholderText="{x:Static res:Strings.Settings_Ea_TokenPlaceholder}" />
@@ -217,14 +205,8 @@
 
                         <!-- Not connected: three steps to the code -->
                         <StackPanel Spacing="10" IsVisible="{Binding !Accounts.EpicSync.IsConnected}">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Classes="caption" Text="{x:Static res:Strings.Settings_Epic_Step1}" VerticalAlignment="Center" />
-                                <HyperlinkButton Content="epicgames.com" Command="{Binding Accounts.OpenEpicSignInCommand}" Padding="2,0" />
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Classes="caption" Text="{x:Static res:Strings.Settings_Epic_Step2}" VerticalAlignment="Center" />
-                                <HyperlinkButton Content="{x:Static res:Strings.Settings_Epic_OpenPage}" Command="{Binding Accounts.OpenEpicCodePageCommand}" Padding="2,0" />
-                            </StackPanel>
+                            <HyperlinkButton Classes="step" Content="{x:Static res:Strings.Settings_Epic_Step1}" Command="{Binding Accounts.OpenEpicSignInCommand}" />
+                            <HyperlinkButton Classes="step" Content="{x:Static res:Strings.Settings_Epic_Step2}" Command="{Binding Accounts.OpenEpicCodePageCommand}" />
                             <TextBlock Classes="caption" TextWrapping="Wrap" Text="{x:Static res:Strings.Settings_Epic_Step3}" />
                             <TextBox Text="{Binding Accounts.EpicCodeInput}" PasswordChar="•"
                                      PlaceholderText="{x:Static res:Strings.Settings_Epic_CodePlaceholder}" />

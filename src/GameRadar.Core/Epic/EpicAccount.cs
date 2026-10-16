@@ -58,7 +58,7 @@ public sealed class EpicAccount
             ["code"] = code,
         }, exchange: true, ct).ConfigureAwait(false);
 
-        await _tokens.RunLockedAsync(() => Remember(session, tokens), ct).ConfigureAwait(false);
+        await _tokens.RunLockedAsync(() => Remember(session, tokens, renewal: false), ct).ConfigureAwait(false);
     }
 
     /// <summary>Forgets the session on this computer (the history cache is kept).</summary>
@@ -105,7 +105,7 @@ public sealed class EpicAccount
             throw;
         }
 
-        Remember(session, tokens);
+        Remember(session, tokens, renewal: true);
         return tokens.AccessToken;
     }
 
@@ -144,19 +144,10 @@ public sealed class EpicAccount
     /// refresh token replaces the old one, no longer valid), unless the user
     /// disconnected since: then nothing stays, and a new code is asked.
     /// </summary>
-    private void Remember(int session, EpicTokens tokens)
+    private void Remember(int session, EpicTokens tokens, bool renewal)
     {
         var saved = new SavedEpicAccount(tokens.RefreshToken, tokens.AccountId);
-        try
-        {
-            _session.TrySave(_store, Secret.EpicAccount, saved, EpicJsonContext.Default.SavedEpicAccount, session);
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            // The disk refused it (a backup, an antivirus): Epic already replaced
-            // the old token, so the new one stays in memory and is saved again
-            // at the next renewal rather than lost.
-        }
+        _session.TrySave(_store, Secret.EpicAccount, saved, EpicJsonContext.Default.SavedEpicAccount, session, renewal);
         if (!_session.Keep(session, () => { _saved = saved; _tokens.Set(tokens.AccessToken, tokens.ExpiresAt); }, ForgetMemory))
             throw EpicException.SessionExpired();
     }

@@ -276,3 +276,97 @@ internal sealed class ProductResultDto
     [JsonPropertyName("averageRating")]
     public double? AverageRating { get; set; }
 }
+
+// The store's free games promotions (store-site-backend-static, no account).
+internal sealed class PromotionsData
+{
+    [JsonPropertyName("Catalog")]
+    public PromotionsCatalogDto? Catalog { get; set; }
+}
+
+internal sealed class PromotionsCatalogDto
+{
+    [JsonPropertyName("searchStore")]
+    public PromotionsStoreDto? SearchStore { get; set; }
+}
+
+internal sealed class PromotionsStoreDto
+{
+    [JsonPropertyName("elements")]
+    public List<PromotionElementDto>? Elements { get; set; }
+}
+
+internal sealed class PromotionElementDto
+{
+    [JsonPropertyName("title")]
+    public string? Title { get; set; }
+
+    // "BASE_GAME", "BUNDLE", "ADD_ON"...
+    [JsonPropertyName("offerType")]
+    public string? OfferType { get; set; }
+
+    // Often null: the page slug is then in catalogNs.
+    [JsonPropertyName("productSlug")]
+    public string? ProductSlug { get; set; }
+
+    [JsonPropertyName("keyImages")]
+    public List<KeyImageDto>? KeyImages { get; set; }
+
+    [JsonPropertyName("catalogNs")]
+    public CatalogNsDto? CatalogNs { get; set; }
+
+    // Where some giveaways carry their page instead of catalogNs.
+    [JsonPropertyName("offerMappings")]
+    public List<PageMappingDto>? OfferMappings { get; set; }
+
+    [JsonPropertyName("price")]
+    public PromotionPriceDto? Price { get; set; }
+
+    [JsonPropertyName("promotions")]
+    public PromotionsDto? Promotions { get; set; }
+}
+
+internal sealed class PromotionPriceDto
+{
+    [JsonPropertyName("totalPrice")]
+    public TotalPriceDto? TotalPrice { get; set; }
+}
+
+internal sealed class TotalPriceDto
+{
+    // In cents, after the current discount.
+    [JsonPropertyName("discountPrice")]
+    public int? DiscountPrice { get; set; }
+}
+
+internal sealed class PromotionsDto
+{
+    // The current offers (the upcoming ones are not read: no "Bientôt gratuit").
+    [JsonPropertyName("promotionalOffers")]
+    public List<PromotionGroupDto>? PromotionalOffers { get; set; }
+}
+
+internal sealed class PromotionGroupDto
+{
+    [JsonPropertyName("promotionalOffers")]
+    public List<PromotionalOfferDto>? PromotionalOffers { get; set; }
+}
+
+internal sealed class PromotionalOfferDto
+{
+    [JsonPropertyName("startDate")]
+    public DateTimeOffset? StartDate { get; set; }
+
+    [JsonPropertyName("endDate")]
+    public DateTimeOffset? EndDate { get; set; }
+
+    [JsonPropertyName("discountSetting")]
+    public DiscountSettingDto? DiscountSetting { get; set; }
+}
+
+internal sealed class DiscountSettingDto
+{
+    // What is left to pay, in percent: 0 = free.
+    [JsonPropertyName("discountPercentage")]
+    public int? DiscountPercentage { get; set; }
+}

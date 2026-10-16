@@ -12,9 +12,9 @@ public enum FetchResult
 }
 
 /// <summary>
-/// Something downloaded on demand with its own status line in Settings › Data:
-/// a platform's history (<see cref="SyncedPlatform"/>) or a candidate catalog
-/// (<see cref="CatalogLine"/>). Never downloaded twice at once; "fetching" and
+/// Something downloaded on demand with its own status line: a platform's history
+/// (<see cref="SyncedPlatform"/>) or a candidate catalog (<see cref="CatalogLine"/>)
+/// in Settings › Data, a source of "Jeux gratuits" (<see cref="FreeGameSection"/>). Never downloaded twice at once; "fetching" and
 /// the last error stay on the line until the download ends or the next one starts.
 /// </summary>
 public abstract partial class FetchLine : ObservableObject

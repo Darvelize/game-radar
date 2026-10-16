@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GameRadar.Core.Cache;
@@ -431,67 +430,9 @@ public sealed partial class RecommendationsViewModel : ObservableObject
                 : Localization.Format(Strings.Reco_SummaryIgnored, result.Sections.Count, state.TasteGames.Count, string.Join(", ", ignored), offered);
         }
 
-        // The cards are already on screen; pictures fill in as they arrive.
-        _work.Track(LoadCardImagesAsync(Sections.SelectMany(s => s.Games).ToList(), imagesCts.Token));
-    }
-
-    /// <summary>
-    /// Downloads (or reads from disk) then decodes each card's picture.
-    /// Never throws: a picture that fails keeps the card's placeholder.
-    /// </summary>
-    /// <param name="ct">Cancelled when newer recommendations replace these cards.</param>
-    private async Task LoadCardImagesAsync(IReadOnlyList<RecommendationRow> rows, CancellationToken ct)
-    {
-        // The downloads a few at a time (as many as the cache makes), in the
-        // cards' order: when newer cards replace these (a filter click), those
-        // not started yet are never made. A started one is not stopped:
-        // ImageFileCache shares it with every card of the same game.
-        using var downloads = new SemaphoreSlim(ImageFileCache.MaxParallelDownloads);
-        await Task.WhenAll(rows.Where(r => r.ImageUrl is not null).Select(LoadAsync));
-
-        async Task LoadAsync(RecommendationRow row)
-        {
-            try
-            {
-                // Already on disk: at once, never behind the downloads.
-                string? path = _imageCache.CachedPath(row.ImageUrl!) ?? await DownloadAsync(row.ImageUrl!);
-                if (path is null || ct.IsCancellationRequested)
-                    return;
-
-                // Decoding a JPEG is CPU work: off the UI thread. DecodeToWidth
-                // keeps only the pixels the card needs in memory.
-                var bitmap = await Task.Run(() =>
-                {
-                    ImageFileCache.MarkShown(path);
-                    using var stream = File.OpenRead(path);
-                    return Bitmap.DecodeToWidth(stream, RecommendationRow.ImageDecodeWidth);
-                });
-
-                // Back on the UI thread. If the cards were replaced meanwhile,
-                // nobody will show this picture: free it right away.
-                if (ct.IsCancellationRequested)
-                    bitmap.Dispose();
-                else
-                    row.Image = bitmap;
-            }
-            catch (Exception)
-            {
-                // Corrupted file, unsupported format...: keep the placeholder.
-            }
-        }
-
-        async Task<string?> DownloadAsync(string url)
-        {
-            await downloads.WaitAsync(ct);
-            try
-            {
-                return await _imageCache.GetAsync(url);
-            }
-            finally
-            {
-                downloads.Release();
-            }
-        }
+        // The cards are already on screen; pictures fill in as they arrive (cancelled
+        // when newer recommendations replace these cards, a filter click).
+        _work.Track(CardPicture.LoadAllAsync(_imageCache, Sections.SelectMany(s => s.Games).ToList(), imagesCts.Token));
     }
 
     // Kept until it ends: between the save and the recomputation, nothing else is running.

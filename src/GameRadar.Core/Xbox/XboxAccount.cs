@@ -84,7 +84,7 @@ public sealed class XboxAccount
         {
             // Another account maybe: its own gamertag or none, never the
             // previous account's.
-            Remember(session, tokens.RefreshToken, credentials.Gamertag, credentials);
+            Remember(session, tokens.RefreshToken, credentials.Gamertag, credentials, renewal: false);
         }
         finally
         {
@@ -140,11 +140,11 @@ public sealed class XboxAccount
             // otherwise): saved at once, the old one may be dead already,
             // even if the Xbox Live steps below fail.
             string refreshToken = tokens.RefreshToken ?? saved.RefreshToken;
-            Remember(session, refreshToken, saved.Gamertag, credentials: null);
+            Remember(session, refreshToken, saved.Gamertag, credentials: null, renewal: true);
 
             var credentials = await _auth.GetXboxCredentialsAsync(tokens.AccessToken, ct).ConfigureAwait(false);
             // The same account: its gamertag stays if Xbox Live sends none.
-            Remember(session, refreshToken, credentials.Gamertag ?? saved.Gamertag, credentials);
+            Remember(session, refreshToken, credentials.Gamertag ?? saved.Gamertag, credentials, renewal: true);
             return credentials;
         }
         finally
@@ -160,10 +160,10 @@ public sealed class XboxAccount
     /// Saves the session started under <paramref name="session"/>, unless the
     /// user signed out since: then nothing stays, and a new sign-in is asked.
     /// </summary>
-    private void Remember(int session, string refreshToken, string? gamertag, XboxCredentials? credentials)
+    private void Remember(int session, string refreshToken, string? gamertag, XboxCredentials? credentials, bool renewal)
     {
         var saved = new SavedXboxAccount(refreshToken, gamertag);
-        _session.TrySave(_store, Secret.XboxAccount, saved, XboxJsonContext.Default.SavedXboxAccount, session);
+        _session.TrySave(_store, Secret.XboxAccount, saved, XboxJsonContext.Default.SavedXboxAccount, session, renewal);
         if (!_session.Keep(session, () => { _saved = saved; _credentials = credentials ?? _credentials; }, ForgetMemory))
             throw new XboxLiveException(CoreStrings.Xbox_SignInToLoad, requiresSignIn: true);
     }

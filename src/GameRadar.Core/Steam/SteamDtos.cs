@@ -209,6 +209,16 @@ internal sealed class CatalogFiltersDto
 {
     [JsonPropertyName("type_filters")]
     public required TypeFiltersDto TypeFilters { get; init; }
+
+    [JsonPropertyName("price_filters")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public PriceFiltersDto? PriceFilters { get; init; }
+}
+
+internal sealed class PriceFiltersDto
+{
+    [JsonPropertyName("min_discount_percent")]
+    public int MinDiscountPercent { get; init; }
 }
 
 internal sealed class TypeFiltersDto

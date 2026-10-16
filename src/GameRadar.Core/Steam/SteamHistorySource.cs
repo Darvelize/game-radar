@@ -82,26 +82,20 @@ public sealed class SteamHistorySource
             progress?.Report((0, toFetch.Count));
             try
             {
-                // Parallel.ForEachAsync runs the body for several games at a
-                // time, never more than MaxDegreeOfParallelism.
-                await Parallel.ForEachAsync(
-                    toFetch,
-                    new ParallelOptions { MaxDegreeOfParallelism = ParallelRequests, CancellationToken = ct },
-                    async (game, token) =>
+                // Several games at a time, by the rule of every platform (StoreLookup.FetchEachAsync):
+                // a game that fails is asked again next time, the network failing stops the rest.
+                await StoreLookup.FetchEachAsync(toFetch, ParallelRequests, async (game, token) =>
+                {
+                    try
                     {
-                        try
-                        {
-                            var achievements = await client.FetchAchievementsAsync(steamId, game.AppId, token).ConfigureAwait(false);
-                            fetched[game.AppId] = new AchievementEntry(achievements?.Unlocked ?? 0, achievements?.Total ?? 0, game.LastPlayed);
-                        }
-                        // This game alone failed (server error, timeout, odd answer):
-                        // the others go on, and it is asked again at the next sync.
-                        // A refused key or the rate limit (SteamException) stop everything.
-                        catch (Exception ex) when (StoreLookup.Transient(ex, token))
-                        {
-                        }
+                        var achievements = await client.FetchAchievementsAsync(steamId, game.AppId, token).ConfigureAwait(false);
+                        fetched[game.AppId] = new AchievementEntry(achievements?.Unlocked ?? 0, achievements?.Total ?? 0, game.LastPlayed);
+                    }
+                    finally
+                    {
                         progress?.Report((Interlocked.Increment(ref done), toFetch.Count));
-                    }).ConfigureAwait(false);
+                    }
+                }, ct).ConfigureAwait(false);
             }
             finally
             {

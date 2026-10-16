@@ -149,7 +149,7 @@ public sealed partial class AddGameViewModel : ObservableObject
                 fromPsPlus = ManualGameSearch.InPsPlusCatalog(
                     fallback.Games.Select(g => g.ForPsPlusPlan(PsPlusTier.Premium)).Where(g => g.InPsPlus), typed);
         }
-        else if (_filter.HasPsPlusPlan && _library.PsPlusCatalog is { } psPlus)
+        else if (_filter.HasPsPlusCatalog && _library.PsPlusCatalog is { } psPlus)
         {
             fromPsPlus = ManualGameSearch.InPsPlusCatalog(
                 psPlus.Games.Select(g => g.ForPsPlusPlan(_filter.PsPlusPlan)).Where(g => g.InPsPlus), typed);

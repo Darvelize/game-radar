@@ -2,12 +2,16 @@ namespace GameRadar.App.ViewModels;
 
 /// <summary>
 /// The pages of the app, in the order of the window's TabbedPage: the
-/// sidebar reaches the first three; the others are side pages, left with
+/// sidebar reaches the first four; the others are side pages, left with
 /// "Retour" (or Escape) to the page they were opened from.
 /// </summary>
 public enum AppPage
 {
     Recommendations,
+
+    /// <summary>What Epic, Steam, PS Plus and Amazon Prime give away now, for information.</summary>
+    FreeGames,
+
     History,
     Settings,
 

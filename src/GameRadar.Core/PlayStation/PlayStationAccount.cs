@@ -53,7 +53,7 @@ public sealed partial class PlayStationAccount
 
         var tokens = await _auth.SignInAsync(npsso, ct).ConfigureAwait(false);
 
-        await _tokens.RunLockedAsync(() => Remember(session, npsso, tokens), ct).ConfigureAwait(false);
+        await _tokens.RunLockedAsync(() => Remember(session, npsso, tokens, renewal: false), ct).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -119,7 +119,7 @@ public sealed partial class PlayStationAccount
             tokens = await SignInAgainAsync(saved.Npsso, ct).ConfigureAwait(false);
         }
 
-        Remember(session, saved.Npsso, tokens);
+        Remember(session, saved.Npsso, tokens, renewal: true);
         return tokens.AccessToken;
     }
 
@@ -149,14 +149,14 @@ public sealed partial class PlayStationAccount
     /// Saves the session started under <paramref name="session"/>, unless the
     /// user disconnected since: then nothing stays, and a new NPSSO is asked.
     /// </summary>
-    private void Remember(int session, string npsso, PlayStationTokens tokens)
+    private void Remember(int session, string npsso, PlayStationTokens tokens, bool renewal)
     {
         // A refresh may answer without a new refresh token: keep the old one.
         var previous = _saved?.Npsso == npsso ? _saved : null;
         var saved = tokens.RefreshToken is null && previous is not null
             ? previous
             : new SavedPlayStationAccount(npsso, tokens.RefreshToken, tokens.RefreshExpiresAt);
-        _session.TrySave(_store, Secret.PlayStationAccount, saved, PlayStationJsonContext.Default.SavedPlayStationAccount, session);
+        _session.TrySave(_store, Secret.PlayStationAccount, saved, PlayStationJsonContext.Default.SavedPlayStationAccount, session, renewal);
         if (!_session.Keep(session, () => { _saved = saved; _tokens.Set(tokens.AccessToken, tokens.ExpiresAt); }, ForgetMemory))
             throw new PlayStationException(CoreStrings.PlayStation_NotConnected, requiresSignIn: true);
     }

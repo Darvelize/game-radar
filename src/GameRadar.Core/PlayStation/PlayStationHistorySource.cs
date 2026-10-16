@@ -73,19 +73,19 @@ public sealed class PlayStationHistorySource
             .Where(g => !(known.TryGetValue(g.TitleId, out var entry) && entry.LastPlayed == g.LastPlayed))
             .ToList();
 
-        // Batch by batch, saved even when one fails (a rate limit halfway):
-        // the next refresh goes on from there instead of starting over.
+        // Batch by batch, by the rule of every platform (StoreLookup.FetchEachAsync), saved
+        // even when one fails (a rate limit halfway): the next refresh goes on from there.
         var fetched = new Dictionary<string, TrophySetEntry>();
         try
         {
-            foreach (var batch in toFetch.Chunk(PlayStationClient.TitleIdsPerRequest))
+            await StoreLookup.FetchEachAsync(toFetch.Chunk(PlayStationClient.TitleIdsPerRequest), 1, async (batch, token) =>
             {
-                var sets = await client.FetchTrophySetsAsync(batch.Select(g => g.TitleId).ToList(), ct).ConfigureAwait(false);
+                var sets = await client.FetchTrophySetsAsync(batch.Select(g => g.TitleId).ToList(), token).ConfigureAwait(false);
                 // Only the games of the answer: one it left out is asked
                 // again next time, not kept as "no trophies" for good.
                 foreach (var game in batch.Where(g => sets.ContainsKey(g.TitleId)))
                     fetched[game.TitleId] = new TrophySetEntry(sets[game.TitleId], game.LastPlayed);
-            }
+            }, ct).ConfigureAwait(false);
         }
         finally
         {
@@ -122,21 +122,37 @@ public sealed class PlayStationHistorySource
         var trophiesById = trophyTitles
             .GroupBy(t => t.CommunicationId)
             .ToDictionary(g => g.Key, g => g.First());
-        var linked = new HashSet<string>();
-        var played = new List<PlayedGame>();
+        var unique = games.GroupBy(g => g.TitleId).Select(g => g.First()).ToList();
+        // A compilation may have several sets: the furthest one speaks for it.
+        var trophiesOf = unique.ToDictionary(g => g.TitleId, g => (trophySets.GetValueOrDefault(g.TitleId)?.SetIds ?? [])
+            .Select(id => trophiesById.GetValueOrDefault(id))
+            .OfType<PlayStationTrophyTitle>()
+            .MaxBy(t => t.Progress));
+        var linked = trophiesOf.Values.OfType<PlayStationTrophyTitle>().Select(t => t.CommunicationId).ToHashSet();
 
-        foreach (var game in games.GroupBy(g => g.TitleId).Select(g => g.First()))
+        // A trophy set not known yet (its batch failed, the answer left it out: asked again
+        // next time): matched by title meanwhile, rather than the game shown twice.
+        var unknown = unique.Where(g => !trophySets.ContainsKey(g.TitleId)).ToList();
+        if (unknown.Count > 0)
         {
-            // A compilation may have several sets: the furthest one speaks for it.
-            var trophies = (trophySets.GetValueOrDefault(game.TitleId)?.SetIds ?? [])
-                .Select(id => trophiesById.GetValueOrDefault(id))
-                .OfType<PlayStationTrophyTitle>()
-                .MaxBy(t => t.Progress);
-            if (trophies is not null)
-                linked.Add(trophies.CommunicationId);
-
-            played.Add(ToPlayedGame(game.TitleId, game.Name, trophies, game.LastPlayed ?? trophies?.LastUpdated, game.PlaytimeMinutes));
+            // Each title cleaned once (GameTitle.Key runs several patterns).
+            var byKey = trophiesById.Values.ToLookup(t => GameTitle.Key(t.Name));
+            foreach (var game in unknown)
+            {
+                string key = GameTitle.Key(game.Name);
+                if (key.Length > 0 && byKey[key].FirstOrDefault(t => !linked.Contains(t.CommunicationId)) is { } byTitle)
+                {
+                    trophiesOf[game.TitleId] = byTitle;
+                    linked.Add(byTitle.CommunicationId);
+                }
+            }
         }
+
+        var played = unique.Select(game =>
+        {
+            var trophies = trophiesOf[game.TitleId];
+            return ToPlayedGame(game.TitleId, game.Name, trophies, game.LastPlayed ?? trophies?.LastUpdated, game.PlaytimeMinutes);
+        }).ToList();
 
         foreach (var trophies in trophiesById.Values.Where(t => !linked.Contains(t.CommunicationId)))
             played.Add(ToPlayedGame(trophies.CommunicationId, trophies.Name, trophies, trophies.LastUpdated, playtimeMinutes: null));

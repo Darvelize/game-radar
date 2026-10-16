@@ -154,6 +154,22 @@ public sealed class ScreenshotTests : AppTest
         window.Close();
     }
 
+    [AvaloniaTheory]
+    [InlineData("Light")]
+    [InlineData("Dark")]
+    public async Task Free_games(string theme)
+    {
+        var vm = SampleData.ViewModel(TempFolder);
+        var window = Open(vm, theme, height: 1300);
+
+        vm.CurrentPage = AppPage.FreeGames;
+        Assert.True(await BecomesTrueAsync(() => vm.FreeGames.Sections.All(s => s.Games.Count > 0), 5000));
+        SampleData.PaintFreeGames(vm);
+
+        Save(window, $"FreeGames-cards-{theme}");
+        window.Close();
+    }
+
     [AvaloniaFact]
     public void Every_page_in_English()
     {

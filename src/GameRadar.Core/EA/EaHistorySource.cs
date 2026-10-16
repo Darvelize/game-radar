@@ -105,9 +105,8 @@ public sealed class EaHistorySource
 
     /// <summary>
     /// The achievements of the games played since their entry was saved, one
-    /// request each, several at a time. One game failing (network, odd answer) is asked again next
-    /// time; an expired token or the rate limit stop everything. What was read
-    /// is saved whatever happens.
+    /// request each, several at a time, by the rule of every platform (<see cref="StoreLookup.FetchEachAsync"/>).
+    /// What was read is saved whatever happens.
     /// </summary>
     private async Task FetchAchievementsAsync(
         EaClient client, IReadOnlyList<EaPlayedGame> played, IReadOnlyList<EaGameProduct> products,
@@ -126,21 +125,11 @@ public sealed class EaHistorySource
         try
         {
             string playerId = await client.FetchPlayerIdAsync(ct).ConfigureAwait(false);
-            await Parallel.ForEachAsync(toFetch,
-                new ParallelOptions { MaxDegreeOfParallelism = EaClient.RequestsAtOnce, CancellationToken = ct },
-                async (game, token) =>
-                {
-                    try
-                    {
-                        var achievements = await client.FetchAchievementsAsync(offers[game.Slug], playerId, token).ConfigureAwait(false);
-                        fetched[game.Slug] = new AchievementEntry(achievements?.Unlocked ?? 0, achievements?.Total ?? 0, game.LastPlayed);
-                    }
-                    // Skipped, asked again next time. Against ct, not token: the requests a refused
-                    // one stops are skipped too, so only that refusal goes up.
-                    catch (Exception ex) when (StoreLookup.Transient(ex, ct) || ex is EaException { IsTokenRefused: false, IsRateLimited: false })
-                    {
-                    }
-                }).ConfigureAwait(false);
+            await StoreLookup.FetchEachAsync(toFetch, EaClient.RequestsAtOnce, async (game, token) =>
+            {
+                var achievements = await client.FetchAchievementsAsync(offers[game.Slug], playerId, token).ConfigureAwait(false);
+                fetched[game.Slug] = new AchievementEntry(achievements?.Unlocked ?? 0, achievements?.Total ?? 0, game.LastPlayed);
+            }, ct).ConfigureAwait(false);
         }
         finally
         {

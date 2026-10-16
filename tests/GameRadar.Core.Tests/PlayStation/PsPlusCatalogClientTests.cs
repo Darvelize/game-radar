@@ -179,3 +179,57 @@ public class PsPlusCatalogClientTests
         }
     }
 }
+
+public class PsPlusMonthlyGamesTests
+{
+    // Like the real list: a game and its PS Plus starter pack share a concept.
+    private const string MonthlyJson = """
+        [
+          { "catalogKey": "H", "count": 2, "games": [
+            { "conceptId": 234014, "nameEn": "Hunt: Showdown 1896 – Starter Pack for PlayStation®Plus",
+              "imageUrl": "https://image.api.playstation.com/cdn/pack.png", "releaseDate": "2026-10-06T08:00:00Z" },
+            { "conceptId": 234014, "nameEn": "Hunt: Showdown 1896",
+              "imageUrl": "https://image.api.playstation.com/cdn/hunt.png", "releaseDate": "2024-08-15T07:00:00Z" }
+          ] },
+          { "catalogKey": "F", "count": 1, "games": [
+            { "conceptId": 10011830, "nameEn": "F1® 25", "releaseDate": "2025-05-30T15:00:00Z" }
+          ] }
+        ]
+        """;
+
+    [Fact]
+    public void ParseMonthlyJson_GivesOneGamePerConcept_TheGameNotItsPack()
+    {
+        var games = PsPlusCatalogClient.ParseMonthlyJson(MonthlyJson);
+
+        Assert.Equal(2, games.Count);
+        var hunt = games.Single(g => g.Title == "Hunt: Showdown 1896");
+        Assert.Equal("https://image.api.playstation.com/cdn/hunt.png", hunt.ImageUrl);
+        // Without language: the page adds the app's.
+        Assert.Equal("https://store.playstation.com/concept/234014", hunt.Link);
+        // The list gives no end date.
+        Assert.Null(hunt.Until);
+    }
+
+    [Fact]
+    public void ParseMonthlyJson_CleansTheTitle()
+    {
+        Assert.Contains(PsPlusCatalogClient.ParseMonthlyJson(MonthlyJson), g => g.Title == "F1 25");
+    }
+
+    [Fact]
+    public async Task FetchMonthlyGamesAsync_AsksTheMonthlyList()
+    {
+        Uri? asked = null;
+        using var http = new HttpClient(new TestData.JsonHandler(uri =>
+        {
+            asked = uri;
+            return MonthlyJson;
+        }));
+
+        var games = await new PsPlusCatalogClient(http).FetchMonthlyGamesAsync();
+
+        Assert.Equal(2, games.Count);
+        Assert.Contains("categoryList=plus-monthly-games-list", asked!.Query);
+    }
+}

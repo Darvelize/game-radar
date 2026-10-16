@@ -149,6 +149,7 @@ internal static class SampleData
         settings.PsPlusPlan = PsPlusTier.Extra;
         settings.ShowPlayStationStore = true;
         store.SaveAsync(settings).GetAwaiter().GetResult();
+        SaveFreeGames(tempFolder);
 
         var vm = Empty(tempFolder);
         vm.History.HasHistory = true;
@@ -250,6 +251,39 @@ internal static class SampleData
             box.IsOffered = true;
 
         return vm;
+    }
+
+    // The free games of each source, fresh: the page shows them without asking the network.
+    // Public titles; no picture address (no network): see PaintFreeGames.
+    private static void SaveFreeGames(string tempFolder)
+    {
+        var cache = new CacheStore(Path.Combine(tempFolder, "cache"));
+        var thursday = Now.Date.AddDays(((int)DayOfWeek.Thursday - (int)Now.DayOfWeek + 6) % 7 + 1).AddHours(17);
+        void Save(string key, params FreeGame[] games) => new FreeGameCache(cache, key).SaveAsync(games).GetAwaiter().GetResult();
+        Save(FreeGameCache.EpicKey,
+            new FreeGame("Bad Cheese", "https://store.epicgames.com/p/bad-cheese-4256d9", thursday),
+            new FreeGame("Agent A: A puzzle in disguise", "https://store.epicgames.com/p/agent-a-a-puzzle-in-disguise-42fe5f", thursday));
+        Save(FreeGameCache.SteamKey,
+            new FreeGame("Battlefield 6", "https://store.steampowered.com/app/2807960/", Now.AddDays(3), PlayOnly: true),
+            new FreeGame("Stranded Deep", "https://store.steampowered.com/app/313120/", Now.AddDays(3), PlayOnly: true),
+            new FreeGame("Portal 2", "https://store.steampowered.com/app/620/", Now.AddDays(6)));
+        Save(FreeGameCache.PsPlusKey,
+            new FreeGame("F1 25", "https://store.playstation.com/concept/10011830"),
+            new FreeGame("Hunt: Showdown 1896", "https://store.playstation.com/concept/234014"));
+        Save(FreeGameCache.AmazonKey,
+            new FreeGame("DOOM", "https://gaming.amazon.com/doom-gog/dp/amzn1.pg.item.1", Now.AddDays(20), RedeemOn: "GOG"),
+            new FreeGame("High on Life", "https://gaming.amazon.com/high-on-life-epic/dp/amzn1.pg.item.2", Now.AddDays(13), RedeemOn: "Epic Games"),
+            new FreeGame("Caravan SandWitch", "https://gaming.amazon.com/caravan-sandwitch-aga/dp/amzn1.pg.item.3", Now.AddDays(62), RedeemOn: "Amazon Games"));
+    }
+
+    /// <summary>Generated pictures on the free games cards, the last one of each source kept without (placeholder).</summary>
+    public static void PaintFreeGames(MainWindowViewModel vm)
+    {
+        (uint, uint)[] palettes = [(0xFF2B1D5C, 0xFFE0703A), (0xFF0F3D3E, 0xFF7BC8A4), (0xFF3A0F2E, 0xFFF2B134), (0xFF10233F, 0xFF4FA3E0)];
+        int i = 0;
+        foreach (var section in vm.FreeGames.Sections)
+            foreach (var row in section.Games.SkipLast(1))
+                row.Image = Picture(palettes[i++ % palettes.Length]);
     }
 
     // French names of a few Steam tags, as GetTagList?language=french gives them.

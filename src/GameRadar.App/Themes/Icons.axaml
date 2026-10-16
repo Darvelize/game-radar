@@ -11,6 +11,7 @@
 
     <!-- Navigation -->
     <StreamGeometry x:Key="IconSparkle">M12 3l2 5.5l5.5 2l-5.5 2l-2 5.5l-2-5.5l-5.5-2l5.5-2z M19 16v4 M17 18h4</StreamGeometry>
+    <StreamGeometry x:Key="IconGift">M4 11h16v9h-16z M3 7.5h18v3.5h-18z M12 7.5v12.5 M12 7.5c-1.5-3.5-5.5-4-5.5-1.75s4 1.75 5.5 1.75 M12 7.5c1.5-3.5 5.5-4 5.5-1.75s-4 1.75-5.5 1.75</StreamGeometry>
     <StreamGeometry x:Key="IconHistory">M3.5 12a8.5 8.5 0 1 0 2.5-6 M3.5 4v4h4 M12 8v4.5l3 2</StreamGeometry>
     <StreamGeometry x:Key="IconSettings">M4 7h9 M17 7h3 M15 5v4 M4 17h3 M11 17h9 M9 15v4 M4 12h14 M20 12h0.01</StreamGeometry>
 

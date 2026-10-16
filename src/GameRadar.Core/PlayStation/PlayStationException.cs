@@ -22,5 +22,7 @@ public sealed class PlayStationException : ServiceException
     /// </summary>
     public bool RequiresSignIn { get; }
 
+    public override bool EndsSession => IsSignInError || RequiresSignIn;
+
     internal static PlayStationException RateLimited() => new(CoreStrings.PlayStation_RateLimited) { IsRateLimited = true };
 }

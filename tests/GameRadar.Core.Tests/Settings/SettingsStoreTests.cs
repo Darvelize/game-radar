@@ -21,6 +21,15 @@ public class SettingsStoreTests : IDisposable
     }
 
     [Fact]
+    public async Task The_PS_Plus_Essential_plan_is_saved_by_its_name()
+    {
+        await new SettingsStore(_folder.Path).SaveAsync(new AppSettings { PsPlusPlan = PsPlusTier.Essential });
+
+        Assert.Contains("\"Essential\"", File.ReadAllText(SettingsFile));
+        Assert.Equal(PsPlusTier.Essential, new SettingsStore(_folder.Path).Load().PsPlusPlan);
+    }
+
+    [Fact]
     public void Load_GivesDefaultsWhenFileIsCorrupted()
     {
         Directory.CreateDirectory(_folder.Path);

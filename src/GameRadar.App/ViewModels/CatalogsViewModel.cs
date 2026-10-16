@@ -82,7 +82,7 @@ public sealed partial class CatalogsViewModel : ObservableObject
                 ex, Strings.Error_PsPlusUnreachable, Strings.Error_PsPlusSlow, Strings.Error_PsPlusFormat),
             Describe = c => Localization.Format(Strings.Status_PsPlusCatalog, c.Games.Count, c.FetchedAt.ToLocalTime()),
             // Nothing is asked of playstation.com (nor reported as an error) for someone without PS Plus.
-            IsWanted = () => _filter.HasPsPlusPlan,
+            IsWanted = () => _filter.HasPsPlusCatalog,
             // Its games carry no history badge.
             RebuildsHistory = false
         };

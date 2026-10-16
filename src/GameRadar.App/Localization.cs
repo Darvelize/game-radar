@@ -40,6 +40,12 @@ public static class Localization
     public static string SteamLanguage => IsFrenchUi ? "french" : "english";
 
     /// <summary>
+    /// A Steam store page in the app's language, whatever the Steam account's (l=). Replaces any
+    /// query of the link: the language is the only one a store page needs.
+    /// </summary>
+    public static Uri SteamPage(Uri page) => new UriBuilder(page) { Query = "l=" + SteamLanguage }.Uri;
+
+    /// <summary>
     /// Locale of the xbox.com store pages: fr-FR, or en-GB for English (the
     /// European store, closest to the French catalog GameRadar works with).
     /// </summary>

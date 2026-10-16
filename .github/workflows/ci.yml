@@ -20,12 +20,12 @@ jobs:
     # Windows: GameRadar is Windows-only (DPAPI) and its tests run the real UI stack.
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # The exact SDK of the developer's machine: the third-party notices test
       # compares the notices with the packages of this SDK (see
       # tools/Update-ThirdPartyNotices.ps1). Raise it together with them.
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.401
 

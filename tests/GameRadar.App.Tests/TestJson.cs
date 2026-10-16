@@ -7,4 +7,6 @@ namespace GameRadar.App.Tests;
 internal static class TestJson
 {
     public static string Serialize(GameCatalog catalog) => JsonSerializer.Serialize(catalog, CoreJsonContext.Default.GameCatalog);
+
+    public static string Serialize(FreeGameList list) => JsonSerializer.Serialize(list, CoreJsonContext.Default.FreeGameList);
 }

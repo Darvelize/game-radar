@@ -130,7 +130,7 @@
   <data name="Settings_Data_Portable_Step4" xml:space="preserve"><value>4. Pour revenir au mode normal, renomme ou supprime le dossier « Data » : GameRadar ne le crée jamais lui-même.</value></data>
   <data name="Privacy_Title" xml:space="preserve"><value>Confidentialité</value></data>
   <data name="Privacy_Statement" xml:space="preserve"><value>GameRadar n'a aucun serveur : il ne collecte, ne transmet et ne vend aucune donnée. Ton historique, tes réglages et ses caches restent sur cet ordinateur ; ta session Xbox, ta clé Steam, ton jeton PlayStation et ta connexion Epic y sont chiffrés par Windows ; le jeton EA n'est jamais enregistré. Le journal des erreurs, sans aucun secret, ne quitte cet ordinateur que si tu l'envoies toi-même.</value></data>
-  <data name="Privacy_Services" xml:space="preserve"><value>L'appli ne contacte que les services dont elle a besoin : Microsoft (Xbox Live, catalogue Game Pass et Microsoft Store), Steam (ta bibliothèque, tes succès et ta liste de souhaits si tu connectes ton compte), Sony (PlayStation Network si tu le connectes, catalogue PS Plus si tu as choisi un abonnement PS Plus, PlayStation Store quand tu cherches un jeu à ajouter et pour ses meilleures ventes si la case « PlayStation Store » est cochée, et le catalogue PS Plus à ce moment-là si le PlayStation Store ne répond pas), GOG (ton profil public si tu l'indiques, et le catalogue de ses meilleures ventes, sans compte), EA (tes jeux joués dans l'appli EA, seulement quand tu colles la page EA), Epic Games (tes jeux, ton temps de jeu et tes succès si tu connectes ton compte, et les meilleures ventes, les plus joués et les mieux notés de son catalogue, sans compte), et GitHub pour vérifier les mises à jour. Chacun ne reçoit que ce qu'il faut pour répondre : ta connexion pour lire tes propres données, rien de personnel pour les catalogues.</value></data>
+  <data name="Privacy_Services" xml:space="preserve"><value>L'appli ne contacte que les services dont elle a besoin : Microsoft (Xbox Live, catalogue Game Pass et Microsoft Store), Steam (ton historique, tes succès et ta liste de souhaits si tu connectes ton compte, et ses jeux offerts et week-ends gratuits sur la page « Jeux gratuits », sans compte), Sony (PlayStation Network si tu le connectes, catalogue PS Plus si tu as choisi un abonnement PS Plus, PlayStation Store quand tu cherches un jeu à ajouter et pour ses meilleures ventes si la case « PlayStation Store » est cochée, et le catalogue PS Plus à ce moment-là si le PlayStation Store ne répond pas, et les jeux du mois PS Plus sur la page « Jeux gratuits » si tu as choisi un abonnement), GOG (ton profil public si tu l'indiques, et le catalogue de ses meilleures ventes, sans compte), EA (tes jeux joués dans l'appli EA, seulement quand tu colles la page EA), Epic Games (tes jeux, ton temps de jeu et tes succès si tu connectes ton compte, et les meilleures ventes, les plus joués et les mieux notés de son catalogue ainsi que ses jeux offerts de la semaine, sans compte), Amazon (les jeux offerts aux abonnés Prime, sur la page « Jeux gratuits », sans compte), et GitHub pour vérifier les mises à jour. Chacun ne reçoit que ce qu'il faut pour répondre : ta connexion pour lire tes propres données, rien de personnel pour les catalogues.</value></data>
   <data name="Privacy_Revoke_Title" xml:space="preserve"><value>Retirer l'accès de GameRadar</value></data>
   <data name="Privacy_Revoke_Description" xml:space="preserve"><value>Se déconnecter oublie ta session sur cet ordinateur. Pour retirer aussi l'autorisation donnée à GameRadar, passe par ton compte :</value></data>
   <data name="Privacy_Revoke_Microsoft" xml:space="preserve"><value>Autorisations de mon compte Microsoft</value></data>
@@ -162,7 +162,7 @@
   <data name="Licenses_License" xml:space="preserve"><value>Licence</value></data>
   <data name="Licenses_LicenseText" xml:space="preserve"><value>Texte de la licence {0}</value></data>
   <data name="Licenses_Bundled" xml:space="preserve"><value>Composants inclus dans {0}</value></data>
-  <data name="About_Trademarks" xml:space="preserve"><value>GameRadar est un projet indépendant, non affilié à Microsoft Corporation, Valve Corporation, Sony Interactive Entertainment, GOG sp. z o.o., Electronic Arts Inc. ni Epic Games, Inc., et approuvé par aucune d'elles. Xbox et Game Pass sont des marques de Microsoft Corporation ; Steam est une marque de Valve Corporation ; PlayStation et PlayStation Plus sont des marques de Sony Interactive Entertainment ; GOG et GOG.com sont des marques de GOG sp. z o.o. ; EA et EA Play sont des marques d'Electronic Arts Inc. ; Epic Games et Epic Games Store sont des marques d'Epic Games, Inc. Les jaquettes et noms des jeux appartiennent à leurs éditeurs.</value></data>
+  <data name="About_Trademarks" xml:space="preserve"><value>GameRadar est un projet indépendant, non affilié à Microsoft Corporation, Valve Corporation, Sony Interactive Entertainment, GOG sp. z o.o., Electronic Arts Inc., Epic Games, Inc. ni Amazon.com, Inc., et approuvé par aucune d'elles. Xbox et Game Pass sont des marques de Microsoft Corporation ; Steam est une marque de Valve Corporation ; PlayStation et PlayStation Plus sont des marques de Sony Interactive Entertainment ; GOG et GOG.com sont des marques de GOG sp. z o.o. ; EA et EA Play sont des marques d'Electronic Arts Inc. ; Epic Games et Epic Games Store sont des marques d'Epic Games, Inc. ; Amazon, Prime et Luna sont des marques d'Amazon.com, Inc. ou de ses filiales. Les jaquettes et noms des jeux appartiennent à leurs éditeurs.</value></data>
   <data name="Common_Back_Tip" xml:space="preserve"><value>Revenir à la page précédente (Échap)</value></data>
   <data name="Common_Back" xml:space="preserve"><value>Retour</value></data>
   <data name="News_NewBadge" xml:space="preserve"><value>Nouveau</value></data>
@@ -233,7 +233,7 @@
   <data name="Card_OpenPlayStation_Tip" xml:space="preserve"><value>Voir sa page sur le PlayStation Store</value></data>
   <data name="Recommendations_PsPlus_Tip" xml:space="preserve"><value>Les jeux inclus dans ton abonnement PS Plus (palier à choisir dans les Réglages)</value></data>
   <data name="Settings_PsPlus_Title" xml:space="preserve"><value>Mon abonnement PS Plus</value></data>
-  <data name="Settings_PsPlus_Description" xml:space="preserve"><value>Chaque palier propose des jeux différents : les recommandations PS Plus se limitent au tien. Sans abonnement, aucun jeu PS Plus n'est proposé. Les jeux d'un palier supérieur restent visibles s'ils sont vendus sur Steam.</value></data>
+  <data name="Settings_PsPlus_Description" xml:space="preserve"><value>Chaque palier propose des jeux différents : les recommandations PS Plus se limitent au tien. Sans abonnement, aucun jeu PS Plus n'est proposé. Les jeux d'un palier supérieur restent visibles s'ils sont vendus sur Steam. Essential n'a pas de catalogue : ses jeux du mois sont dans « Jeux gratuits ».</value></data>
   <data name="Common_PsPlusCatalog" xml:space="preserve"><value>Catalogue PS Plus</value></data>
   <data name="Card_OpenXbox_Tip" xml:space="preserve"><value>Voir sa page sur le Store Xbox</value></data>
   <data name="Card_OpenSteam_Tip" xml:space="preserve"><value>Voir sa page sur Steam</value></data>
@@ -344,9 +344,8 @@
   <data name="Account_PlayStationChecking" xml:space="preserve"><value>Vérification de ton jeton PlayStation…</value></data>
   <data name="Account_PlayStationSignedOut" xml:space="preserve"><value>Déconnecté : le jeton est effacé de cet ordinateur. Ton historique PlayStation reste affiché jusqu'à la prochaine connexion.</value></data>
   <data name="Settings_PlayStation_Description" xml:space="preserve"><value>Ajoute tes trophées (PS3, PS4, PS5, Vita) et ton temps de jeu (PS4, PS5) : ils affinent tes recommandations. Sony ne propose pas de connexion aux applis : GameRadar passe par une API non officielle, avec ton jeton de session (NPSSO), qui reste chiffré sur cet ordinateur.</value></data>
-  <data name="Settings_PlayStation_Step1" xml:space="preserve"><value>1. Connecte-toi sur</value></data>
-  <data name="Settings_PlayStation_Step2" xml:space="preserve"><value>2. Puis ouvre</value></data>
-  <data name="Settings_PlayStation_OpenNpsso" xml:space="preserve"><value>la page de ton jeton</value></data>
+  <data name="Settings_PlayStation_Step1" xml:space="preserve"><value>1. Connecte-toi sur playstation.com</value></data>
+  <data name="Settings_PlayStation_Step2" xml:space="preserve"><value>2. Puis ouvre la page de ton jeton</value></data>
   <data name="Settings_PlayStation_Step3" xml:space="preserve"><value>3. Copie tout ce que la page affiche ({"npsso":"…"}) et colle-le ici :</value></data>
   <data name="Settings_PlayStation_NpssoPlaceholder" xml:space="preserve"><value>Jeton NPSSO</value></data>
   <data name="Settings_PlayStation_Connect" xml:space="preserve"><value>Connecter PlayStation</value></data>
@@ -428,9 +427,8 @@
   <data name="History_CompletedOnPlatform_Tip" xml:space="preserve"><value>Terminé d'après la plateforme : platine obtenu. Il manque seulement des trophées de DLC pour « Platiné ».</value></data>
   <data name="Settings_Ea_Title" xml:space="preserve"><value>Compte EA</value></data>
   <data name="Settings_Ea_Description" xml:space="preserve"><value>Ajoute les jeux auxquels tu as joué dans l'appli EA (EA Play compris), avec leur temps de jeu et leurs succès. EA ne propose pas de connexion aux applis : GameRadar passe par une API non officielle, avec un jeton que tu copies depuis la page d'EA. Il vaut 4 heures et n'est jamais enregistré : recolle-le quand tu veux mettre ton historique EA à jour.</value></data>
-  <data name="Settings_Ea_Step1" xml:space="preserve"><value>1. Connecte-toi sur</value></data>
-  <data name="Settings_Ea_Step2" xml:space="preserve"><value>2. Puis ouvre</value></data>
-  <data name="Settings_Ea_OpenPage" xml:space="preserve"><value>la page EA</value></data>
+  <data name="Settings_Ea_Step1" xml:space="preserve"><value>1. Connecte-toi sur ea.com</value></data>
+  <data name="Settings_Ea_Step2" xml:space="preserve"><value>2. Puis ouvre la page EA</value></data>
   <data name="Settings_Ea_Step3" xml:space="preserve"><value>3. Copie tout ce que la page affiche (Ctrl+A, Ctrl+C : {"access_token":…}) et colle-le ici :</value></data>
   <data name="Settings_Ea_TokenPlaceholder" xml:space="preserve"><value>Page EA ({"access_token":…})</value></data>
   <data name="Settings_Ea_Update" xml:space="preserve"><value>Mettre à jour mon historique EA</value></data>
@@ -452,12 +450,31 @@
   <data name="Settings_Epic_CodePlaceholder" xml:space="preserve"><value>Code Epic</value></data>
   <data name="Settings_Epic_Connect" xml:space="preserve"><value>Connecter Epic</value></data>
   <data name="Settings_Epic_Description" xml:space="preserve"><value>Ajoute les jeux auxquels tu as joué sur Epic Games, ton temps de jeu et tes succès (pour les jeux qui en ont) : ils affinent tes recommandations. Epic ne propose pas de connexion aux applis : GameRadar passe par les services non officiels du lanceur Epic, avec un code que tu colles une seule fois ; la connexion reste chiffrée sur cet ordinateur.</value></data>
-  <data name="Settings_Epic_OpenPage" xml:space="preserve"><value>la page de ton code</value></data>
-  <data name="Settings_Epic_Step1" xml:space="preserve"><value>1. Connecte-toi sur</value></data>
-  <data name="Settings_Epic_Step2" xml:space="preserve"><value>2. Puis ouvre</value></data>
+  <data name="Settings_Epic_Step1" xml:space="preserve"><value>1. Connecte-toi sur epicgames.com</value></data>
+  <data name="Settings_Epic_Step2" xml:space="preserve"><value>2. Puis ouvre la page de ton code</value></data>
   <data name="Settings_Epic_Step3" xml:space="preserve"><value>3. Copie tout ce que la page affiche (il contient "authorizationCode") et colle-le ici sans attendre : le code expire vite.</value></data>
   <data name="Settings_Epic_Title" xml:space="preserve"><value>Compte Epic Games</value></data>
   <data name="Status_EpicHistory" xml:space="preserve"><value>{0} jeux joués, dont {1} à 100 % — historique du {2:dd/MM/yyyy 'à' HH:mm}.</value></data>
   <data name="Status_FetchingEpic" xml:space="preserve"><value>Récupération de ton historique Epic…</value></data>
   <data name="Status_NoEpicHistory" xml:space="preserve"><value>Aucun historique Epic : connecte ton compte Epic Games dans Réglages › Comptes pour l'ajouter.</value></data>
+  <data name="Nav_FreeGames" xml:space="preserve"><value>Jeux gratuits</value></data>
+  <data name="FreeGames_Intro" xml:space="preserve"><value>Les jeux offerts en ce moment, à récupérer avant la fin de l'offre : ils restent alors à toi. Les week-ends gratuits de Steam, eux, ne se jouent que pendant l'offre.</value></data>
+  <data name="FreeGames_Until" xml:space="preserve"><value>Gratuit jusqu'au {0:dddd d MMMM} à {0:HH:mm}</value></data>
+  <data name="FreeGames_SteamWeekend" xml:space="preserve"><value>Jouable gratuitement jusqu'au {0:dddd d MMMM} à {0:HH:mm}, sans le garder</value></data>
+  <data name="FreeGames_PrimeUntil" xml:space="preserve"><value>Avec Amazon Prime, jusqu'au {0:dddd d MMMM}</value></data>
+  <data name="FreeGames_PsPlusMonthly" xml:space="preserve"><value>Jeu du mois avec PlayStation Plus</value></data>
+  <data name="FreeGames_RedeemOn" xml:space="preserve"><value>À récupérer sur {0}</value></data>
+  <data name="FreeGames_None" xml:space="preserve"><value>Aucun jeu gratuit en ce moment.</value></data>
+  <data name="FreeGames_PsPlusHint" xml:space="preserve"><value>Choisis ton abonnement PS Plus dans Réglages › Comptes pour voir ses jeux du mois.</value></data>
+  <data name="FreeGames_Fetching" xml:space="preserve"><value>Récupération des jeux gratuits…</value></data>
+  <data name="FreeGames_Unreachable" xml:space="preserve"><value>Impossible de joindre {0}. Vérifie ta connexion Internet.</value></data>
+  <data name="FreeGames_Slow" xml:space="preserve"><value>{0} met trop de temps à répondre. Réessaie plus tard.</value></data>
+  <data name="FreeGames_Open" xml:space="preserve"><value>Voir l'offre</value></data>
+  <data name="Common_PsPlusMonthly" xml:space="preserve"><value>Jeux du mois PS Plus</value></data>
+  <data name="About_PsPlusMonthly" xml:space="preserve"><value>— les jeux du mois de PlayStation Plus Essential, pour la page « Jeux gratuits ». Sans compte, seulement si tu as choisi un abonnement ; liste publique de playstation.com, service non documenté.</value></data>
+  <data name="Common_EpicFreeGames" xml:space="preserve"><value>Jeux gratuits Epic</value></data>
+  <data name="About_EpicFreeGames" xml:space="preserve"><value>— les jeux offerts de la semaine, pour la page « Jeux gratuits ». Sans compte ; liste publique d'Epic Games, service non documenté.</value></data>
+  <data name="Common_SteamFreeGames" xml:space="preserve"><value>Jeux gratuits Steam</value></data>
+  <data name="About_SteamFreeGames" xml:space="preserve"><value>— les jeux offerts et les week-ends gratuits, pour la page « Jeux gratuits ». Sans compte ni clé ; API publique de Steam, service non documenté.</value></data>
+  <data name="About_AmazonFreeGames" xml:space="preserve"><value>— les jeux offerts aux abonnés Prime, pour la page « Jeux gratuits ». Sans compte : GameRadar lit la page publique de Luna comme le site lui-même ; service non documenté.</value></data>
 </root>

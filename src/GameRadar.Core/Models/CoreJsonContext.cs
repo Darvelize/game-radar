@@ -11,6 +11,7 @@ namespace GameRadar.Core.Models;
 /// being listed in one fails at its first use.
 /// </summary>
 [JsonSerializable(typeof(GameCatalog))]
+[JsonSerializable(typeof(FreeGameList))]
 // The update check's one field, from GitHub.
 [JsonSerializable(typeof(GitHubReleaseDto))]
 internal sealed partial class CoreJsonContext : JsonSerializerContext;

@@ -1,5 +1,3 @@
-using Avalonia.Media.Imaging;
-using CommunityToolkit.Mvvm.ComponentModel;
 using GameRadar.Core.Models;
 using GameRadar.Core.Services;
 using GameRadar.Core.Steam;
@@ -10,13 +8,8 @@ namespace GameRadar.App.ViewModels;
 /// One recommended game, with every label already formatted.
 /// Observable because its picture arrives after the card is shown.
 /// </summary>
-public sealed partial class RecommendationRow : ObservableObject
+public sealed partial class RecommendationRow : PictureCard
 {
-    // Twice the card width (280 px), so the picture stays sharp on high-DPI
-    // screens; the image server resizes on the fly (~30 KB instead of ~250 KB).
-    private const string ImageSize = "w=560&h=315&q=80";
-    private const string EpicImageSize = "resize=1&w=640&h=360&quality=medium";
-    public const int ImageDecodeWidth = 560;
     /// <summary>A game close to a favorite: the reason is what they share.</summary>
     /// <param name="tagNames">French names of the Steam tags (tag id → name).</param>
     public RecommendationRow(SimilarGame similar, IReadOnlyDictionary<int, string>? tagNames = null)
@@ -142,9 +135,8 @@ public sealed partial class RecommendationRow : ObservableObject
         PsStorePage = !game.InPsPlus && game.PlayStationProductId is { } productId
             ? new Uri($"https://store.playstation.com/{Localization.PlayStationStoreLocale}/product/{Uri.EscapeDataString(productId)}")
             : null;
-        // l=: the page in the language of the app, whatever the Steam account's.
         SteamPage = game.SteamAppId is { } appId
-            ? new Uri($"https://store.steampowered.com/app/{Uri.EscapeDataString(appId)}/?l={Localization.SteamLanguage}")
+            ? Localization.SteamPage(new Uri($"https://store.steampowered.com/app/{Uri.EscapeDataString(appId)}/"))
             : null;
         // The link comes from GOG's answer, as is: only an https page of gog.com is opened.
         GogPage = Uri.TryCreate(game.GogStoreLink, UriKind.Absolute, out var gogPage)
@@ -153,10 +145,7 @@ public sealed partial class RecommendationRow : ObservableObject
             ? gogPage : null;
         // The same for Epic: an https page of store.epicgames.com only, opened in
         // the language of the app (the catalog keeps "/p/<slug>", without language).
-        EpicPage = Uri.TryCreate(game.EpicStoreLink, UriKind.Absolute, out var epicPage)
-            && epicPage.Scheme == Uri.UriSchemeHttps && epicPage.Host == "store.epicgames.com"
-            ? new Uri($"https://store.epicgames.com/{Localization.EpicStoreLocale}{epicPage.AbsolutePath}")
-            : null;
+        EpicPage = CardPicture.StorePage(game.EpicStoreLink, Localization.EpicStoreLocale, "store.epicgames.com");
         ReasonLabel = string.Empty;
         // The Microsoft and PlayStation image servers resize on the fly (the
         // PlayStation pictures are 1024 px squares); Steam pictures come at
@@ -165,33 +154,10 @@ public sealed partial class RecommendationRow : ObservableObject
         // A PS Plus game sold on Steam keeps its PlayStation picture.
         ImageUrl = game.ImageUrl is not { } url ? null : store switch
         {
-            CatalogSource.Epic => WithQuery(url, EpicImageSize),
+            CatalogSource.Epic => CardPicture.Resized(url, CardPicture.EpicSize),
             CatalogSource.Steam or CatalogSource.Gog => url,
-            _ => WithQuery(url, ImageSize)
+            _ => CardPicture.Resized(url, CardPicture.ServerSize)
         };
-    }
-
-    private static string WithQuery(string url, string query) => url + (url.Contains('?') ? "&" : "?") + query;
-
-    /// <summary>Resized picture address, or null when the game has none.</summary>
-    public string? ImageUrl { get; }
-
-    /// <summary>Set once downloaded and decoded; until then the card shows its placeholder.</summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasImage))]
-    public partial Bitmap? Image { get; set; }
-
-    public bool HasImage => Image is not null;
-
-    /// <summary>
-    /// Frees the decoded picture. A Bitmap holds native memory that the
-    /// garbage collector does not see: dispose it when the card goes away.
-    /// </summary>
-    public void ReleaseImage()
-    {
-        var image = Image;
-        Image = null;
-        image?.Dispose();
     }
 
     public string Title { get; }

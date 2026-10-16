@@ -3,6 +3,18 @@
 English translation of `CHANGELOG.md` (the French file comes first): same versions, same dates, same parts (`### Improvements` for `### Évolutions`, `### Fixes` for `### Corrections`), as many lines (checked by the tests).
 Shown by the app when it runs in English, and used for the English part of the GitHub release notes.
 
+## 1.7.0 — 2026-10-16
+
+### Improvements
+
+- New "Free games" page, in the sidebar: the games Epic Games (this week's), Steam (with its free weekends, playable only during the offer) and Amazon Prime (with where to redeem them: GOG, Epic Games, Amazon Games…) give away right now, with the end of each offer and a button to go and claim them. Nothing is downloaded before the page is opened, and at most once a day.
+- "My PS Plus subscription" also offers PlayStation Plus Essential: its games of the month show in "Free games" (Extra and Premium show them too).
+
+### Fixes
+
+- Steam, EA, Epic and PlayStation sync: when the network stops answering, it stops at once instead of waiting up to 30 seconds per game; the missing achievements and trophies are read at the next sync.
+- PlayStation history: a game whose trophies could not be read yet no longer shows twice.
+
 ## 1.6.2 — 2026-10-14
 
 ### Improvements

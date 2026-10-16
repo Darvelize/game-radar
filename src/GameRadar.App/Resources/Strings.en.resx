@@ -125,7 +125,7 @@
   <data name="Settings_Data_Portable_Step4" xml:space="preserve"><value>4. To go back to the normal mode, rename or delete the "Data" folder: GameRadar never creates it itself.</value></data>
   <data name="Privacy_Title" xml:space="preserve"><value>Privacy</value></data>
   <data name="Privacy_Statement" xml:space="preserve"><value>GameRadar has no server: it collects, transmits and sells no data. Your history, your settings and its caches stay on this computer; your Xbox session, your Steam key, your PlayStation token and your Epic sign-in are encrypted there by Windows; the EA token is never saved. The error log, free of any secret, only leaves this computer if you send it yourself.</value></data>
-  <data name="Privacy_Services" xml:space="preserve"><value>The app only contacts the services it needs: Microsoft (Xbox Live, Game Pass catalog and Microsoft Store), Steam (your library, achievements and wishlist if you connect your account), Sony (PlayStation Network if you connect it, the PS Plus catalog if you chose a PS Plus plan, the PlayStation Store when you search for a game to add and for its top sellers if the &quot;PlayStation Store&quot; box is ticked, and the PS Plus catalog then if the PlayStation Store does not answer), GOG (your public profile if you enter it, and the catalog of its best sellers, without an account), EA (the games you played in the EA app, only when you paste the EA page), Epic Games (your games, play time and achievements if you connect your account, and the top sellers, most played and top rated of its catalog, without an account), and GitHub to check for updates. Each one only receives what it needs to answer: your sign-in to read your own data, nothing personal for the catalogs.</value></data>
+  <data name="Privacy_Services" xml:space="preserve"><value>The app only contacts the services it needs: Microsoft (Xbox Live, Game Pass catalog and Microsoft Store), Steam (your history, achievements and wishlist if you connect your account, and its games given away and free weekends on the &quot;Free games&quot; page, without an account), Sony (PlayStation Network if you connect it, the PS Plus catalog if you chose a PS Plus plan, the PlayStation Store when you search for a game to add and for its top sellers if the &quot;PlayStation Store&quot; box is ticked, and the PS Plus catalog then if the PlayStation Store does not answer, and the PS Plus games of the month on the &quot;Free games&quot; page if you chose a plan), GOG (your public profile if you enter it, and the catalog of its best sellers, without an account), EA (the games you played in the EA app, only when you paste the EA page), Epic Games (your games, play time and achievements if you connect your account, and the top sellers, most played and top rated of its catalog as well as its games given away this week, without an account), Amazon (the games given to Prime members, on the &quot;Free games&quot; page, without an account), and GitHub to check for updates. Each one only receives what it needs to answer: your sign-in to read your own data, nothing personal for the catalogs.</value></data>
   <data name="Privacy_Revoke_Title" xml:space="preserve"><value>Remove GameRadar's access</value></data>
   <data name="Privacy_Revoke_Description" xml:space="preserve"><value>Signing out forgets your session on this computer. To also remove the permission given to GameRadar, go through your account:</value></data>
   <data name="Privacy_Revoke_Microsoft" xml:space="preserve"><value>My Microsoft account permissions</value></data>
@@ -157,7 +157,7 @@
   <data name="Licenses_License" xml:space="preserve"><value>License</value></data>
   <data name="Licenses_LicenseText" xml:space="preserve"><value>{0} license text</value></data>
   <data name="Licenses_Bundled" xml:space="preserve"><value>Components included in {0}</value></data>
-  <data name="About_Trademarks" xml:space="preserve"><value>GameRadar is an independent project, not affiliated with nor endorsed by Microsoft Corporation, Valve Corporation, Sony Interactive Entertainment, GOG sp. z o.o., Electronic Arts Inc. or Epic Games, Inc. Xbox and Game Pass are trademarks of Microsoft Corporation; Steam is a trademark of Valve Corporation; PlayStation and PlayStation Plus are trademarks of Sony Interactive Entertainment; GOG and GOG.com are trademarks of GOG sp. z o.o.; EA and EA Play are trademarks of Electronic Arts Inc.; Epic Games and Epic Games Store are trademarks of Epic Games, Inc. Game covers and names belong to their publishers.</value></data>
+  <data name="About_Trademarks" xml:space="preserve"><value>GameRadar is an independent project, not affiliated with nor endorsed by Microsoft Corporation, Valve Corporation, Sony Interactive Entertainment, GOG sp. z o.o., Electronic Arts Inc., Epic Games, Inc. or Amazon.com, Inc. Xbox and Game Pass are trademarks of Microsoft Corporation; Steam is a trademark of Valve Corporation; PlayStation and PlayStation Plus are trademarks of Sony Interactive Entertainment; GOG and GOG.com are trademarks of GOG sp. z o.o.; EA and EA Play are trademarks of Electronic Arts Inc.; Epic Games and Epic Games Store are trademarks of Epic Games, Inc.; Amazon, Prime and Luna are trademarks of Amazon.com, Inc. or its affiliates. Game covers and names belong to their publishers.</value></data>
   <data name="Common_Back_Tip" xml:space="preserve"><value>Back to the previous page (Esc)</value></data>
   <data name="Common_Back" xml:space="preserve"><value>Back</value></data>
   <data name="News_NewBadge" xml:space="preserve"><value>New</value></data>
@@ -228,7 +228,7 @@
   <data name="Card_OpenPlayStation_Tip" xml:space="preserve"><value>See its page on the PlayStation Store</value></data>
   <data name="Recommendations_PsPlus_Tip" xml:space="preserve"><value>The games included in your PS Plus subscription (choose your plan in the Settings)</value></data>
   <data name="Settings_PsPlus_Title" xml:space="preserve"><value>My PS Plus subscription</value></data>
-  <data name="Settings_PsPlus_Description" xml:space="preserve"><value>Each plan offers different games: the PS Plus recommendations are limited to yours. Without a subscription, no PS Plus game is suggested. The games of a higher plan stay visible if they are sold on Steam.</value></data>
+  <data name="Settings_PsPlus_Description" xml:space="preserve"><value>Each plan offers different games: the PS Plus recommendations are limited to yours. Without a subscription, no PS Plus game is suggested. The games of a higher plan stay visible if they are sold on Steam. Essential has no catalog: its games of the month are in &quot;Free games&quot;.</value></data>
   <data name="Common_PsPlusCatalog" xml:space="preserve"><value>PS Plus catalog</value></data>
   <data name="Card_OpenXbox_Tip" xml:space="preserve"><value>See its page on the Xbox Store</value></data>
   <data name="Card_OpenSteam_Tip" xml:space="preserve"><value>See its page on Steam</value></data>
@@ -339,9 +339,8 @@
   <data name="Account_PlayStationChecking" xml:space="preserve"><value>Checking your PlayStation token…</value></data>
   <data name="Account_PlayStationSignedOut" xml:space="preserve"><value>Signed out: the token is erased from this computer. Your PlayStation history stays shown until you connect again.</value></data>
   <data name="Settings_PlayStation_Description" xml:space="preserve"><value>Add your trophies (PS3, PS4, PS5, Vita) and your play time (PS4, PS5): they refine your recommendations. Sony offers no sign-in for apps: GameRadar goes through an unofficial API, with your session token (NPSSO), which stays encrypted on this computer.</value></data>
-  <data name="Settings_PlayStation_Step1" xml:space="preserve"><value>1. Sign in on</value></data>
-  <data name="Settings_PlayStation_Step2" xml:space="preserve"><value>2. Then open</value></data>
-  <data name="Settings_PlayStation_OpenNpsso" xml:space="preserve"><value>the page of your token</value></data>
+  <data name="Settings_PlayStation_Step1" xml:space="preserve"><value>1. Sign in on playstation.com</value></data>
+  <data name="Settings_PlayStation_Step2" xml:space="preserve"><value>2. Then open the page of your token</value></data>
   <data name="Settings_PlayStation_Step3" xml:space="preserve"><value>3. Copy everything the page shows ({"npsso":"…"}) and paste it here:</value></data>
   <data name="Settings_PlayStation_NpssoPlaceholder" xml:space="preserve"><value>NPSSO token</value></data>
   <data name="Settings_PlayStation_Connect" xml:space="preserve"><value>Connect PlayStation</value></data>
@@ -423,9 +422,8 @@
   <data name="History_CompletedOnPlatform_Tip" xml:space="preserve"><value>Finished according to the platform: platinum earned. Only DLC trophies are missing for "Mastered".</value></data>
   <data name="Settings_Ea_Title" xml:space="preserve"><value>EA account</value></data>
   <data name="Settings_Ea_Description" xml:space="preserve"><value>Add the games you played in the EA app (EA Play included), with their play time and achievements. EA offers no sign-in for apps: GameRadar goes through an unofficial API, with a token you copy from EA's page. It lasts 4 hours and is never saved: paste it again whenever you want to update your EA history.</value></data>
-  <data name="Settings_Ea_Step1" xml:space="preserve"><value>1. Sign in to</value></data>
-  <data name="Settings_Ea_Step2" xml:space="preserve"><value>2. Then open</value></data>
-  <data name="Settings_Ea_OpenPage" xml:space="preserve"><value>the EA page</value></data>
+  <data name="Settings_Ea_Step1" xml:space="preserve"><value>1. Sign in to ea.com</value></data>
+  <data name="Settings_Ea_Step2" xml:space="preserve"><value>2. Then open the EA page</value></data>
   <data name="Settings_Ea_Step3" xml:space="preserve"><value>3. Copy everything the page shows (Ctrl+A, Ctrl+C: {"access_token":…}) and paste it here:</value></data>
   <data name="Settings_Ea_TokenPlaceholder" xml:space="preserve"><value>EA page ({"access_token":…})</value></data>
   <data name="Settings_Ea_Update" xml:space="preserve"><value>Update my EA history</value></data>
@@ -447,12 +445,31 @@
   <data name="Settings_Epic_CodePlaceholder" xml:space="preserve"><value>Epic code</value></data>
   <data name="Settings_Epic_Connect" xml:space="preserve"><value>Connect Epic</value></data>
   <data name="Settings_Epic_Description" xml:space="preserve"><value>Add the games you played on Epic Games, your play time and achievements (for the games that have some): they refine your recommendations. Epic offers no sign-in for apps: GameRadar goes through the unofficial services of the Epic launcher, with a code you paste only once; the sign-in stays encrypted on this computer.</value></data>
-  <data name="Settings_Epic_OpenPage" xml:space="preserve"><value>the page of your code</value></data>
-  <data name="Settings_Epic_Step1" xml:space="preserve"><value>1. Sign in to</value></data>
-  <data name="Settings_Epic_Step2" xml:space="preserve"><value>2. Then open</value></data>
+  <data name="Settings_Epic_Step1" xml:space="preserve"><value>1. Sign in to epicgames.com</value></data>
+  <data name="Settings_Epic_Step2" xml:space="preserve"><value>2. Then open the page of your code</value></data>
   <data name="Settings_Epic_Step3" xml:space="preserve"><value>3. Copy everything the page shows (it contains "authorizationCode") and paste it here right away: the code expires quickly.</value></data>
   <data name="Settings_Epic_Title" xml:space="preserve"><value>Epic Games account</value></data>
   <data name="Status_EpicHistory" xml:space="preserve"><value>{0} games played, {1} of them at 100% — history as of {2:dd/MM/yyyy 'at' HH:mm}.</value></data>
   <data name="Status_FetchingEpic" xml:space="preserve"><value>Fetching your Epic history…</value></data>
   <data name="Status_NoEpicHistory" xml:space="preserve"><value>No Epic history: connect your Epic Games account in Settings › Accounts to add it.</value></data>
+  <data name="Nav_FreeGames" xml:space="preserve"><value>Free games</value></data>
+  <data name="FreeGames_Intro" xml:space="preserve"><value>The games given away right now: claim them before the offer ends and they are yours to keep. Steam's free weekends, though, can only be played during the offer.</value></data>
+  <data name="FreeGames_Until" xml:space="preserve"><value>Free until {0:dddd, MMMM d} at {0:h:mm tt}</value></data>
+  <data name="FreeGames_SteamWeekend" xml:space="preserve"><value>Free to play until {0:dddd, MMMM d} at {0:h:mm tt}, not to keep</value></data>
+  <data name="FreeGames_PrimeUntil" xml:space="preserve"><value>With Amazon Prime, until {0:dddd, MMMM d}</value></data>
+  <data name="FreeGames_PsPlusMonthly" xml:space="preserve"><value>Game of the month with PlayStation Plus</value></data>
+  <data name="FreeGames_RedeemOn" xml:space="preserve"><value>Redeem on {0}</value></data>
+  <data name="FreeGames_None" xml:space="preserve"><value>No free game right now.</value></data>
+  <data name="FreeGames_PsPlusHint" xml:space="preserve"><value>Choose your PS Plus subscription in Settings › Accounts to see its games of the month.</value></data>
+  <data name="FreeGames_Fetching" xml:space="preserve"><value>Fetching the free games…</value></data>
+  <data name="FreeGames_Unreachable" xml:space="preserve"><value>Cannot reach {0}. Check your Internet connection.</value></data>
+  <data name="FreeGames_Slow" xml:space="preserve"><value>{0} is taking too long to answer. Try again later.</value></data>
+  <data name="FreeGames_Open" xml:space="preserve"><value>See the offer</value></data>
+  <data name="Common_PsPlusMonthly" xml:space="preserve"><value>PS Plus games of the month</value></data>
+  <data name="About_PsPlusMonthly" xml:space="preserve"><value>— the PlayStation Plus Essential games of the month, for the &quot;Free games&quot; page. Without an account, only if you chose a plan; public list of playstation.com, undocumented service.</value></data>
+  <data name="Common_EpicFreeGames" xml:space="preserve"><value>Epic free games</value></data>
+  <data name="About_EpicFreeGames" xml:space="preserve"><value>— the games given away this week, for the &quot;Free games&quot; page. Without an account; public list of Epic Games, undocumented service.</value></data>
+  <data name="Common_SteamFreeGames" xml:space="preserve"><value>Steam free games</value></data>
+  <data name="About_SteamFreeGames" xml:space="preserve"><value>— the games given away and the free weekends, for the &quot;Free games&quot; page. Without an account or key; public API of Steam, undocumented service.</value></data>
+  <data name="About_AmazonFreeGames" xml:space="preserve"><value>— the games given to Prime members, for the &quot;Free games&quot; page. Without an account: GameRadar reads the public Luna page as the site itself does; undocumented service.</value></data>
 </root>

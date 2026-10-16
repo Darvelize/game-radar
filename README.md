@@ -8,7 +8,7 @@
 
 **English** · [Français plus bas](#francais)
 
-A Windows app that recommends games based on what you really played: games finished, 100%-completed, playtime on Xbox, Steam, PlayStation, GOG, EA and Epic. It picks from **your** Game Pass or PS Plus plan, or from the Steam, GOG, Epic and PlayStation Store best sellers.
+A Windows app that recommends games based on what you really played: games finished, 100%-completed, playtime on Xbox, Steam, PlayStation, GOG, EA and Epic. It picks from **your** Game Pass or PS Plus plan, or from the Steam, GOG, Epic and PlayStation Store best sellers. A **Free games** page also lists what Epic, Steam, PS Plus and Amazon Prime give away right now.
 
 A personal project: free, no ads, no account, no server. The code is right here, under the [MIT](LICENSE) license.
 
@@ -35,6 +35,7 @@ Sites contacted, only for the accounts and catalogs you use:
 | EA | `service-aggregation-layer.juno.ea.com` |
 | Epic | `*.epicgames.com` |
 | GOG | `www.gog.com`, `catalog.gog.com` |
+| Free games (Amazon Prime) | `luna.amazon.com` (no account) |
 | Updates | `api.github.com` (one request at startup, no personal data) |
 | Covers | the image servers of those same stores |
 
@@ -93,7 +94,7 @@ Open an [issue](../../issues). **Settings › About › Error log** opens the lo
 
 Code under the [MIT](LICENSE) license. The app has its [terms of use](legal/LICENSE.txt): provided as is, without warranty. Component licenses: [THIRD-PARTY-NOTICES.txt](legal/THIRD-PARTY-NOTICES.txt).
 
-GameRadar uses undocumented services that may change without notice. It is an independent project, not affiliated with nor endorsed by Microsoft Corporation, Valve Corporation, Sony Interactive Entertainment, GOG sp. z o.o., Electronic Arts Inc. or Epic Games, Inc. Xbox and Game Pass are trademarks of Microsoft Corporation; Steam, of Valve Corporation; PlayStation and PlayStation Plus, of Sony Interactive Entertainment; GOG and GOG.com, of GOG sp. z o.o.; EA and EA Play, of Electronic Arts Inc.; Epic Games and Epic Games Store, of Epic Games, Inc. Game covers and names belong to their publishers.
+GameRadar uses undocumented services that may change without notice. It is an independent project, not affiliated with nor endorsed by Microsoft Corporation, Valve Corporation, Sony Interactive Entertainment, GOG sp. z o.o., Electronic Arts Inc., Epic Games, Inc. or Amazon.com, Inc. Xbox and Game Pass are trademarks of Microsoft Corporation; Steam, of Valve Corporation; PlayStation and PlayStation Plus, of Sony Interactive Entertainment; GOG and GOG.com, of GOG sp. z o.o.; EA and EA Play, of Electronic Arts Inc.; Epic Games and Epic Games Store, of Epic Games, Inc.; Amazon, Prime and Luna, of Amazon.com, Inc. or its affiliates. Game covers and names belong to their publishers.
 
 ---
 
@@ -101,7 +102,7 @@ GameRadar uses undocumented services that may change without notice. It is an in
 
 # GameRadar (Français)
 
-Une appli Windows qui te recommande des jeux d'après ce que tu as vraiment joué : jeux finis, platinés, temps de jeu sur Xbox, Steam, PlayStation, GOG, EA et Epic. Elle pioche dans **ton** palier Game Pass ou PS Plus, ou dans les meilleures ventes Steam, GOG, Epic et PlayStation Store.
+Une appli Windows qui te recommande des jeux d'après ce que tu as vraiment joué : jeux finis, platinés, temps de jeu sur Xbox, Steam, PlayStation, GOG, EA et Epic. Elle pioche dans **ton** palier Game Pass ou PS Plus, ou dans les meilleures ventes Steam, GOG, Epic et PlayStation Store. Une page **Jeux gratuits** montre aussi ce qu'Epic, Steam, PS Plus et Amazon Prime offrent en ce moment.
 
 Projet perso, gratuit, sans pub, sans compte, sans serveur. Le code est ici, sous licence [MIT](LICENSE).
 
@@ -128,6 +129,7 @@ Sites contactés, seulement pour les comptes et catalogues que tu utilises :
 | EA | `service-aggregation-layer.juno.ea.com` |
 | Epic | `*.epicgames.com` |
 | GOG | `www.gog.com`, `catalog.gog.com` |
+| Jeux gratuits (Amazon Prime) | `luna.amazon.com` (sans compte) |
 | Mises à jour | `api.github.com` (une requête au démarrage, sans donnée personnelle) |
 | Jaquettes | les serveurs d'images de ces mêmes boutiques |
 
@@ -186,4 +188,4 @@ Ouvre une [issue](../../issues). **Réglages › À propos › Journal des erreu
 
 Code sous licence [MIT](LICENSE). L'appli a ses [conditions d'utilisation](legal/LICENSE.txt) : fournie telle quelle, sans garantie. Licences des composants : [THIRD-PARTY-NOTICES.txt](legal/THIRD-PARTY-NOTICES.txt).
 
-GameRadar utilise des services non documentés qui peuvent changer sans prévenir. C'est un projet indépendant, ni affilié à Microsoft Corporation, Valve Corporation, Sony Interactive Entertainment, GOG sp. z o.o., Electronic Arts Inc. ou Epic Games, Inc., ni approuvé par l'une d'elles. Xbox et Game Pass sont des marques de Microsoft Corporation ; Steam, de Valve Corporation ; PlayStation et PlayStation Plus, de Sony Interactive Entertainment ; GOG et GOG.com, de GOG sp. z o.o. ; EA et EA Play, d'Electronic Arts Inc. ; Epic Games et Epic Games Store, d'Epic Games, Inc. Les jaquettes et noms des jeux appartiennent à leurs éditeurs.
+GameRadar utilise des services non documentés qui peuvent changer sans prévenir. C'est un projet indépendant, ni affilié à Microsoft Corporation, Valve Corporation, Sony Interactive Entertainment, GOG sp. z o.o., Electronic Arts Inc., Epic Games, Inc. ou Amazon.com, Inc., ni approuvé par l'une d'elles. Xbox et Game Pass sont des marques de Microsoft Corporation ; Steam, de Valve Corporation ; PlayStation et PlayStation Plus, de Sony Interactive Entertainment ; GOG et GOG.com, de GOG sp. z o.o. ; EA et EA Play, d'Electronic Arts Inc. ; Epic Games et Epic Games Store, d'Epic Games, Inc. ; Amazon, Prime et Luna, d'Amazon.com, Inc. ou de ses filiales. Les jaquettes et noms des jeux appartiennent à leurs éditeurs.

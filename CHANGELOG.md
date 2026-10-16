@@ -4,6 +4,18 @@ Source unique des notes de version : l'appli affiche ce fichier (page « Nouveau
 Format lu par `Changelog.Parse` : `## <version>` (suivi de ` — <AAAA-MM-JJ>` une fois publiée), puis les parties `### Évolutions` et `### Corrections` (depuis la 1.2.0), chacune avec une ligne `- ` par nouveauté, en français, écrite pour les joueurs.
 Traduction anglaise : `CHANGELOG.en.md` (`### Improvements`, `### Fixes`), mêmes versions, mêmes dates, mêmes parties, autant de lignes (vérifié par les tests).
 
+## 1.7.0 — 2026-10-16
+
+### Évolutions
+
+- Nouvelle page « Jeux gratuits », dans la barre latérale : les jeux offerts en ce moment par Epic Games (ceux de la semaine), par Steam (avec ses week-ends gratuits, jouables seulement pendant l'offre) et par Amazon Prime (avec l'endroit où les récupérer : GOG, Epic Games, Amazon Games…), avec la fin de chaque offre et un bouton pour aller les récupérer. Rien n'est téléchargé avant d'ouvrir la page, et au plus une fois par jour.
+- « Mon abonnement PS Plus » propose aussi PlayStation Plus Essential : ses jeux du mois apparaissent dans « Jeux gratuits » (Extra et Premium les montrent aussi).
+
+### Corrections
+
+- Synchronisation Steam, EA, Epic et PlayStation : quand le réseau ne répond plus, elle s'arrête aussitôt au lieu d'attendre jusqu'à 30 secondes par jeu ; les succès et trophées qui manquent sont lus à la synchronisation suivante.
+- Historique PlayStation : un jeu dont les trophées n'ont pas encore pu être lus n'apparaît plus deux fois.
+
 ## 1.6.2 — 2026-10-14
 
 ### Évolutions

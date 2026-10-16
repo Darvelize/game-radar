@@ -22,9 +22,47 @@ public static class StoreLookup
     /// The network, not the service: unreachable, an unexpected answer, or
     /// too slow (the HttpClient timeout, not <paramref name="ct"/>).
     /// </summary>
-    public static bool Transient(Exception ex, CancellationToken ct) =>
+    private static bool Transient(Exception ex, CancellationToken ct) =>
         ex is HttpRequestException or JsonException
         || (ex is OperationCanceledException && !ct.IsCancellationRequested);
+
+    /// <summary>No answer at all: unreachable, or too slow (the HttpClient timeout, not <paramref name="ct"/>).</summary>
+    private static bool Unreachable(Exception ex, CancellationToken ct) =>
+        ex is HttpRequestException { StatusCode: null }
+        || (ex is OperationCanceledException && !ct.IsCancellationRequested);
+
+    /// <summary>
+    /// The details of a history (achievements, trophies), one request per item,
+    /// <paramref name="maxAtOnce"/> at a time: the same rule for every platform. An item
+    /// whose answer fails (the service refused or broke it, an odd answer) is skipped and
+    /// asked again at the next sync; the network failing (no answer, each request waiting
+    /// up to 30 s) skips the items not started yet; an ended session or the rate limit go up.
+    /// </summary>
+    internal static async Task FetchEachAsync<TItem>(
+        IEnumerable<TItem> items, int maxAtOnce, Func<TItem, CancellationToken, Task> fetchOne, CancellationToken ct)
+    {
+        bool unreachable = false;
+        await Parallel.ForEachAsync(items,
+            new ParallelOptions { MaxDegreeOfParallelism = maxAtOnce, CancellationToken = ct },
+            async (item, token) =>
+            {
+                if (Volatile.Read(ref unreachable))
+                    return;
+                try
+                {
+                    await fetchOne(item, token).ConfigureAwait(false);
+                }
+                // Against ct, not token: the requests that an error going up stops land
+                // here too, so only that error goes up.
+                catch (Exception ex) when (Unreachable(ex, ct))
+                {
+                    Volatile.Write(ref unreachable, true);
+                }
+                catch (Exception ex) when (ex is ServiceException { IsRateLimited: false, EndsSession: false } || Transient(ex, ct))
+                {
+                }
+            }).ConfigureAwait(false);
+    }
 
     /// <summary>
     /// One request per item, <paramref name="maxAtOnce"/> at a time, answers in the items'

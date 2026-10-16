@@ -93,9 +93,8 @@ public sealed class EpicHistorySource
     /// <summary>
     /// The title of each game played not known yet, then the achievements of
     /// the games whose play time grew since they were read, one request each,
-    /// most played first. One game failing (an odd or refused answer) is asked
-    /// again next time; the network failing, a refused session or the rate limit
-    /// stop the loop. What was read is saved whatever happens.
+    /// most played first, by the rule of every platform (<see cref="StoreLookup.FetchEachAsync"/>).
+    /// What was read is saved whatever happens.
     /// </summary>
     private async Task FetchDetailsAsync(
         EpicClient client, IReadOnlyList<(EpicLibraryEntry Entry, int Minutes)> played,
@@ -105,35 +104,24 @@ public sealed class EpicHistorySource
         var newAchievements = new Dictionary<string, EpicAchievementEntry>();
         try
         {
-            foreach (var (entry, minutes) in played)
+            // One game at a time (the dictionaries are not shared), by the rule of every platform.
+            await StoreLookup.FetchEachAsync(played, 1, async (game, token) =>
             {
-                try
+                var (entry, minutes) = game;
+                if (!titles.TryGetValue(entry.CatalogItemId, out var title))
                 {
-                    if (!titles.TryGetValue(entry.CatalogItemId, out var title))
-                    {
-                        // Unknown to the catalog: asked again next time (rare).
-                        if (await client.FetchCatalogItemAsync(entry.Namespace, entry.CatalogItemId, ct).ConfigureAwait(false) is not { } found)
-                            continue;
-                        title = titles[entry.CatalogItemId] = newTitles[entry.CatalogItemId] = found;
-                    }
-                    if (!title.IsGame || achievements.GetValueOrDefault(entry.AppName) is { } known && known.Minutes >= minutes)
-                        continue;
+                    // Unknown to the catalog: asked again next time (rare).
+                    if (await client.FetchCatalogItemAsync(entry.Namespace, entry.CatalogItemId, token).ConfigureAwait(false) is not { } found)
+                        return;
+                    title = titles[entry.CatalogItemId] = newTitles[entry.CatalogItemId] = found;
+                }
+                if (!title.IsGame || achievements.GetValueOrDefault(entry.AppName) is { } known && known.Minutes >= minutes)
+                    return;
 
-                    int? total = await client.FetchAchievementsTotalAsync(entry.Namespace, ct).ConfigureAwait(false);
-                    int unlocked = total is > 0 ? await client.FetchAchievementsUnlockedAsync(entry.Namespace, ct).ConfigureAwait(false) : 0;
-                    achievements[entry.AppName] = newAchievements[entry.AppName] = new EpicAchievementEntry(unlocked, total ?? 0, minutes);
-                }
-                catch (EpicException ex) when (ex is { IsTokenRefused: false, IsRateLimited: false })
-                {
-                    // This game's answer only (odd, refused, a 5xx): the next game is asked.
-                }
-                catch (Exception ex) when (StoreLookup.Transient(ex, ct))
-                {
-                    // Unreachable or too slow: the next requests would wait as long
-                    // (30 s each); the rest is asked at the next sync.
-                    break;
-                }
-            }
+                int? total = await client.FetchAchievementsTotalAsync(entry.Namespace, token).ConfigureAwait(false);
+                int unlocked = total is > 0 ? await client.FetchAchievementsUnlockedAsync(entry.Namespace, token).ConfigureAwait(false) : 0;
+                achievements[entry.AppName] = newAchievements[entry.AppName] = new EpicAchievementEntry(unlocked, total ?? 0, minutes);
+            }, ct).ConfigureAwait(false);
         }
         finally
         {

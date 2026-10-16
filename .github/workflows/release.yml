@@ -35,10 +35,10 @@ jobs:
       id-token: write      # sign the attestation
       attestations: write  # store the attestation
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Same SDK as ci.yml (the third-party notices test depends on it).
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.401
 
@@ -73,7 +73,7 @@ jobs:
           ./tools/Build-ReleaseNotes.ps1 -Version '${{ steps.version.outputs.version }}' -ExePath publish/GameRadar.exe -OutFile publish/release-notes.md
           Get-Content publish/release-notes.md -Raw | Out-File -Append -Encoding utf8 $env:GITHUB_STEP_SUMMARY
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: GameRadar-${{ steps.version.outputs.version }}
           path: |
@@ -83,7 +83,7 @@ jobs:
       # Only for a real release: a dry run attests nothing.
       - name: Attest the build provenance
         if: github.event_name == 'push' || inputs.dry-run == false
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: publish/GameRadar.exe
 

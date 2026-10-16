@@ -29,6 +29,26 @@ public class AccessTokenCacheTests
     }
 
     [Fact]
+    public async Task ARenewalThatFails_IsASignInError()
+    {
+        // Every next request needs the session: a loop over games must stop, not renew again for each one.
+        var error = await Assert.ThrowsAsync<GameRadar.Core.Epic.EpicException>(() => new AccessTokenCache().GetAsync(
+            () => throw new GameRadar.Core.Epic.EpicException("down"), CancellationToken.None));
+
+        Assert.True(error.IsSignInError);
+        Assert.True(error.EndsSession);
+    }
+
+    [Fact]
+    public async Task ARenewalRateLimited_StaysARateLimit()
+    {
+        var error = await Assert.ThrowsAsync<GameRadar.Core.Epic.EpicException>(() => new AccessTokenCache().GetAsync(
+            () => throw GameRadar.Core.Epic.EpicException.RateLimited(), CancellationToken.None));
+
+        Assert.False(error.IsSignInError);
+    }
+
+    [Fact]
     public async Task ATokenAboutToExpire_IsRenewed()
     {
         // Within the 5-minute margin: it could expire between here and the call.

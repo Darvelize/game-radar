@@ -34,6 +34,8 @@ public class EaHistorySourceTests
         /// <summary>Set: each request of this kind ("recent", "achievements") waits (5 s at most) until another one runs too: proves they overlap, without timing.</summary>
         public string? Overlapping { get; init; }
         public OverlapProbe Probe { get; } = new();
+        /// <summary>Every achievements request fails as the network would.</summary>
+        public bool AchievementsUnreachable { get; init; }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
         {
@@ -52,6 +54,8 @@ public class EaHistorySourceTests
                 if (RecentError is { } recentError && slugs.Contains(recentError.Slug))
                     return new HttpResponseMessage(recentError.Status) { Content = new StringContent("") };
             }
+            if (kind == "achievements" && AchievementsUnreachable)
+                throw new HttpRequestException("unreachable");
             if (kind == "achievements" && AnthemAchievementsError is { } error
                 && body["variables"]!["offerId"]!.GetValue<string>() == "offer-anthem")
                 return new HttpResponseMessage(error) { Content = new StringContent("") };
@@ -267,6 +271,21 @@ public class EaHistorySourceTests
         var error = await Assert.ThrowsAsync<EaException>(() => new EaHistorySource(new CacheStore(folder.Path)).RefreshAsync(new EaClient(new HttpClient(ea), Token)));
 
         Assert.True(error.IsRateLimited);
+    }
+
+    [Fact]
+    public async Task RefreshAsync_UnreachableAchievements_StopAfterTheRequestsAlreadySentAndKeepTheHistory()
+    {
+        using var folder = new TempFolder();
+        // 20 games played: without the stop, 20 requests waiting 30 s each, 4 at a time.
+        var ea = new FakeEa { Catalog = [.. Enumerable.Range(1, 20).Select(i => $"game-{i}")], EverySlugPlayed = true, AchievementsUnreachable = true };
+        var source = new EaHistorySource(new CacheStore(folder.Path));
+
+        var history = await source.RefreshAsync(new EaClient(new HttpClient(ea), Token));
+
+        Assert.NotEmpty(history.Games);
+        Assert.InRange(ea.Requests.Count(r => r.Kind == "achievements"), 1, EaClient.RequestsAtOnce);
+        Assert.NotNull(source.LoadCached());
     }
 
     [Fact]

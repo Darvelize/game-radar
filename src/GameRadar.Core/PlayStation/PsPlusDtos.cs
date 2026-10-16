@@ -26,6 +26,10 @@ internal sealed class PsPlusGameDto
     [JsonPropertyName("nameEn")]
     public string? NameEn { get; set; }
 
+    // A game's PS Plus starter pack, in the monthly list, came out after the game.
+    [JsonPropertyName("releaseDate")]
+    public DateTimeOffset? ReleaseDate { get; set; }
+
     [JsonPropertyName("imageUrl")]
     public string? ImageUrl { get; set; }
 

@@ -37,6 +37,11 @@
     <Style Selector=":is(TextBlock).accent">
         <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
     </Style>
+    <!-- A numbered step written as one link (the whole sentence): caption size, aligned with the steps in text -->
+    <Style Selector="HyperlinkButton.step">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeCaption}" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
 
     <!-- ============ Icons ============ -->
 

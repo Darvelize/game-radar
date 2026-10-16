@@ -20,7 +20,7 @@
                         <CheckBox IsChecked="{Binding SourceFilter.ShowGamePass}" IsVisible="{Binding SourceFilter.HasGamePassPlan}"
                                   Content="{Binding SourceFilter.GamePassLabel}"
                                   ToolTip.Tip="{x:Static res:Strings.Recommendations_GamePass_Tip}" />
-                        <CheckBox IsChecked="{Binding SourceFilter.ShowPsPlus}" IsVisible="{Binding SourceFilter.HasPsPlusPlan}"
+                        <CheckBox IsChecked="{Binding SourceFilter.ShowPsPlus}" IsVisible="{Binding SourceFilter.HasPsPlusCatalog}"
                                   Content="{Binding SourceFilter.PsPlusLabel}"
                                   ToolTip.Tip="{x:Static res:Strings.Recommendations_PsPlus_Tip}" />
                         <CheckBox IsChecked="{Binding SourceFilter.ShowSteam}" IsVisible="{Binding Recommendations.HasSteamCandidates}"

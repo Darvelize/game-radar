@@ -1,3 +1,5 @@
+using GameRadar.Core.Services;
+
 namespace GameRadar.Core.Settings;
 
 /// <summary>
@@ -31,6 +33,13 @@ internal sealed class AccessTokenCache
             if (Volatile.Read(ref _current) is { } current && current.ExpiresAt > DateTimeOffset.UtcNow + Margin)
                 return current.Token;
             return await renew().ConfigureAwait(false);
+        }
+        catch (ServiceException ex) when (!ex.IsRateLimited)
+        {
+            // Every next request needs the session: a loop over games stops here
+            // (StoreLookup.FetchEachAsync) instead of renewing again for each one.
+            ex.IsSignInError = true;
+            throw;
         }
         finally
         {

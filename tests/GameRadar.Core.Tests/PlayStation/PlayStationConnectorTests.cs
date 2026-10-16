@@ -252,6 +252,22 @@ public class PlayStationConnectorTests : IDisposable
     }
 
     [Fact]
+    public void ToPlayedGames_AGameWhoseTrophySetIsNotKnownYet_IsLinkedByTitleNotShownTwice()
+    {
+        // Its batch failed, or the answer left it out: asked again next time, shown once meanwhile.
+        var played = new DateTimeOffset(2026, 9, 20, 20, 0, 0, TimeSpan.Zero);
+        var trophies = new PlayStationTrophyTitle("NPWR00900_00", "Bloodborne™", 50, 20, 40, HasPlatinum: false, played);
+        var game = new PlayStationGame("CUSA00900_00", "Bloodborne", 600, played, []);
+
+        var games = PlayStationHistorySource.ToPlayedGames([trophies], [game], new Dictionary<string, PlayStationHistorySource.TrophySetEntry>());
+
+        var bloodborne = Assert.Single(games);
+        Assert.Equal("CUSA00900_00", bloodborne.PlatformId);
+        Assert.True(bloodborne.HasAchievements);
+        Assert.Equal(600, bloodborne.PlaytimeMinutes);
+    }
+
+    [Fact]
     public async Task Refresh_ReadsEveryPageWhenSonyLeavesTheTotalOut()
     {
         _handler.TrophyTitlesPageSize = 1;

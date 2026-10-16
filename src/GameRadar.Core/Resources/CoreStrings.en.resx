@@ -92,4 +92,8 @@
   <data name="Epic_Down" xml:space="preserve"><value>Epic is not answering for now. Try again later.</value></data>
   <data name="Epic_StoreDown" xml:space="preserve"><value>The Epic catalog is not answering right now. Recommendations go on without it.</value></data>
   <data name="Epic_EmptyCatalog" xml:space="preserve"><value>The Epic catalog received is empty (the format may have changed).</value></data>
+  <data name="Amazon_Format" xml:space="preserve"><value>Amazon's answer has an unexpected format (the site may have changed).</value></data>
+  <data name="Amazon_Refused" xml:space="preserve"><value>Amazon refused the request for its free games (the site may have changed).</value></data>
+  <data name="Amazon_RateLimited" xml:space="preserve"><value>Amazon is limiting requests right now. Try again in a few minutes.</value></data>
+  <data name="Amazon_Down" xml:space="preserve"><value>Amazon is not answering right now. Try again later.</value></data>
 </root>
