@@ -80,7 +80,9 @@ public class SteamTagTests : IDisposable
         // The profile is learned on tags too: every game that counts, the favorites first. Two
         // searches leave at once (after the app ids): the played games, then the Game Pass one.
         Assert.InRange(requests.FindIndex(r => r.Contains("Control")), 1, SteamTagSource.TitleSearchesAtOnce);
-        Assert.Equal(3, requests.FindIndex(r => r.Contains("Unknown On Steam")));
+        // The Game Pass one waits for a free slot, so it comes after the app ids and the favorite at least;
+        // the two searches that leave together are recorded in either order (it failed on the CI, 19/10/2026).
+        Assert.InRange(requests.FindIndex(r => r.Contains("Unknown On Steam")), 2, 3);
         Assert.DoesNotContain(requests, r => r.Contains("Dropped Game") || r.Contains("Steam Hit"));
 
         var index = source.LoadIndex(candidates);
