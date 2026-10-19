@@ -9,15 +9,8 @@ namespace GameRadar.Core.Xbox;
 /// </summary>
 public sealed class XboxLiveException : ServiceException
 {
-    public XboxLiveException(string message, bool requiresSignIn = false, Exception? inner = null)
+    public XboxLiveException(string message, Exception? inner = null)
         : base(message, inner)
     {
-        RequiresSignIn = requiresSignIn;
     }
-
-    /// <summary>
-    /// True when the saved session can no longer be used (revoked, expired
-    /// after 90 days unused...): the user must sign in again.
-    /// </summary>
-    public bool RequiresSignIn { get; }
 }

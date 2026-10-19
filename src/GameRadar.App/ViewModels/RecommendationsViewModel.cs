@@ -85,6 +85,10 @@ public sealed partial class RecommendationsViewModel : ObservableObject
     [ObservableProperty]
     public partial bool HasSteamCandidates { get; set; }
 
+    /// <summary>The games of each source, next to its box in the sources menu.</summary>
+    [ObservableProperty]
+    public partial SourceCountLabels Counts { get; set; } = new(new Dictionary<CatalogSource, int>());
+
     /// <summary>The GOG box only makes sense once GOG store candidates are loaded.</summary>
     [ObservableProperty]
     public partial bool HasGogCandidates { get; set; }
@@ -146,6 +150,8 @@ public sealed partial class RecommendationsViewModel : ObservableObject
         var psStoreGames = _filter.ShowPlayStationStore ? _library.PsStoreCatalog?.Games ?? [] : [];
         var plan = _filter.GamePassPlan;
         var psPlusPlan = _filter.PsPlusPlan;
+        // Only while its box is ticked: their tags cost Steam lookups.
+        bool myGames = _filter.ShowMyGames;
         // Copies: the background computation must not read the sets while
         // a click on the UI thread modifies them (HashSet is not thread-safe).
         var excluded = new HashSet<string>(_saver.Settings.ExcludedFromTaste);
@@ -170,7 +176,7 @@ public sealed partial class RecommendationsViewModel : ObservableObject
 
             // Every candidate: the Game Pass and PS Plus games of the player's plans,
             // and the Steam, GOG, Epic and PlayStation Store ones.
-            var pool = CatalogMerger.Combine(
+            IReadOnlyList<CatalogGame> pool = CatalogMerger.Combine(
                 gamePassGames.Select(g => g.ForPlan(plan)).ToList(), steamGames,
                 psPlusGames.Select(g => g.ForPsPlusPlan(psPlusPlan)).ToList(), gogGames, epicGames, psStoreGames);
             var tagClient = new SteamTagClient(_http);
@@ -212,6 +218,22 @@ public sealed partial class RecommendationsViewModel : ObservableObject
                 .Select(g => genresFound.GetValueOrDefault(g.Key)
                     ?? new PlayedGameWithGenres(g, platformGenres.GetValueOrDefault(g.Key) ?? []))
                 .ToList();
+            // The player's games not finished yet ("Mes jeux"), as candidates; how many, for the box.
+            // Their own lines no longer leave them out (a game finished under another title still does).
+            // Titles of ~2,000 games: off the UI thread.
+            bool CountsInTaste(PlayedGame g) => TasteSelection.Counts(g, excluded, included);
+            // A Game Pass subscriber: an Xbox game out of their Game Pass is not theirs any more.
+            var catalogsForOwned = pool;
+            var owned = await Task.Run(() => plan == GamePassTier.None
+                ? OwnedGames.Collect(playedGames, CountsInTaste)
+                : OwnedGames.WithoutGamePassLeftovers(OwnedGames.Collect(playedGames, CountsInTaste), catalogsForOwned), cts.Token);
+            IReadOnlyList<PlayedGame> exclusionHistory = playedGames;
+            if (myGames)
+            {
+                var catalogs = pool;
+                (pool, exclusionHistory) = await Task.Run(
+                    () => (OwnedGames.AddTo(catalogs, owned, withGenres), OwnedGames.Others(playedGames, owned)), cts.Token);
+            }
 
             // Pure computation, but on ~2,000 games: kept off the UI thread.
             // The Steam tags known in "index" make the similarity finer.
@@ -234,11 +256,11 @@ public sealed partial class RecommendationsViewModel : ObservableObject
                         .Select(g => g with { Tags = gameTags[GameTitle.Key(g.Game.Name)] })
                         .Where(g => g.Genres.Count > 0 || g.Tags is not null), now);
                 var taste = TasteProfile.Build(tasteGames, now);
-                // Tag rarity measured on every candidate, so the filter does not change it.
-                var vectorizer = new TagVectorizer(tagged.Select(g => g.Tags));
+                // Tag rarity measured on every catalog candidate, so the filter (nor "Mes jeux") does not change it.
+                var vectorizer = new TagVectorizer(tagged.Where(g => !g.FromHistory).Select(g => g.Tags));
                 // v1: filtered, deduplicated, scored (on tags, else genres);
                 // then the v2 sections per favorite on top of them.
-                var candidates = RecommendationEngine.Recommend(taste, tagged, playedGames, matcher, maxCount: int.MaxValue, tagVectorizer: vectorizer,
+                var candidates = RecommendationEngine.Recommend(taste, tagged, exclusionHistory, matcher, maxCount: int.MaxValue, tagVectorizer: vectorizer,
                     wishlist: _wishlistSource.LoadCached());
                 // For the status line: games left out by the rule (barely
                 // played), counted once per game, not per platform.
@@ -247,8 +269,7 @@ public sealed partial class RecommendationsViewModel : ObservableObject
                     .Count(group => group.All(g => !TasteSelection.Counts(g.Game, excluded, included))
                         && group.Any(g => !excluded.Contains(g.Game.Key) && TasteProfile.IsBarelyPlayed(g.Game)));
                 return new RecommendationState(
-                    tasteGames, taste, candidates, excluded.Count, barelyPlayed,
-                    Enum.GetValues<CatalogSource>().Where(source => pool.Any(g => g.IsIn(source))).ToHashSet(), vectorizer);
+                    tasteGames, taste, candidates, excluded.Count, barelyPlayed, SourceCounts(pool, owned.Count), vectorizer);
             }, cts.Token);
 
             void Show(RecommendationState state)
@@ -305,9 +326,18 @@ public sealed partial class RecommendationsViewModel : ObservableObject
         IReadOnlyList<Recommendation> Candidates,
         int ExcludedCount,
         int BarelyPlayedCount,
-        // The sources with at least one candidate (the player's plans applied).
-        IReadOnlySet<CatalogSource> SourcesWithCandidates,
-        TagVectorizer Vectorizer);
+        // The games of each source (the player's plans applied), for its box.
+        IReadOnlyDictionary<CatalogSource, int> SourceCounts,
+        TagVectorizer Vectorizer)
+    {
+        public bool HasCandidates(CatalogSource source) => SourceCounts.GetValueOrDefault(source) > 0;
+    }
+
+    /// <summary>The games of each source, and the player's games not finished yet, ticked or not.</summary>
+    private static Dictionary<CatalogSource, int> SourceCounts(IReadOnlyList<CatalogGame> pool, int myGames) =>
+        Enum.GetValues<CatalogSource>().ToDictionary(source => source, source => source == CatalogSource.MyGames
+            ? myGames
+            : pool.Count(g => g.IsIn(source)));
 
     private RecommendationState? _recommendationState;
 
@@ -357,8 +387,10 @@ public sealed partial class RecommendationsViewModel : ObservableObject
             .Select(c => c.Game)
             .ToList();
         bool showGamePass = ticked.Contains(CatalogSource.GamePass);
+        bool showMine = ticked.Contains(CatalogSource.MyGames);
         var candidates = state.Candidates
-            .Where(c => ticked.Any(c.Game.IsIn))
+            // The player's games only with "Mes jeux" (unticked, they wait for the new computation).
+            .Where(c => ticked.Any(c.Game.IsIn) && (c.Game.Owned is null || showMine))
             // Game Pass unticked: a game leaving it is only a Steam game here,
             // it must not open the "leaving the Game Pass" section.
             .Select(c => showGamePass || !c.Game.LeavingSoon ? c : c with { Game = c.Game with { LeavingSoon = false } })
@@ -398,9 +430,11 @@ public sealed partial class RecommendationsViewModel : ObservableObject
                 Strings.Section_ByGenres,
                 result.ByGenres.Select(r => new RecommendationRow(r, state.Profile, _tagNames)).ToList()));
 
-        HasSteamCandidates = state.SourcesWithCandidates.Contains(CatalogSource.Steam);
-        HasGogCandidates = state.SourcesWithCandidates.Contains(CatalogSource.Gog);
-        HasEpicCandidates = state.SourcesWithCandidates.Contains(CatalogSource.Epic);
+        Counts = new SourceCountLabels(state.SourceCounts);
+        _filter.WithGames = state.SourceCounts.Where(e => e.Value > 0).Select(e => e.Key).ToHashSet();
+        HasSteamCandidates = state.HasCandidates(CatalogSource.Steam);
+        HasGogCandidates = state.HasCandidates(CatalogSource.Gog);
+        HasEpicCandidates = state.HasCandidates(CatalogSource.Epic);
         var ignored = new List<string>();
         if (state.ExcludedCount > 0)
             ignored.Add(Localization.Format(Strings.Reco_ExcludedByYou, state.ExcludedCount));
@@ -408,7 +442,7 @@ public sealed partial class RecommendationsViewModel : ObservableObject
             ignored.Add(Localization.Format(Strings.Reco_BarelyPlayed, state.BarelyPlayedCount));
         // The sources actually shown: a box can be ticked but unavailable
         // (no subscription, Steam catalog not loaded yet).
-        var sources = _filter.Ticked.Where(state.SourcesWithCandidates.Contains).Select(_filter.Label).ToList();
+        var sources = _filter.Ticked.Where(state.HasCandidates).Select(_filter.Label).ToList();
         if (sources.Count == 0)
         {
             Status = Strings.Reco_NoSource;
@@ -418,6 +452,7 @@ public sealed partial class RecommendationsViewModel : ObservableObject
             // Whole sentences, never assembled from pieces: word order differs between languages.
             string offered = sources.Count switch
             {
+                7 => Localization.Format(Strings.Reco_SevenSources, sources[0], sources[1], sources[2], sources[3], sources[4], sources[5], sources[6]),
                 6 => Localization.Format(Strings.Reco_SixSources, sources[0], sources[1], sources[2], sources[3], sources[4], sources[5]),
                 5 => Localization.Format(Strings.Reco_FiveSources, sources[0], sources[1], sources[2], sources[3], sources[4]),
                 4 => Localization.Format(Strings.Reco_FourSources, sources[0], sources[1], sources[2], sources[3]),

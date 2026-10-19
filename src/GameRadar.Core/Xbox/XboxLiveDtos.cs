@@ -49,6 +49,22 @@ internal sealed class TitleDto
 
     [JsonPropertyName("titleHistory")]
     public TitleHistoryDto? TitleHistory { get; set; }
+
+    // The picture Xbox shows, and the others by kind ("SuperHeroArt" is 16:9).
+    [JsonPropertyName("displayImage")]
+    public string? DisplayImage { get; set; }
+
+    [JsonPropertyName("images")]
+    public List<TitleImageDto>? Images { get; set; }
+}
+
+internal sealed class TitleImageDto
+{
+    [JsonPropertyName("url")]
+    public string? Url { get; set; }
+
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
 }
 
 internal sealed class AchievementSummaryDto

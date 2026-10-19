@@ -86,10 +86,21 @@ public class FreeGameCacheTests : IDisposable
     [Fact]
     public void NeedsDownload_AsSoonAsAnOfferEnded()
     {
-        // Epic changes its games on Thursday at 17:00: an hour later, the new ones are asked.
-        var list = new FreeGameList([Game("Ended", Now.AddHours(-1)), Game("Still free", Now.AddDays(3))], Now.AddHours(-2));
+        // Epic changes its games on Thursday at 17:00: five minutes later, the new ones are asked.
+        var list = new FreeGameList([Game("Ended", Now.AddMinutes(-5)), Game("Still free", Now.AddDays(3))], Now.AddMinutes(-10));
 
         Assert.True(FreeGameCache.NeedsDownload(list, Now));
+    }
+
+    [Theory]
+    [InlineData(10, false)]
+    [InlineData(120, true)]
+    public void NeedsDownload_ReadWithAnOfferAlreadyEnded_AtMostOnceAnHour(int minutesAgo, bool needed)
+    {
+        // Xbox's list stays online, ended, from Monday to Wednesday: not asked again at each visit.
+        var list = new FreeGameList([Game("Ended", Now.AddDays(-1))], Now.AddMinutes(-minutesAgo));
+
+        Assert.Equal(needed, FreeGameCache.NeedsDownload(list, Now));
     }
 
     [Theory]

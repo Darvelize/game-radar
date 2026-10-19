@@ -3,6 +3,16 @@
 English translation of `CHANGELOG.md` (the French file comes first): same versions, same dates, same parts (`### Improvements` for `### Évolutions`, `### Fixes` for `### Corrections`), as many lines (checked by the tests).
 Shown by the app when it runs in English, and used for the English part of the GitHub release notes.
 
+## 1.7.1 — 2026-10-19
+
+### Improvements
+
+- The "Free games" page now has two tabs: "Permanent" for the games given away, which stay yours once claimed, and "Temporary" for those you can only play for free for a few days, like Steam's free weekends.
+- New in "Temporary": Game Pass Free Play Days, from Thursday to Sunday, if you chose your Game Pass plan in Settings › Accounts.
+- "Free games": a game already in your history, on any platform, says so on its card ("In your history").
+- "For you": the source boxes move into a "Sources" menu, with how many games each one has; its last sentence opens Settings › Accounts, where your plan is chosen.
+- New "My games" source in that menu: your games not finished yet (never launched or started, that do not count in your taste) are offered to you by your taste, with how far you went; ticking it unticks the other sources, to see them alone. Unticked at first.
+
 ## 1.7.0 — 2026-10-16
 
 ### Improvements

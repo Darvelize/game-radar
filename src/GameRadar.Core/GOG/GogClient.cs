@@ -83,7 +83,9 @@ public sealed partial class GogClient
                 title.Trim(),
                 stats is { } s && s.TryGetProperty("playtime", out var playtime) && playtime.ValueKind == JsonValueKind.Number && playtime.TryGetInt32(out int minutes) ? minutes : null,
                 stats is { } t && t.TryGetProperty("lastSession", out var session) && session.ValueKind == JsonValueKind.String && session.TryGetDateTimeOffset(out var last) ? last : null,
-                stats is { } u && u.TryGetProperty("achievementsPercentage", out var achievements) && achievements.ValueKind == JsonValueKind.Number && achievements.TryGetDouble(out double percentage) ? percentage : null));
+                stats is { } u && u.TryGetProperty("achievementsPercentage", out var achievements) && achievements.ValueKind == JsonValueKind.Number && achievements.TryGetDouble(out double percentage) ? percentage : null,
+                // A PNG of the store ("//images.gog-statics.com/…" in the samples): at the card's size, in https.
+                GogCatalogClient.ImageUrlOf(item.Game.Image is { } image && image.StartsWith("//", StringComparison.Ordinal) ? "https:" + image : item.Game.Image)));
         }
         return new GogProfilePage(Math.Max(page.Pages ?? 1, 1), games);
     }
@@ -145,6 +147,9 @@ public sealed partial class GogClient
 
         [JsonPropertyName("title")]
         public string? Title { get; set; }
+
+        [JsonPropertyName("image")]
+        public string? Image { get; set; }
     }
 }
 
@@ -155,4 +160,4 @@ internal sealed record GogProfilePage(int Pages, IReadOnlyList<GogLibraryGame> G
 /// A game of the GOG library. Play time, last session and achievement
 /// percentage are null for a game GOG Galaxy never followed.
 /// </summary>
-internal sealed record GogLibraryGame(string Id, string Title, int? PlaytimeMinutes, DateTimeOffset? LastSession, double? AchievementsPercentage);
+internal sealed record GogLibraryGame(string Id, string Title, int? PlaytimeMinutes, DateTimeOffset? LastSession, double? AchievementsPercentage, string? ImageUrl = null);

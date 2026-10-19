@@ -591,7 +591,7 @@ public sealed partial class AccountsViewModel : ObservableObject
                             new Progress<(int Done, int Total)>(p =>
                                 platform.Status = Localization.Format(Strings.Status_FetchingEaGames, p.Done, p.Total)));
                     }
-                    catch (EaException ex) when (ex.IsTokenRefused)
+                    catch (EaException ex) when (ex.RequiresSignIn)
                     {
                         // Expired (4 h): forgotten, the card asks for EA's page again.
                         _eaToken = null;

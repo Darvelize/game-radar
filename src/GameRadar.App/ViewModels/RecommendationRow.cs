@@ -1,3 +1,4 @@
+using GameRadar.Core.Manual;
 using GameRadar.Core.Models;
 using GameRadar.Core.Services;
 using GameRadar.Core.Steam;
@@ -119,8 +120,13 @@ public sealed partial class RecommendationRow : PictureCard
                 _ => Strings.Platform_PcSteam
             }
         };
+        // One of the player's games in no catalog: where they have it ("Xbox · Ajouté à la main").
+        if (game.Owned is { } mine && game.FromHistory)
+            platforms = string.Join(" · ", mine.Platforms.Select(p => p == ManualGames.PlatformName ? Strings.Row_AddedByHand : p));
         var modes = PlayModeLabels.Display(game.Modes).ToList();
         PlatformsLabel = modes.Count == 0 ? platforms : $"{platforms} · {string.Join(", ", modes)}";
+        IsMine = game.Owned is not null;
+        OwnedLabel = game.Owned is not { } owned ? string.Empty : OwnedState(owned);
 
         IsLeavingSoon = game.LeavingSoon;
         // The game's page on each platform it shows a badge for: the player
@@ -155,12 +161,33 @@ public sealed partial class RecommendationRow : PictureCard
         ImageUrl = game.ImageUrl is not { } url ? null : store switch
         {
             CatalogSource.Epic => CardPicture.Resized(url, CardPicture.EpicSize),
+            // A game built from the history ("Mes jeux"): a Steam header or a GOG picture at the
+            // card's size as they are, an Xbox picture resized by the Microsoft server.
+            CatalogSource.MyGames when !url.Contains("store-images.s-microsoft.com", StringComparison.OrdinalIgnoreCase) => url,
             CatalogSource.Steam or CatalogSource.Gog => url,
             _ => CardPicture.Resized(url, CardPicture.ServerSize)
         };
     }
 
+    /// <summary>"Jamais lancé", "Commencé : 4 h de jeu, 12 % des succès": how far the player went, whole sentences.</summary>
+    private static string OwnedState(OwnedGame owned) => owned switch
+    {
+        { NeverPlayed: true } => Strings.Row_NeverLaunched,
+        { PlaytimeMinutes: > 0 and var minutes, AchievementPercent: { } percent } =>
+            Localization.Format(Strings.Card_StartedTimeAndAchievements, GameRow.FormatPlaytime(minutes), Math.Floor(percent)),
+        { PlaytimeMinutes: > 0 and var minutes } => Localization.Format(Strings.Card_StartedTime, GameRow.FormatPlaytime(minutes)),
+        // Rounded down: 99.6 % of a game not finished is not "100 %".
+        { AchievementPercent: { } percent } => Localization.Format(Strings.Card_StartedAchievements, Math.Floor(percent)),
+        _ => Strings.Card_Started
+    };
+
     public string Title { get; }
+
+    /// <summary>One of the player's games not finished yet ("Mes jeux"): its badge and <see cref="OwnedLabel"/>.</summary>
+    public bool IsMine { get; }
+
+    /// <summary>How far the player went in one of their games; empty for another game.</summary>
+    public string OwnedLabel { get; }
 
     /// <summary>The game whatever its store (<see cref="GameTitle.Key"/>): what "Pas intéressé" saves.</summary>
     public string TitleKey { get; }

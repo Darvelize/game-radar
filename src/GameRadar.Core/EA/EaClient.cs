@@ -109,7 +109,7 @@ public sealed partial class EaClient
         {
             HttpOutcome.Ok => await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false),
             // Measured: an unknown or expired token answers 401, empty.
-            HttpOutcome.Unauthorized or HttpOutcome.Forbidden => throw new EaException(CoreStrings.Ea_TokenExpired) { IsTokenRefused = true },
+            HttpOutcome.Unauthorized or HttpOutcome.Forbidden => throw new EaException(CoreStrings.Ea_TokenExpired) { RequiresSignIn = true },
             HttpOutcome.RateLimited => throw new EaException(CoreStrings.Ea_RateLimited) { IsRateLimited = true },
             _ => throw new EaException(CoreStrings.Ea_Down)
         };

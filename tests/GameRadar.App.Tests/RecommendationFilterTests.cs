@@ -61,6 +61,19 @@ public sealed class RecommendationFilterTests : AppTest
         Assert.Equal("PlayStation Plus Extra", vm.SourceFilter.Label(CatalogSource.PsPlus));
     }
 
+    [AvaloniaFact]
+    public void The_sources_button_counts_the_boxes_ticked_with_games()
+    {
+        // Ultimate, Steam, GOG, Epic ticked by default (PS Plus: no plan; the PlayStation Store unticked).
+        var vm = SampleData.Empty(TempFolder);
+        Assert.Equal("Sources (4)", vm.SourceFilter.SourcesLabel);
+
+        // GOG and Epic not loaded yet: their boxes are hidden, not counted.
+        vm.SourceFilter.WithGames = new HashSet<CatalogSource> { CatalogSource.GamePass, CatalogSource.Steam };
+
+        Assert.Equal("Sources (2)", vm.SourceFilter.SourcesLabel);
+    }
+
     [AvaloniaTheory]
     [InlineData(false)]
     [InlineData(true)]

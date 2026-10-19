@@ -199,6 +199,37 @@ public class RecommendationEngineTests
     }
 
     [Fact]
+    public void Recommend_KeepsMyGames_WithTheHistoryLeftOnceTheyAreTakenOut()
+    {
+        // "Mes jeux": started, not finished, not in the taste; the player asked for it.
+        var started = Played("111", 3, name: "Game X");
+        var mine = Catalog("P1", title: "Game X", xboxTitleId: "111", genres: ["Shooter"]);
+        var otherPlayed = Catalog("P2", title: "Game Y", genres: ["Shooter"]);
+        var history = new[] { started, Played("222", 100, PlayStatus.Mastered, name: "Game Y") };
+        var owned = OwnedGames.Collect(history, _ => false);
+
+        var result = Recommend(OwnedGames.AddTo([mine, otherPlayed], owned, []), [.. OwnedGames.Others(history, owned)]);
+
+        Assert.Equal("P1", Assert.Single(result).Game.ProductId);
+    }
+
+    [Fact]
+    public void Recommend_LeavesOutOneOfMyGames_FinishedUnderAnotherTitle()
+    {
+        // Mastered on Xbox as "Halo MCC" (matched by its title id), owned never launched on Steam
+        // under the catalog's title: finished, never offered.
+        var catalogEntry = Catalog("P1", title: "Halo: The Master Chief Collection", xboxTitleId: "111", genres: ["Shooter"]);
+        var history = new[]
+        {
+            Played("111", 100, PlayStatus.Mastered, name: "Halo MCC"),
+            NeverLaunched("976730", "Halo: The Master Chief Collection")
+        };
+        var owned = OwnedGames.Collect(history, _ => false);
+
+        Assert.Empty(Recommend(OwnedGames.AddTo([catalogEntry], owned, []), [.. OwnedGames.Others(history, owned)]));
+    }
+
+    [Fact]
     public void Recommend_KeepsOnlyMostRatedEdition()
     {
         var standard = Catalog("P1", title: "Game Z - Édition Standard", genres: ["Shooter"], rating: 4.5, ratingCount: 100);

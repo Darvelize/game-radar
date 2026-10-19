@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace GameRadar.Core.GamePass;
 
 // Raw JSON shapes of the two unofficial Microsoft endpoints used for the
@@ -103,4 +105,54 @@ internal sealed class AutosuggestProductDto
     // "Game" for games; add-ons are "Durable", bundles other values.
     public string? Type { get; set; }
     public string? Title { get; set; }
+}
+
+// emerald.xboxservices.com/xboxcomfd/browse: the channel xbox.com's Free Play
+// Days page lists (POST body, then the answer: the channel's product ids in
+// order, and a summary per product).
+internal sealed class BrowseRequestDto
+{
+    [JsonPropertyName("Filters")]
+    public string Filters { get; set; } = "";
+
+    [JsonPropertyName("ReturnFilters")]
+    public bool ReturnFilters { get; set; }
+
+    [JsonPropertyName("ChannelKeyToBeUsedInResponse")]
+    public string? ChannelKeyToBeUsedInResponse { get; set; }
+
+    [JsonPropertyName("ChannelId")]
+    public string? ChannelId { get; set; }
+}
+
+internal sealed class BrowseResponseDto
+{
+    public Dictionary<string, BrowseChannelDto>? Channels { get; set; }
+    public List<BrowseProductDto>? ProductSummaries { get; set; }
+}
+
+internal sealed class BrowseChannelDto
+{
+    public List<BrowseProductDto>? Products { get; set; }
+}
+
+internal sealed class BrowseProductDto
+{
+    public string? ProductId { get; set; }
+    public string? Title { get; set; }
+
+    // "Game", or "PASS" for the Game Pass plans the page shows next to the games.
+    public string? ProductKind { get; set; }
+    public BrowseImagesDto? Images { get; set; }
+}
+
+internal sealed class BrowseImagesDto
+{
+    public BrowseImageDto? SuperHeroArt { get; set; }
+    public BrowseImageDto? BoxArt { get; set; }
+}
+
+internal sealed class BrowseImageDto
+{
+    public string? Url { get; set; }
 }

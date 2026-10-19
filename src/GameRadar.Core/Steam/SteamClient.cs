@@ -198,7 +198,7 @@ public sealed partial class SteamClient
         throw outcome switch
         {
             HttpOutcome.Unauthorized or HttpOutcome.Forbidden =>
-                new SteamException(CoreStrings.Steam_KeyRefused) { IsKeyRefused = true },
+                new SteamException(CoreStrings.Steam_KeyRefused) { RequiresSignIn = true },
             HttpOutcome.RateLimited =>
                 new SteamException(CoreStrings.Steam_RateLimited) { IsRateLimited = true },
             _ =>

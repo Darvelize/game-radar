@@ -10,19 +10,10 @@ namespace GameRadar.Core.PlayStation;
 /// </summary>
 public sealed class PlayStationException : ServiceException
 {
-    public PlayStationException(string message, bool requiresSignIn = false, Exception? inner = null)
+    public PlayStationException(string message, Exception? inner = null)
         : base(message, inner)
     {
-        RequiresSignIn = requiresSignIn;
     }
-
-    /// <summary>
-    /// True when the saved NPSSO can no longer be used (expired, signed out
-    /// everywhere...): the user must paste a new one.
-    /// </summary>
-    public bool RequiresSignIn { get; }
-
-    public override bool EndsSession => IsSignInError || RequiresSignIn;
 
     internal static PlayStationException RateLimited() => new(CoreStrings.PlayStation_RateLimited) { IsRateLimited = true };
 }

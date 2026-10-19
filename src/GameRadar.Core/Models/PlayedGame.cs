@@ -52,6 +52,12 @@ public sealed record PlayedGame(
     /// </summary>
     public string? SteamAppId { get; init; }
 
+    /// <summary>
+    /// Its picture, when its history gives one (Xbox: 16:9; GOG: at the card's size), as is:
+    /// the card of one of the player's games in no catalog ("Mes jeux").
+    /// </summary>
+    public string? ImageUrl { get; init; }
+
     /// <summary>Owned but never launched (Steam library): says nothing about taste.</summary>
     public bool NeverPlayed => PlaytimeMinutes == 0;
 

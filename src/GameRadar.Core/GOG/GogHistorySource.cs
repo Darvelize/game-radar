@@ -105,7 +105,10 @@ public sealed class GogHistorySource
                 Status: game.AchievementsPercentage is { } percentage
                     ? StatusClassifier.FromAchievements(0, null, percentage)
                     : PlayStatus.Played,
-                PlaytimeMinutes: game.PlaytimeMinutes ?? 0))
+                PlaytimeMinutes: game.PlaytimeMinutes ?? 0)
+            {
+                ImageUrl = game.ImageUrl
+            })
             .OrderByDescending(g => g.LastPlayed)
             .ToList();
 }

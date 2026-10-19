@@ -1,5 +1,9 @@
+using GameRadar.Core.EA;
 using GameRadar.Core.Epic;
+using GameRadar.Core.PlayStation;
 using GameRadar.Core.Services;
+using GameRadar.Core.Steam;
+using GameRadar.Core.Xbox;
 
 namespace GameRadar.Core.Tests.Services;
 
@@ -75,6 +79,11 @@ public class StoreLookupTests
     {
         EpicException.RateLimited(),
         EpicException.SessionExpired(),
+        // One "sign in again" flag for every service (1.7.1).
+        new XboxLiveException("session revoked") { RequiresSignIn = true },
+        new PlayStationException("NPSSO expired") { RequiresSignIn = true },
+        new SteamException("key refused") { RequiresSignIn = true },
+        new EaException("token expired") { RequiresSignIn = true },
         // The session could not be renewed (the service down): every next request needs it.
         new EpicException("sign-in down") { IsSignInError = true },
     };

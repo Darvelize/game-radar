@@ -15,5 +15,7 @@ namespace GameRadar.Core.GamePass;
 [JsonSerializable(typeof(AutosuggestResponseDto))]
 [JsonSerializable(typeof(ProductsResponseDto))]
 [JsonSerializable(typeof(List<SiglEntryDto>))]
+[JsonSerializable(typeof(BrowseRequestDto))]
+[JsonSerializable(typeof(BrowseResponseDto))]
 [JsonSerializable(typeof(Dictionary<string, StoreGenreSource.GenreEntry>))]
 internal sealed partial class GamePassJsonContext : JsonSerializerContext;

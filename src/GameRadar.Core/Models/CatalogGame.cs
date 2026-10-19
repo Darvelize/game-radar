@@ -87,6 +87,23 @@ public sealed record CatalogGame(
     /// </summary>
     public CatalogGame ForPsPlusPlan(PsPlusTier plan) => this with { PsPlusTiers = PsPlusTiers & plan };
 
+    /// <summary>Product id prefix of a candidate built from the history ("Mes jeux", in no catalog).</summary>
+    public const string FromHistoryPrefix = "mine:";
+
+    /// <summary>
+    /// Built from the history ("Mes jeux"), in no catalog: its Steam app id only says which game
+    /// it is (tags, picture, page), not that a catalog sells it.
+    /// </summary>
+    [JsonIgnore]
+    public bool FromHistory => ProductId.StartsWith(FromHistoryPrefix, StringComparison.Ordinal);
+
+    /// <summary>
+    /// One of the player's games not finished yet ("Mes jeux", Services.OwnedGames): set on the
+    /// catalog's entry of the game, or on a candidate built from the history. Never cached.
+    /// </summary>
+    [JsonIgnore]
+    public OwnedGame? Owned { get; init; }
+
     /// <summary>In PS Plus, for the plan this entry was filtered with (<see cref="ForPsPlusPlan"/>).</summary>
     [JsonIgnore]
     public bool InPsPlus => PsPlusTiers != PsPlusTier.None;
@@ -123,16 +140,20 @@ public sealed record CatalogGame(
     {
         CatalogSource.GamePass => InGamePass,
         CatalogSource.PsPlus => InPsPlus,
-        CatalogSource.Steam => SteamAppId is not null,
+        CatalogSource.Steam => SteamAppId is not null && !FromHistory,
         CatalogSource.Gog => GogStoreLink is not null,
         CatalogSource.Epic => EpicStoreLink is not null,
         CatalogSource.PlayStationStore => PlayStationProductId is not null,
+        CatalogSource.MyGames => Owned is not null,
         _ => throw new ArgumentOutOfRangeException(nameof(source), source, null)
     };
 }
 
-/// <summary>Where a candidate can come from, in the order of the merge (CatalogMerger.Combine).</summary>
-public enum CatalogSource { GamePass, PsPlus, Steam, Gog, Epic, PlayStationStore }
+/// <summary>
+/// Where a candidate can come from, in the order of the merge (CatalogMerger.Combine,
+/// then the player's own games: Services.OwnedGames).
+/// </summary>
+public enum CatalogSource { GamePass, PsPlus, Steam, Gog, Epic, PlayStationStore, MyGames }
 
 /// <summary>A whole catalog (Game Pass or Steam store) and when it was fetched.</summary>
 public sealed record GameCatalog(IReadOnlyList<CatalogGame> Games, DateTimeOffset FetchedAt);

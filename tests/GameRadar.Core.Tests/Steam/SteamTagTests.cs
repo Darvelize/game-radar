@@ -140,6 +140,32 @@ public class SteamTagTests : IDisposable
     }
 
     [Fact]
+    public async Task FetchMissing_LooksUpMyGames_ByAppIdOrTitle()
+    {
+        // "Mes jeux": never launched on Steam (app id), barely played on Xbox (title).
+        var requests = new List<string>();
+        using var http = new HttpClient(new FakeHandler(uri =>
+        {
+            string input = Uri.UnescapeDataString(uri.Query);
+            requests.Add(uri.AbsolutePath.Contains("GetItems") ? "items" : "search:" + input);
+            return Items((620, "Portal 2"));
+        }));
+        var owned = new OwnedGame(["Steam"], 0, null, NeverPlayed: true);
+        var candidates = new[]
+        {
+            Catalog("mine:portal2", title: "Portal 2", steamAppId: "620", inGamePass: false) with { Owned = owned },
+            Catalog("mine:roguewaters", title: "Rogue Waters", inGamePass: false) with { Owned = owned with { Platforms = ["Xbox"] } }
+        };
+        var source = new SteamTagSource(new CacheStore(_folder.Path));
+
+        await source.FetchMissingAsync([], candidates, new SteamTagClient(http));
+
+        Assert.Contains("items", requests);
+        Assert.Contains(requests, r => r.Contains("Rogue Waters"));
+        Assert.NotNull(source.LoadIndex(candidates).For(candidates[0]));
+    }
+
+    [Fact]
     public async Task FetchMissing_LooksUpAGameAddedByHandByItsSteamAppId()
     {
         var requests = new List<string>();

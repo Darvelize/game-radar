@@ -96,7 +96,7 @@ public sealed partial class PlayStationAccount
         // The refresh token too must outlive the call.
         var soon = DateTimeOffset.UtcNow + AccessTokenCache.Margin;
         if (_saved is not { } saved)
-            throw new PlayStationException(CoreStrings.PlayStation_NotConnected, requiresSignIn: true);
+            throw new PlayStationException(CoreStrings.PlayStation_NotConnected) { RequiresSignIn = true };
 
         int session = _session.Current;
         PlayStationTokens tokens;
@@ -158,7 +158,7 @@ public sealed partial class PlayStationAccount
             : new SavedPlayStationAccount(npsso, tokens.RefreshToken, tokens.RefreshExpiresAt);
         _session.TrySave(_store, Secret.PlayStationAccount, saved, PlayStationJsonContext.Default.SavedPlayStationAccount, session, renewal);
         if (!_session.Keep(session, () => { _saved = saved; _tokens.Set(tokens.AccessToken, tokens.ExpiresAt); }, ForgetMemory))
-            throw new PlayStationException(CoreStrings.PlayStation_NotConnected, requiresSignIn: true);
+            throw new PlayStationException(CoreStrings.PlayStation_NotConnected) { RequiresSignIn = true };
     }
 
     // {"npsso":"…"}: the page's answer, copied whole.

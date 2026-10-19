@@ -4,6 +4,16 @@ Source unique des notes de version : l'appli affiche ce fichier (page « Nouveau
 Format lu par `Changelog.Parse` : `## <version>` (suivi de ` — <AAAA-MM-JJ>` une fois publiée), puis les parties `### Évolutions` et `### Corrections` (depuis la 1.2.0), chacune avec une ligne `- ` par nouveauté, en français, écrite pour les joueurs.
 Traduction anglaise : `CHANGELOG.en.md` (`### Improvements`, `### Fixes`), mêmes versions, mêmes dates, mêmes parties, autant de lignes (vérifié par les tests).
 
+## 1.7.1 — 2026-10-19
+
+### Évolutions
+
+- La page « Jeux gratuits » se range en deux onglets : « Définitif » pour les jeux offerts, qui restent à toi une fois récupérés, et « Temporaire » pour ceux qu'on ne peut jouer gratuitement que quelques jours, comme les week-ends gratuits de Steam.
+- Nouveau dans « Temporaire » : les jours de jeu gratuit (Free Play Days) du Game Pass, du jeudi au dimanche, si tu as choisi ton abonnement Game Pass dans Réglages › Comptes.
+- « Jeux gratuits » : un jeu déjà dans ton historique, sur n'importe quelle plateforme, le dit sur sa carte (« Dans ton historique »).
+- « Pour toi » : les cases des sources passent dans un menu « Sources », avec le nombre de jeux de chacune ; sa dernière phrase ouvre directement Réglages › Comptes, où se choisit ton abonnement.
+- Nouvelle source « Mes jeux » dans ce menu : tes jeux pas encore terminés (jamais lancés ou commencés, qui ne comptent pas dans tes goûts) te sont proposés selon tes goûts, avec où tu en es ; la cocher décoche les autres sources, pour ne voir qu'eux. Décochée au départ.
+
 ## 1.7.0 — 2026-10-16
 
 ### Évolutions

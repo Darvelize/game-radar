@@ -121,7 +121,7 @@ public sealed class XboxAccount
                 return current;
 
             if (_saved is not { } saved)
-                throw new XboxLiveException(CoreStrings.Xbox_SignInToLoad, requiresSignIn: true);
+                throw new XboxLiveException(CoreStrings.Xbox_SignInToLoad) { RequiresSignIn = true };
 
             int session = _session.Current;
             MicrosoftTokens tokens;
@@ -165,6 +165,6 @@ public sealed class XboxAccount
         var saved = new SavedXboxAccount(refreshToken, gamertag);
         _session.TrySave(_store, Secret.XboxAccount, saved, XboxJsonContext.Default.SavedXboxAccount, session, renewal);
         if (!_session.Keep(session, () => { _saved = saved; _credentials = credentials ?? _credentials; }, ForgetMemory))
-            throw new XboxLiveException(CoreStrings.Xbox_SignInToLoad, requiresSignIn: true);
+            throw new XboxLiveException(CoreStrings.Xbox_SignInToLoad) { RequiresSignIn = true };
     }
 }

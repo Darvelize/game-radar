@@ -121,7 +121,7 @@ public sealed class GogCatalogClient
     // The cover is a PNG of ~2 MB (1600 × 740). GOG's image server gives other
     // sizes by name: "_product_card_v2_mobile_slider_639.jpg" is 639 × 361, ~50 KB,
     // about the card's size (560 × 315).
-    private static string? ImageUrlOf(string? cover) =>
+    internal static string? ImageUrlOf(string? cover) =>
         cover is null ? null : Path.ChangeExtension(cover, null) + "_product_card_v2_mobile_slider_639.jpg";
 
     /// <summary>

@@ -148,6 +148,7 @@ internal static class SampleData
         var settings = store.Load();
         settings.PsPlusPlan = PsPlusTier.Extra;
         settings.ShowPlayStationStore = true;
+        settings.ShowMyGames = true;
         store.SaveAsync(settings).GetAwaiter().GetResult();
         SaveFreeGames(tempFolder);
 
@@ -174,7 +175,12 @@ internal static class SampleData
         vm.Recommendations.HasSteamCandidates = true;
         vm.Recommendations.HasGogCandidates = true;
         vm.Recommendations.HasEpicCandidates = true;
-        vm.Recommendations.Status = "6 de tes jeux favoris servent de point de départ, sur 103 jeux analysés dans ton historique. Jeux proposés : Game Pass Ultimate, PlayStation Plus Extra, catalogue Steam, catalogue GOG, catalogue Epic et catalogue PlayStation Store.";
+        vm.Recommendations.Counts = new SourceCountLabels(new Dictionary<CatalogSource, int>
+        {
+            [CatalogSource.GamePass] = 903, [CatalogSource.PsPlus] = 465, [CatalogSource.Steam] = 1375, [CatalogSource.Gog] = 886,
+            [CatalogSource.Epic] = 214, [CatalogSource.PlayStationStore] = 558, [CatalogSource.MyGames] = 128
+        });
+        vm.Recommendations.Status = "6 de tes jeux favoris servent de point de départ, sur 103 jeux analysés dans ton historique. Jeux proposés : Game Pass Ultimate, PlayStation Plus Extra, catalogue Steam, catalogue GOG, catalogue Epic, catalogue PlayStation Store et tes jeux pas encore terminés.";
 
         var destiny = Played("Destiny 2", 75);
         vm.Recommendations.Sections.Add(new RecommendationSectionRow(
@@ -190,7 +196,10 @@ internal static class SampleData
                 new RecommendationRow(Similar(Game("Warhammer 40,000: Space Marine 2", ["Shooter", "Action & adventure"], 4.6, 21400, PlayModes.Solo | PlayModes.CoopOnline | PlayModes.MultiOnline, steamAppId: "2183900") with { Tags = Tags(19, 3814, 3843) }, "Shooter", "Action & adventure"), TagNames),
                 // Compared on Steam tags: the reason names the shared tags.
                 new RecommendationRow(new SimilarGame(new Recommendation(Game("Tom Clancy's The Division 2", ["Shooter", "Role playing"], 4.4, 88100, PlayModes.Solo | PlayModes.CoopOnline) with { Tags = Tags(353880, 3814, 3843) }, 0.5, []), 0.67, ["Shooter"], PlayModes.CoopOnline, ByTags: true, SharedTags: [353880, 3814, 3843]), TagNames),
-                new RecommendationRow(Similar(Game("Borderlands 3", ["Shooter", "Role playing", "Action & adventure"], 4.4, 187_500, PlayModes.Solo | PlayModes.CoopOnline | PlayModes.Local, steamAppId: "397540", inGamePass: false), "Shooter"))
+                new RecommendationRow(Similar(Game("Borderlands 3", ["Shooter", "Role playing", "Action & adventure"], 4.4, 187_500, PlayModes.Solo | PlayModes.CoopOnline | PlayModes.Local, steamAppId: "397540", inGamePass: false), "Shooter")),
+                // One of the player's games ("Mes jeux"): started on Steam, not finished.
+                new RecommendationRow(Similar(Game("Outriders", ["Shooter", "Role playing"], 3.6, 64_800, PlayModes.Solo | PlayModes.CoopOnline, steamAppId: "680420", inGamePass: false)
+                    with { Owned = new OwnedGame(["Steam"], 4 * 60, 12, NeverPlayed: false) }, "Shooter"))
             ]));
 
         // The PS Plus catalog: a game only there, and one also sold on Steam and GOG; a game
@@ -270,6 +279,9 @@ internal static class SampleData
         Save(FreeGameCache.PsPlusKey,
             new FreeGame("F1 25", "https://store.playstation.com/concept/10011830"),
             new FreeGame("Hunt: Showdown 1896", "https://store.playstation.com/concept/234014"));
+        Save(FreeGameCache.XboxKey,
+            new FreeGame("Crusader Kings III", "https://www.xbox.com/games/store/-/9MZ8RZSD0NFQ", Now.AddDays(2), PlayOnly: true),
+            new FreeGame("Ravenswatch", "https://www.xbox.com/games/store/-/9P4NX9RD7FRG", Now.AddDays(2), PlayOnly: true));
         Save(FreeGameCache.AmazonKey,
             new FreeGame("DOOM", "https://gaming.amazon.com/doom-gog/dp/amzn1.pg.item.1", Now.AddDays(20), RedeemOn: "GOG"),
             new FreeGame("High on Life", "https://gaming.amazon.com/high-on-life-epic/dp/amzn1.pg.item.2", Now.AddDays(13), RedeemOn: "Epic Games"),

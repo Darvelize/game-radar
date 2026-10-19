@@ -14,13 +14,8 @@ public sealed class EpicException : ServiceException
     {
     }
 
-    /// <summary>Epic refused the session (expired, revoked): a new code must be pasted.</summary>
-    public bool IsTokenRefused { get; init; }
-
-    public override bool EndsSession => IsSignInError || IsTokenRefused;
-
     /// <summary>The session is gone (expired a year unused, revoked): a new code must be pasted.</summary>
-    internal static EpicException SessionExpired() => new(CoreStrings.Epic_SessionExpired) { IsTokenRefused = true };
+    internal static EpicException SessionExpired() => new(CoreStrings.Epic_SessionExpired) { RequiresSignIn = true };
 
     /// <summary>Epic asks to wait: every other request would be refused too.</summary>
     internal static EpicException RateLimited() => new(CoreStrings.Epic_RateLimited) { IsRateLimited = true };

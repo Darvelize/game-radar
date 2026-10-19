@@ -112,7 +112,7 @@ public class EpicAccountTests : IDisposable
 
         var ex = await Assert.ThrowsAsync<EpicException>(() => account.GetAccessTokenAsync(CancellationToken.None));
 
-        Assert.True(ex.IsTokenRefused);
+        Assert.True(ex.RequiresSignIn);
         Assert.Equal(CoreStrings.Epic_SessionExpired, ex.Message);
         Assert.False(account.IsConnected);
         Assert.Null(SavedRefreshToken());
@@ -132,7 +132,7 @@ public class EpicAccountTests : IDisposable
 
         var ex = await Assert.ThrowsAsync<EpicException>(() => account.GetAccessTokenAsync(CancellationToken.None));
 
-        Assert.False(ex.IsTokenRefused);
+        Assert.False(ex.RequiresSignIn);
         Assert.True(account.IsConnected);
         Assert.Equal("eg1~refresh1", SavedRefreshToken());
     }
@@ -148,7 +148,7 @@ public class EpicAccountTests : IDisposable
 
         var ex = await Assert.ThrowsAsync<EpicException>(() => new EpicClient(new HttpClient(epic), account).FetchPlaytimeJsonAsync());
 
-        Assert.True(ex.IsTokenRefused);
+        Assert.True(ex.RequiresSignIn);
         Assert.False(account.IsConnected);
         Assert.Null(SavedRefreshToken());
     }
@@ -229,6 +229,6 @@ public class EpicAccountTests : IDisposable
 
         var ex = await Assert.ThrowsAsync<EpicException>(() => new EpicClient(new HttpClient(epic), account).FetchPlaytimeJsonAsync());
 
-        Assert.Equal((refused, rateLimited), (ex.IsTokenRefused, ex.IsRateLimited));
+        Assert.Equal((refused, rateLimited), (ex.RequiresSignIn, ex.IsRateLimited));
     }
 }

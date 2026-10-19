@@ -110,7 +110,7 @@ internal sealed class XboxLiveAuth
         // fix a saved session. For a first sign-in (a code refused), that is
         // a sign-in failure, not an expired session: told below.
         if (renewing && answer?.Error is "invalid_grant" or "interaction_required" or "consent_required" or "login_required")
-            throw new XboxLiveException(CoreStrings.Xbox_SessionExpired, requiresSignIn: true);
+            throw new XboxLiveException(CoreStrings.Xbox_SessionExpired) { RequiresSignIn = true };
 
         if (answer?.Error == AppBlockedError)
             throw new XboxLiveException(CoreStrings.Xbox_AppBlocked);

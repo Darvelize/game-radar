@@ -88,6 +88,21 @@ public class XboxLiveClientTests
         Assert.Equal("5", Assert.Single(games).PlatformId);
     }
 
+    [Theory]
+    // Its 16:9 picture first, else the one Xbox shows; in https.
+    [InlineData("""[ { "url": "http://store-images.s-microsoft.com/image/box", "type": "BoxArt" }, { "url": "http://store-images.s-microsoft.com/image/hero", "type": "SuperHeroArt" } ]""",
+        "https://store-images.s-microsoft.com/image/hero")]
+    [InlineData("null", "https://store-images.s-microsoft.com/image/display")]
+    public void ParseJson_KeepsThePictureOfAGame(string images, string expected)
+    {
+        var game = Assert.Single(XboxLiveClient.ParseJson($$"""
+            { "titles": [ { "titleId": "7", "name": "Metal Slug Tactics", "type": "Game", "devices": ["XboxSeries"],
+                            "displayImage": "http://store-images.s-microsoft.com/image/display", "images": {{images}} } ] }
+            """));
+
+        Assert.Equal(expected, game.ImageUrl);
+    }
+
     [Fact]
     public void ParseJson_ReadsTitlehubAnswerWithoutEnvelope()
     {

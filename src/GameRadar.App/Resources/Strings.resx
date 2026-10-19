@@ -87,7 +87,6 @@
   <data name="AddGame_Updated" xml:space="preserve"><value>« {0} » était déjà dans ton historique : il est mis à jour.</value></data>
   <data name="Welcome_AddByHand" xml:space="preserve"><value>Ajoute tes jeux à la main</value></data>
   <data name="History_Completed_Tip" xml:space="preserve"><value>Histoire finie : les succès ne permettent pas de le savoir, indique-le ici</value></data>
-  <data name="Recommendations_Show" xml:space="preserve"><value>Afficher :</value></data>
   <data name="Recommendations_GamePass_Tip" xml:space="preserve"><value>Les jeux inclus dans ton abonnement (palier à choisir dans les Réglages)</value></data>
   <data name="Recommendations_Steam_Tip" xml:space="preserve"><value>Les jeux vendus sur Steam, y compris ceux aussi présents au Game Pass</value></data>
   <data name="Welcome_Title" xml:space="preserve"><value>Bienvenue sur GameRadar</value></data>
@@ -130,7 +129,7 @@
   <data name="Settings_Data_Portable_Step4" xml:space="preserve"><value>4. Pour revenir au mode normal, renomme ou supprime le dossier « Data » : GameRadar ne le crée jamais lui-même.</value></data>
   <data name="Privacy_Title" xml:space="preserve"><value>Confidentialité</value></data>
   <data name="Privacy_Statement" xml:space="preserve"><value>GameRadar n'a aucun serveur : il ne collecte, ne transmet et ne vend aucune donnée. Ton historique, tes réglages et ses caches restent sur cet ordinateur ; ta session Xbox, ta clé Steam, ton jeton PlayStation et ta connexion Epic y sont chiffrés par Windows ; le jeton EA n'est jamais enregistré. Le journal des erreurs, sans aucun secret, ne quitte cet ordinateur que si tu l'envoies toi-même.</value></data>
-  <data name="Privacy_Services" xml:space="preserve"><value>L'appli ne contacte que les services dont elle a besoin : Microsoft (Xbox Live, catalogue Game Pass et Microsoft Store), Steam (ton historique, tes succès et ta liste de souhaits si tu connectes ton compte, et ses jeux offerts et week-ends gratuits sur la page « Jeux gratuits », sans compte), Sony (PlayStation Network si tu le connectes, catalogue PS Plus si tu as choisi un abonnement PS Plus, PlayStation Store quand tu cherches un jeu à ajouter et pour ses meilleures ventes si la case « PlayStation Store » est cochée, et le catalogue PS Plus à ce moment-là si le PlayStation Store ne répond pas, et les jeux du mois PS Plus sur la page « Jeux gratuits » si tu as choisi un abonnement), GOG (ton profil public si tu l'indiques, et le catalogue de ses meilleures ventes, sans compte), EA (tes jeux joués dans l'appli EA, seulement quand tu colles la page EA), Epic Games (tes jeux, ton temps de jeu et tes succès si tu connectes ton compte, et les meilleures ventes, les plus joués et les mieux notés de son catalogue ainsi que ses jeux offerts de la semaine, sans compte), Amazon (les jeux offerts aux abonnés Prime, sur la page « Jeux gratuits », sans compte), et GitHub pour vérifier les mises à jour. Chacun ne reçoit que ce qu'il faut pour répondre : ta connexion pour lire tes propres données, rien de personnel pour les catalogues.</value></data>
+  <data name="Privacy_Services" xml:space="preserve"><value>L'appli ne contacte que les services dont elle a besoin : Microsoft (Xbox Live, catalogue Game Pass et Microsoft Store, et les jours de jeu gratuit du Game Pass sur la page « Jeux gratuits » si tu as choisi un abonnement Game Pass, sans compte), Steam (ton historique, tes succès et ta liste de souhaits si tu connectes ton compte, et ses jeux offerts et week-ends gratuits sur la page « Jeux gratuits », sans compte), Sony (PlayStation Network si tu le connectes, catalogue PS Plus si tu as choisi un abonnement PS Plus, PlayStation Store quand tu cherches un jeu à ajouter et pour ses meilleures ventes si la case « PlayStation Store » est cochée, et le catalogue PS Plus à ce moment-là si le PlayStation Store ne répond pas, et les jeux du mois PS Plus sur la page « Jeux gratuits » si tu as choisi un abonnement), GOG (ton profil public si tu l'indiques, et le catalogue de ses meilleures ventes, sans compte), EA (tes jeux joués dans l'appli EA, seulement quand tu colles la page EA), Epic Games (tes jeux, ton temps de jeu et tes succès si tu connectes ton compte, et les meilleures ventes, les plus joués et les mieux notés de son catalogue ainsi que ses jeux offerts de la semaine, sans compte), Amazon (les jeux offerts aux abonnés Prime, sur la page « Jeux gratuits », sans compte), et GitHub pour vérifier les mises à jour. Chacun ne reçoit que ce qu'il faut pour répondre : ta connexion pour lire tes propres données, rien de personnel pour les catalogues.</value></data>
   <data name="Privacy_Revoke_Title" xml:space="preserve"><value>Retirer l'accès de GameRadar</value></data>
   <data name="Privacy_Revoke_Description" xml:space="preserve"><value>Se déconnecter oublie ta session sur cet ordinateur. Pour retirer aussi l'autorisation donnée à GameRadar, passe par ton compte :</value></data>
   <data name="Privacy_Revoke_Microsoft" xml:space="preserve"><value>Autorisations de mon compte Microsoft</value></data>
@@ -398,6 +397,21 @@
   <data name="Reco_FiveSources" xml:space="preserve"><value>{0}, {1}, {2}, {3} et {4}</value></data>
   <data name="Reco_SixSources" xml:space="preserve"><value>{0}, {1}, {2}, {3}, {4} et {5}</value></data>
   <data name="Reco_SourceEpic" xml:space="preserve"><value>catalogue Epic</value></data>
+  <data name="Card_MyGames" xml:space="preserve"><value>Mes jeux</value></data>
+  <data name="Card_StartedTimeAndAchievements" xml:space="preserve"><value>Commencé : {0} de jeu, {1:0} % des succès</value></data>
+  <data name="Card_StartedTime" xml:space="preserve"><value>Commencé : {0} de jeu</value></data>
+  <data name="Card_StartedAchievements" xml:space="preserve"><value>Commencé : {0:0} % des succès</value></data>
+  <data name="Card_Started" xml:space="preserve"><value>Commencé</value></data>
+  <data name="Reco_Sources" xml:space="preserve"><value>Sources ({0})</value></data>
+  <data name="Reco_Sources_Tip" xml:space="preserve"><value>Choisis d'où viennent les jeux proposés</value></data>
+  <data name="Reco_SourceCount" xml:space="preserve"><value>{0:N0}</value></data>
+  <data name="Reco_GroupSubscriptions" xml:space="preserve"><value>Abonnements</value></data>
+  <data name="Reco_GroupCatalogs" xml:space="preserve"><value>Catalogues</value></data>
+  <data name="Reco_MyGamesBox" xml:space="preserve"><value>Pas encore terminés</value></data>
+  <data name="Reco_MyGames_Tip" xml:space="preserve"><value>Tes jeux ni « Histoire finie » ni à 100 %, qui ne comptent pas dans tes goûts : jamais lancés ou commencés. La cocher décoche les autres sources.</value></data>
+  <data name="Reco_SourcesHint" xml:space="preserve"><value>Ton abonnement Game Pass ou PS Plus se choisit dans Réglages › Comptes.</value></data>
+  <data name="Reco_SevenSources" xml:space="preserve"><value>{0}, {1}, {2}, {3}, {4}, {5} et {6}</value></data>
+  <data name="Reco_SourceMyGames" xml:space="preserve"><value>tes jeux pas encore terminés</value></data>
   <data name="Reco_SourcePsStore" xml:space="preserve"><value>catalogue PlayStation Store</value></data>
   <data name="Recommendations_Epic_Tip" xml:space="preserve"><value>Les jeux vendus sur Epic Games, y compris ceux aussi présents ailleurs</value></data>
   <data name="Recommendations_PsStore_Tip" xml:space="preserve"><value>Les meilleures ventes du PlayStation Store (PS5 et PS4), y compris celles aussi présentes ailleurs</value></data>
@@ -458,13 +472,19 @@
   <data name="Status_FetchingEpic" xml:space="preserve"><value>Récupération de ton historique Epic…</value></data>
   <data name="Status_NoEpicHistory" xml:space="preserve"><value>Aucun historique Epic : connecte ton compte Epic Games dans Réglages › Comptes pour l'ajouter.</value></data>
   <data name="Nav_FreeGames" xml:space="preserve"><value>Jeux gratuits</value></data>
-  <data name="FreeGames_Intro" xml:space="preserve"><value>Les jeux offerts en ce moment, à récupérer avant la fin de l'offre : ils restent alors à toi. Les week-ends gratuits de Steam, eux, ne se jouent que pendant l'offre.</value></data>
+  <data name="FreeGames_TabKept" xml:space="preserve"><value>Définitif</value></data>
+  <data name="FreeGames_TabTimed" xml:space="preserve"><value>Temporaire</value></data>
+  <data name="FreeGames_IntroKept" xml:space="preserve"><value>Les jeux offerts en ce moment : récupère-les avant la fin de l'offre, ils restent alors à toi.</value></data>
+  <data name="FreeGames_IntroTimed" xml:space="preserve"><value>Les jeux jouables gratuitement pendant quelques jours, sans les garder : week-ends gratuits de Steam et jours de jeu gratuit du Game Pass.</value></data>
   <data name="FreeGames_Until" xml:space="preserve"><value>Gratuit jusqu'au {0:dddd d MMMM} à {0:HH:mm}</value></data>
   <data name="FreeGames_SteamWeekend" xml:space="preserve"><value>Jouable gratuitement jusqu'au {0:dddd d MMMM} à {0:HH:mm}, sans le garder</value></data>
   <data name="FreeGames_PrimeUntil" xml:space="preserve"><value>Avec Amazon Prime, jusqu'au {0:dddd d MMMM}</value></data>
   <data name="FreeGames_PsPlusMonthly" xml:space="preserve"><value>Jeu du mois avec PlayStation Plus</value></data>
   <data name="FreeGames_RedeemOn" xml:space="preserve"><value>À récupérer sur {0}</value></data>
   <data name="FreeGames_None" xml:space="preserve"><value>Aucun jeu gratuit en ce moment.</value></data>
+  <data name="FreeGames_XboxFreePlay" xml:space="preserve"><value>Jouable gratuitement avec le Game Pass jusqu'au {0:dddd d MMMM} à {0:HH:mm}, sans le garder</value></data>
+  <data name="FreeGames_InHistory" xml:space="preserve"><value>Dans ton historique</value></data>
+  <data name="FreeGames_GamePassHint" xml:space="preserve"><value>Choisis ton abonnement Game Pass dans Réglages › Comptes pour voir ses jours de jeu gratuit.</value></data>
   <data name="FreeGames_PsPlusHint" xml:space="preserve"><value>Choisis ton abonnement PS Plus dans Réglages › Comptes pour voir ses jeux du mois.</value></data>
   <data name="FreeGames_Fetching" xml:space="preserve"><value>Récupération des jeux gratuits…</value></data>
   <data name="FreeGames_Unreachable" xml:space="preserve"><value>Impossible de joindre {0}. Vérifie ta connexion Internet.</value></data>
@@ -476,5 +496,7 @@
   <data name="About_EpicFreeGames" xml:space="preserve"><value>— les jeux offerts de la semaine, pour la page « Jeux gratuits ». Sans compte ; liste publique d'Epic Games, service non documenté.</value></data>
   <data name="Common_SteamFreeGames" xml:space="preserve"><value>Jeux gratuits Steam</value></data>
   <data name="About_SteamFreeGames" xml:space="preserve"><value>— les jeux offerts et les week-ends gratuits, pour la page « Jeux gratuits ». Sans compte ni clé ; API publique de Steam, service non documenté.</value></data>
+  <data name="About_XboxFreePlayDays_Name" xml:space="preserve"><value>Jours de jeu gratuit</value></data>
+  <data name="About_XboxFreePlayDays" xml:space="preserve"><value>— les jeux jouables gratuitement avec le Game Pass, du jeudi au dimanche, pour la page « Jeux gratuits ». Sans compte ; API du site xbox.com, service non documenté.</value></data>
   <data name="About_AmazonFreeGames" xml:space="preserve"><value>— les jeux offerts aux abonnés Prime, pour la page « Jeux gratuits ». Sans compte : GameRadar lit la page publique de Luna comme le site lui-même ; service non documenté.</value></data>
 </root>

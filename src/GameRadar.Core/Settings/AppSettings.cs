@@ -89,6 +89,10 @@ public sealed class AppSettings
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? ShowPlayStationStore { get; set; }
 
+    /// <summary>"Pour toi" filter: the player's own games not finished yet ("Mes jeux"). Unticked by default, then not written.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool ShowMyGames { get; set; }
+
     /// <summary>
     /// Name of the player's public GOG profile, or null when not connected.
     /// Public, not a secret: kept in the settings. Not written when null,
@@ -128,6 +132,7 @@ public sealed class AppSettings
         ShowGog = ShowGog,
         ShowEpic = ShowEpic,
         ShowPlayStationStore = ShowPlayStationStore,
+        ShowMyGames = ShowMyGames,
         GogUser = GogUser,
         LastSeenVersion = LastSeenVersion,
         Language = Language

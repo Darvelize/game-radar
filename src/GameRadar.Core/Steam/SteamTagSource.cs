@@ -262,9 +262,10 @@ public sealed class SteamTagSource
         }
 
         // The Game Pass candidates, and the GOG, Epic and PlayStation Store ones Steam
-        // does not sell (those on Steam take the tags of their Steam entry).
+        // does not sell (those on Steam take the tags of their Steam entry); the player's
+        // games built from their history ("Mes jeux": by app id, else by title).
         foreach (var game in candidates.Where(g => g.PrimaryStore
-            is CatalogSource.GamePass or CatalogSource.Gog or CatalogSource.Epic or CatalogSource.PlayStationStore))
+            is CatalogSource.GamePass or CatalogSource.Gog or CatalogSource.Epic or CatalogSource.PlayStationStore or CatalogSource.MyGames))
         {
             if (index.For(game) is not null)
                 continue;

@@ -44,6 +44,7 @@ public static partial class CacheCleanup
         FreeGameCache.PsPlusKey,
         FreeGameCache.AmazonKey,
         FreeGameCache.SteamKey,
+        FreeGameCache.XboxKey,
     ];
 
     /// <summary>

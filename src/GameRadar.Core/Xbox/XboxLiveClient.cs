@@ -142,8 +142,17 @@ public sealed class XboxLiveClient
             ProgressPercentage: percentage,
             LastPlayed: title.TitleHistory?.LastTimePlayed,
             Status: StatusClassifier.FromAchievements(unlocked, total, percentage),
-            PackageFamilyName: string.IsNullOrWhiteSpace(title.PackageFamilyName) ? null : title.PackageFamilyName);
+            PackageFamilyName: string.IsNullOrWhiteSpace(title.PackageFamilyName) ? null : title.PackageFamilyName)
+        {
+            ImageUrl = ImageUrlOf(title)
+        };
     }
+
+    // Its 16:9 picture, else the one Xbox shows; Xbox sends them in http.
+    private static string? ImageUrlOf(TitleDto title) =>
+        (title.Images?.FirstOrDefault(i => i.Type == "SuperHeroArt")?.Url ?? title.DisplayImage) is { Length: > 0 } url
+            ? (url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ? "https://" + url["http://".Length..] : url)
+            : null;
 
     // The Xbox PC app also records games launched from other stores (Steam,
     // Epic...). They are the only titles whose sole device is "Win32";

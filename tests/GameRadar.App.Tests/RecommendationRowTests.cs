@@ -23,6 +23,67 @@ public sealed class RecommendationRowTests
         Assert.Equal("", row.StyleLabel);
     }
 
+    // ---------- "Mes jeux": the player's own games not finished yet ----------
+
+    private static CatalogGame Mine(OwnedGame owned, string? appId = null) =>
+        new("mine:portal2", "Portal 2", null, null, ["Shooter"], OnPc: false, OnConsole: false, LeavingSoon: false, SteamAppId: appId)
+        {
+            Owned = owned
+        };
+
+    [Theory]
+    [InlineData(true, 0, null, "Jamais lancé")]
+    [InlineData(false, 240, 12.4, "Commencé : 4 h de jeu, 12 % des succès")]
+    [InlineData(false, 240, null, "Commencé : 4 h de jeu")]
+    [InlineData(false, null, 12.4, "Commencé : 12 % des succès")]
+    [InlineData(false, null, null, "Commencé")]
+    [InlineData(false, null, 99.6, "Commencé : 99 % des succès")]
+    public void One_of_my_games_says_how_far_I_went(bool neverPlayed, int? minutes, double? percent, string expected)
+    {
+        var row = Row(Mine(new OwnedGame(["Steam"], minutes, percent, neverPlayed)));
+
+        Assert.True(row.IsMine);
+        Assert.Equal(expected, row.OwnedLabel);
+    }
+
+    [Fact]
+    public void One_of_my_games_in_no_catalog_names_where_I_have_it()
+    {
+        var row = Row(Mine(new OwnedGame(["Xbox", "Manual"], null, 3, NeverPlayed: false)));
+
+        Assert.Equal("Xbox · Ajouté à la main", row.PlatformsLabel);
+        Assert.False(row.IsOnSteam);
+    }
+
+    [Fact]
+    public void One_of_my_games_on_Steam_opens_its_Steam_page()
+    {
+        var row = Row(Mine(new OwnedGame(["Steam"], 0, null, NeverPlayed: true), appId: "620"));
+
+        Assert.True(row.IsOnSteam);
+        Assert.Equal("Steam", row.PlatformsLabel);
+    }
+
+    [Theory]
+    // The Microsoft image server resizes on the fly; a Steam header comes at its size.
+    [InlineData("https://store-images.s-microsoft.com/image/hero", "https://store-images.s-microsoft.com/image/hero?w=560&h=315&q=80")]
+    [InlineData("https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/620/header.jpg", "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/620/header.jpg")]
+    public void One_of_my_games_in_no_catalog_shows_the_picture_of_its_history(string picture, string shown)
+    {
+        var row = Row(Mine(new OwnedGame(["Xbox"], null, 0, NeverPlayed: false)) with { ImageUrl = picture });
+
+        Assert.Equal(shown, row.ImageUrl);
+    }
+
+    [Fact]
+    public void A_game_of_a_catalog_is_not_one_of_my_games()
+    {
+        var row = Row(new CatalogGame("gp:1", "Halo", null, null, ["Shooter"], OnPc: true, OnConsole: true, LeavingSoon: false));
+
+        Assert.False(row.IsMine);
+        Assert.Equal("", row.OwnedLabel);
+    }
+
     [Fact]
     public void A_card_without_tags_or_tag_names_shows_its_genres()
     {

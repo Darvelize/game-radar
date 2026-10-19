@@ -161,6 +161,9 @@ public sealed class SteamCatalogClient
         return games;
     }
 
+    /// <summary>A Steam game's header picture (460 × 215), from its app id alone.</summary>
+    internal static string HeaderImageUrl(string appId) => AssetBaseUrl + "steam/apps/" + Uri.EscapeDataString(appId) + "/header.jpg";
+
     internal static bool IsAdult(StoreItemDto item) => item.ContentDescriptorIds?.Intersect(AdultDescriptors).Any() == true;
 
     // "main_capsule" is 616 × 353: close to the 16:9 of the cards.

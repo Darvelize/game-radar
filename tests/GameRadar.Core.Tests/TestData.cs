@@ -40,6 +40,10 @@ internal static class TestData
             SteamAppId = platform == "Steam" ? id : null
         };
 
+    /// <summary>A Steam game owned but never launched (0 minutes, no achievements).</summary>
+    public static PlayedGame NeverLaunched(string appId, string name) =>
+        Played(appId, platform: "Steam", name: name, hasAchievements: false) with { PlaytimeMinutes = 0 };
+
     public static CatalogGame Catalog(
         string productId,
         string? title = null,

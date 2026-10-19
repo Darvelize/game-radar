@@ -48,6 +48,10 @@
                                 <Run Text="{x:Static res:Strings.About_Catalog_Name}" FontWeight="SemiBold" />
                                 <Run Text="{x:Static res:Strings.About_Catalog}" />
                             </TextBlock>
+                            <TextBlock Classes="secondary" TextWrapping="Wrap">
+                                <Run Text="{x:Static res:Strings.About_XboxFreePlayDays_Name}" FontWeight="SemiBold" />
+                                <Run Text="{x:Static res:Strings.About_XboxFreePlayDays}" />
+                            </TextBlock>
                         </StackPanel>
 
                         <!-- Steam -->

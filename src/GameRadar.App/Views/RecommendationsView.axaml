@@ -12,31 +12,73 @@
             <StackPanel Spacing="4">
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
                     <TextBlock Classes="display" Text="{x:Static res:Strings.Nav_ForYou}" />
-                    <!-- Filter: where the games can be played. Each box only when it
-                         means something (a Game Pass plan, Steam candidates loaded).
-                         Wraps in a narrow window: six boxes no longer fit on one line. -->
-                    <WrapPanel Grid.Column="1" ItemSpacing="16" LineSpacing="4" HorizontalAlignment="Right" VerticalAlignment="Center">
-                        <TextBlock Classes="secondary" Text="{x:Static res:Strings.Recommendations_Show}" VerticalAlignment="Center" />
-                        <CheckBox IsChecked="{Binding SourceFilter.ShowGamePass}" IsVisible="{Binding SourceFilter.HasGamePassPlan}"
-                                  Content="{Binding SourceFilter.GamePassLabel}"
-                                  ToolTip.Tip="{x:Static res:Strings.Recommendations_GamePass_Tip}" />
-                        <CheckBox IsChecked="{Binding SourceFilter.ShowPsPlus}" IsVisible="{Binding SourceFilter.HasPsPlusCatalog}"
-                                  Content="{Binding SourceFilter.PsPlusLabel}"
-                                  ToolTip.Tip="{x:Static res:Strings.Recommendations_PsPlus_Tip}" />
-                        <CheckBox IsChecked="{Binding SourceFilter.ShowSteam}" IsVisible="{Binding Recommendations.HasSteamCandidates}"
-                                  Content="Steam"
-                                  ToolTip.Tip="{x:Static res:Strings.Recommendations_Steam_Tip}" />
-                        <CheckBox IsChecked="{Binding SourceFilter.ShowGog}" IsVisible="{Binding Recommendations.HasGogCandidates}"
-                                  Content="GOG"
-                                  ToolTip.Tip="{x:Static res:Strings.Recommendations_Gog_Tip}" />
-                        <CheckBox IsChecked="{Binding SourceFilter.ShowEpic}" IsVisible="{Binding Recommendations.HasEpicCandidates}"
-                                  Content="Epic"
-                                  ToolTip.Tip="{x:Static res:Strings.Recommendations_Epic_Tip}" />
-                        <!-- Always there: the box itself asks for the catalog (never downloaded while unticked). -->
-                        <CheckBox IsChecked="{Binding SourceFilter.ShowPlayStationStore}"
-                                  Content="PlayStation Store"
-                                  ToolTip.Tip="{x:Static res:Strings.Recommendations_PsStore_Tip}" />
-                    </WrapPanel>
+                    <!-- Where the games come from: one button, the boxes in its menu (the menu of
+                         the 2.0 mockup, in today's look). Each box only when it means something
+                         (a Game Pass plan, Steam candidates loaded), its games on the right. -->
+                    <!-- The look of the History's filters (a ComboBox that holds check boxes) -->
+                    <Button x:Name="SourcesButton" Grid.Column="1" Classes="picklist" HorizontalAlignment="Right" VerticalAlignment="Center"
+                            ToolTip.Tip="{x:Static res:Strings.Reco_Sources_Tip}">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="{Binding SourceFilter.SourcesLabel}" VerticalAlignment="Center" />
+                            <Path Grid.Column="1" Classes="icon secondary small" Data="{StaticResource IconChevronDown}" />
+                        </Grid>
+                        <Button.Flyout>
+                            <Flyout Placement="BottomEdgeAlignedRight">
+                                <StackPanel Width="300" Spacing="4">
+                                    <TextBlock Classes="caption" Text="{x:Static res:Strings.Reco_GroupSubscriptions}" />
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" IsVisible="{Binding SourceFilter.HasGamePassPlan}">
+                                        <CheckBox IsChecked="{Binding SourceFilter.ShowGamePass}" Content="{Binding SourceFilter.GamePassLabel}"
+                                                  ToolTip.Tip="{x:Static res:Strings.Recommendations_GamePass_Tip}" />
+                                        <TextBlock Grid.Column="1" Classes="caption" Text="{Binding Recommendations.Counts.GamePass}" VerticalAlignment="Center" />
+                                    </Grid>
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" IsVisible="{Binding SourceFilter.HasPsPlusCatalog}">
+                                        <CheckBox IsChecked="{Binding SourceFilter.ShowPsPlus}" Content="{Binding SourceFilter.PsPlusLabel}"
+                                                  ToolTip.Tip="{x:Static res:Strings.Recommendations_PsPlus_Tip}" />
+                                        <TextBlock Grid.Column="1" Classes="caption" Text="{Binding Recommendations.Counts.PsPlus}" VerticalAlignment="Center" />
+                                    </Grid>
+
+                                    <TextBlock Classes="caption" Text="{x:Static res:Strings.Reco_GroupCatalogs}" Margin="0,8,0,0" />
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" IsVisible="{Binding Recommendations.HasSteamCandidates}">
+                                        <CheckBox IsChecked="{Binding SourceFilter.ShowSteam}" Content="Steam"
+                                                  ToolTip.Tip="{x:Static res:Strings.Recommendations_Steam_Tip}" />
+                                        <TextBlock Grid.Column="1" Classes="caption" Text="{Binding Recommendations.Counts.Steam}" VerticalAlignment="Center" />
+                                    </Grid>
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" IsVisible="{Binding Recommendations.HasGogCandidates}">
+                                        <CheckBox IsChecked="{Binding SourceFilter.ShowGog}" Content="GOG"
+                                                  ToolTip.Tip="{x:Static res:Strings.Recommendations_Gog_Tip}" />
+                                        <TextBlock Grid.Column="1" Classes="caption" Text="{Binding Recommendations.Counts.Gog}" VerticalAlignment="Center" />
+                                    </Grid>
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" IsVisible="{Binding Recommendations.HasEpicCandidates}">
+                                        <CheckBox IsChecked="{Binding SourceFilter.ShowEpic}" Content="Epic Games"
+                                                  ToolTip.Tip="{x:Static res:Strings.Recommendations_Epic_Tip}" />
+                                        <TextBlock Grid.Column="1" Classes="caption" Text="{Binding Recommendations.Counts.Epic}" VerticalAlignment="Center" />
+                                    </Grid>
+                                    <!-- Always there: the box itself asks for the catalog (never downloaded while unticked). -->
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                        <CheckBox IsChecked="{Binding SourceFilter.ShowPlayStationStore}" Content="PlayStation Store"
+                                                  ToolTip.Tip="{x:Static res:Strings.Recommendations_PsStore_Tip}" />
+                                        <TextBlock Grid.Column="1" Classes="caption" Text="{Binding Recommendations.Counts.PlayStationStore}" VerticalAlignment="Center" />
+                                    </Grid>
+
+                                    <!-- The player's own games not finished yet -->
+                                    <TextBlock Classes="caption" Text="{x:Static res:Strings.Card_MyGames}" Margin="0,8,0,0" />
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                        <CheckBox IsChecked="{Binding SourceFilter.ShowMyGames}" Content="{x:Static res:Strings.Reco_MyGamesBox}"
+                                                  ToolTip.Tip="{x:Static res:Strings.Reco_MyGames_Tip}" />
+                                        <TextBlock Grid.Column="1" Classes="caption" Text="{Binding Recommendations.Counts.MyGames}" VerticalAlignment="Center" />
+                                    </Grid>
+
+                                    <Separator Margin="0,8,0,4" />
+                                    <!-- A whole sentence, as a link: opens Settings › Accounts (and closes the menu) -->
+                                    <HyperlinkButton Classes="step" Click="OnSubscriptionsLinkClick"
+                                                     Command="{Binding OpenSettingsCommand}"
+                                                     CommandParameter="{x:Static vm:SettingsTab.Accounts}">
+                                        <TextBlock Text="{x:Static res:Strings.Reco_SourcesHint}" TextWrapping="Wrap" />
+                                    </HyperlinkButton>
+                                </StackPanel>
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
                 </Grid>
                 <TextBlock Classes="secondary" Text="{Binding Recommendations.Status}" TextWrapping="Wrap" />
                 <ProgressBar Classes="thin" IsIndeterminate="True" Margin="0,8,0,0"
@@ -183,6 +225,10 @@
                                                              command is the page's, reached through the page
                                                              (the card's DataContext is the row). -->
                                                         <StackPanel Orientation="Horizontal" Spacing="6">
+                                                            <!-- One of the player's own games ("Mes jeux") -->
+                                                            <Border Classes="badge accent" IsVisible="{Binding IsMine}">
+                                                                <TextBlock Text="{x:Static res:Strings.Card_MyGames}" />
+                                                            </Border>
                                                             <Button Classes="badgeLink" IsVisible="{Binding InGamePass}"
                                                                     Command="{Binding $parent[ContentPage].((vm:MainWindowViewModel)DataContext).Recommendations.OpenPageCommand}"
                                                                     CommandParameter="{Binding XboxStorePage}"
@@ -262,6 +308,9 @@
                                                                    IsVisible="{Binding StyleLabel, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                                                         <TextBlock Classes="accent" FontSize="{StaticResource FontSizeCaption}"
                                                                    Text="{Binding ReasonLabel}" TextWrapping="Wrap" />
+                                                        <!-- How far the player went in one of their games -->
+                                                        <TextBlock Classes="caption" Text="{Binding OwnedLabel}" TextWrapping="Wrap"
+                                                                   IsVisible="{Binding IsMine}" />
                                                     </StackPanel>
                                                 </DockPanel>
                                             </DockPanel>

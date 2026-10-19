@@ -14,6 +14,12 @@ public abstract class ServiceException : Exception
     /// <summary>Raised while signing in or renewing the session (blocked, or the service down): every next request needs it.</summary>
     public bool IsSignInError { get; internal set; }
 
+    /// <summary>
+    /// The session, token or key is refused (expired, revoked, signed out everywhere): the player
+    /// signs in again, pastes a new token or code, or enters the key again. One flag for every service.
+    /// </summary>
+    public bool RequiresSignIn { get; init; }
+
     /// <summary>Nothing more can be asked for now: the session or key is refused, or could not be renewed.</summary>
-    public virtual bool EndsSession => IsSignInError;
+    public bool EndsSession => IsSignInError || RequiresSignIn;
 }

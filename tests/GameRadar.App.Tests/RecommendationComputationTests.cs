@@ -154,6 +154,81 @@ public sealed class RecommendationComputationTests : AppTest
         Assert.DoesNotContain(GenreLabels.Display("Role playing"), card.ReasonLabel);
     }
 
+    // Started, its heart taken away: one of "Mes jeux", also in the Game Pass.
+    private static readonly ManualGame StartedRpg = new("Rpg Pass", ManualPlatform.OldXbox, ManualLevel.PlayedALittle);
+
+    private Task PrepareMyGamesAsync(bool showMyGames) => PrepareAsync(Fresh, null, settings =>
+    {
+        settings.ManualGames.Add(StartedRpg);
+        settings.ExcludedFromTaste.Add(ManualGames.ToPlayed(StartedRpg).Key);
+        settings.ShowMyGames = showMyGames;
+    });
+
+    [AvaloniaFact]
+    public async Task Without_My_games_a_game_started_is_not_offered()
+    {
+        // The default: the recommendations of before "Mes jeux".
+        await PrepareMyGamesAsync(showMyGames: false);
+        var vm = SampleData.Empty(TempFolder, network: new FakeStores());
+
+        await vm.InitializeAsync();
+
+        Assert.False(vm.SourceFilter.ShowMyGames);
+        Assert.DoesNotContain("Rpg Pass", Cards(vm));
+    }
+
+    [AvaloniaFact]
+    public async Task Ticking_My_games_offers_the_games_started_and_not_finished()
+    {
+        await PrepareMyGamesAsync(showMyGames: false);
+        var vm = SampleData.Empty(TempFolder, network: new FakeStores());
+        await vm.InitializeAsync();
+
+        vm.SourceFilter.ShowMyGames = true;
+        await vm.Recommendations.UpdateAsync();
+
+        Assert.Contains("Rpg Pass", Cards(vm));
+        Assert.Contains(CatalogSource.MyGames, vm.SourceFilter.Ticked);
+        // Remembered (saved in the background).
+        await vm.WhenIdleAsync();
+        Assert.True(new SettingsStore(TempFolder).Load().ShowMyGames);
+        // The game of the taste (finished) is never offered.
+        Assert.DoesNotContain("Hero Quest", Cards(vm));
+    }
+
+    [AvaloniaFact]
+    public async Task Ticking_My_games_unticks_the_other_sources()
+    {
+        // The user's choice: "Mes jeux" shows them alone, no link to click besides.
+        await PrepareMyGamesAsync(showMyGames: false);
+        var vm = SampleData.Empty(TempFolder, network: new FakeStores());
+        await vm.InitializeAsync();
+
+        vm.SourceFilter.ShowMyGames = true;
+        await vm.Recommendations.UpdateAsync();
+
+        Assert.Equal([CatalogSource.MyGames], vm.SourceFilter.Ticked);
+        Assert.Equal(["Rpg Pass"], Cards(vm));
+        // Each box saved (in the background).
+        await vm.WhenIdleAsync();
+        var saved = new SettingsStore(TempFolder).Load();
+        Assert.False(saved.ShowGamePass || saved.ShowSteam || saved.ShowGog || saved.ShowEpic || saved.ShowPsPlus);
+        Assert.True(saved.ShowMyGames);
+    }
+
+    [AvaloniaFact]
+    public async Task My_games_saved_ticked_leaves_the_other_boxes_at_start()
+    {
+        // Only a click unticks them: a box ticked again later stays ticked at the next start.
+        await PrepareMyGamesAsync(showMyGames: true);
+
+        var vm = SampleData.Empty(TempFolder, network: new FakeStores());
+
+        Assert.True(vm.SourceFilter.ShowMyGames);
+        Assert.True(vm.SourceFilter.ShowGamePass);
+        Assert.True(vm.SourceFilter.ShowSteam);
+    }
+
     [AvaloniaFact]
     public async Task The_Steam_store_recommends_even_without_the_Game_Pass_catalog()
     {

@@ -123,7 +123,7 @@ internal sealed class PlayStationAuth
         // a rate limit or an error page is not a dead NPSSO: it must not
         // cost the player their session.
         if ((int)response.StatusCode is >= 300 and < 400)
-            throw new PlayStationException(CoreStrings.PlayStation_NpssoRefused, requiresSignIn: true);
+            throw new PlayStationException(CoreStrings.PlayStation_NpssoRefused) { RequiresSignIn = true };
         if (response.StatusCode == HttpStatusCode.TooManyRequests)
             throw PlayStationException.RateLimited();
         throw new PlayStationException(CoreText.Format(CoreStrings.PlayStation_SignInFailed,
@@ -158,7 +158,7 @@ internal sealed class PlayStationAuth
         // On the one-time code of a sign-in (used, expired), it says nothing
         // of the NPSSO: a failure, told below, that keeps the session.
         if (renewing && answer?.Error == "invalid_grant")
-            throw new PlayStationException(CoreStrings.PlayStation_NpssoRefused, requiresSignIn: true);
+            throw new PlayStationException(CoreStrings.PlayStation_NpssoRefused) { RequiresSignIn = true };
         if (IsAppBlocked(answer?.Error))
             throw new PlayStationException(CoreStrings.PlayStation_AppBlocked);
 

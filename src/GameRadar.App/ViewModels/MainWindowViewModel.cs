@@ -71,10 +71,11 @@ public sealed partial class MainWindowViewModel : ObservableObject
         Accounts.AccountChanged += RefreshRelativeTimes;
         History = new HistoryViewModel(Accounts, Library, _saver, SourceFilter, OnChoicesChanged);
         Recommendations = new RecommendationsViewModel(http, cache, imageCache, log, openBrowser, Library, Accounts, _saver, SourceFilter, _work);
-        FreeGames = new FreeGamesViewModel(http, cache, imageCache, Notices, SourceFilter, _work);
+        FreeGames = new FreeGamesViewModel(http, cache, imageCache, Notices, SourceFilter, _work, Library.CombinedHistory);
         SourceFilter.PlanChanged += RebuildAndRecompute;
         // The download is heard once the caches are read (InitializeAsync).
         SourceFilter.PsPlusPlanChanged += RebuildAndRecompute;
+        SourceFilter.MyGamesChanged += () => _ = Recommendations.UpdateAsync();
         NotInterested = new NotInterestedViewModel(_saver, OnNotInterestedChanged);
         History.Rebuilt += OnHistoryRebuilt;
         AddGame = new AddGameViewModel(http, Library, _saver, log, SourceFilter, Show, RebuildAndRecompute, Catalogs.GetPsPlusCatalogForSearchAsync);

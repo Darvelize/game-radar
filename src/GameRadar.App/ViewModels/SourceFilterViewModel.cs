@@ -23,6 +23,9 @@ public sealed partial class SourceFilterViewModel : ObservableObject
     /// <summary>Another PS Plus plan: its catalog may have to be downloaded before the recommendations follow.</summary>
     public event Action? PsPlusPlanChanged;
 
+    /// <summary>"Mes jeux" ticked or unticked: other candidates (and their tags), the recommendations are computed again.</summary>
+    public event Action? MyGamesChanged;
+
     // Events, not constructor callbacks: the window listens once everything exists, and the
     // boxes set from the settings below (the hooks run then) are heard by nobody.
     public SourceFilterViewModel(SettingsSaver saver)
@@ -39,6 +42,7 @@ public sealed partial class SourceFilterViewModel : ObservableObject
         ShowEpic = settings.ShowEpic;
         // The rule comes once the history is known (ApplyPlayStationRule).
         ShowPlayStationStore = settings.ShowPlayStationStore ?? false;
+        ShowMyGames = settings.ShowMyGames;
     }
 
     /// <summary>The "PlayStation Store" box was ticked (by the player or the rule): its catalog may have to be downloaded.</summary>
@@ -47,24 +51,32 @@ public sealed partial class SourceFilterViewModel : ObservableObject
     // Set while the box follows the rule: only a click is the player's choice, and saved.
     private bool _applyingRule;
 
+    // Set while "Mes jeux" unticks the other boxes: their settings change, saved and heard once with it.
+    private bool _unticking;
+
     /// <summary>"Game Pass" box of the filter: the games of the player's plan. Remembered between sessions.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SourcesLabel))]
     public partial bool ShowGamePass { get; set; }
 
     /// <summary>"PS Plus" box of the filter: the games of the player's PS Plus plan. Remembered between sessions.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SourcesLabel))]
     public partial bool ShowPsPlus { get; set; }
 
     /// <summary>"Steam" box of the filter: the games sold on Steam. Remembered between sessions.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SourcesLabel))]
     public partial bool ShowSteam { get; set; }
 
     /// <summary>"GOG" box of the filter: the games sold on GOG. Remembered between sessions.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SourcesLabel))]
     public partial bool ShowGog { get; set; }
 
     /// <summary>"Epic" box of the filter: the games sold on Epic. Remembered between sessions.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SourcesLabel))]
     public partial bool ShowEpic { get; set; }
 
     /// <summary>
@@ -72,7 +84,16 @@ public sealed partial class SourceFilterViewModel : ObservableObject
     /// Ticked for a player with a PlayStation history until they choose; the choice is remembered.
     /// </summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SourcesLabel))]
     public partial bool ShowPlayStationStore { get; set; }
+
+    /// <summary>
+    /// "Mes jeux" box of the filter: the player's own games not finished yet. Unticked by default;
+    /// ticking it unticks the other sources (the user's choice: it shows them alone). Remembered.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SourcesLabel))]
+    public partial bool ShowMyGames { get; set; }
 
     /// <summary>The box follows the history (PlayStation games or not), unless the player chose.</summary>
     public void ApplyPlayStationRule(bool hasPlayStationHistory)
@@ -96,8 +117,17 @@ public sealed partial class SourceFilterViewModel : ObservableObject
         CatalogSource.Gog => ShowGog,
         CatalogSource.Epic => ShowEpic,
         CatalogSource.PlayStationStore => ShowPlayStationStore,
+        CatalogSource.MyGames => ShowMyGames,
         _ => false
     }).ToList();
+
+    /// <summary>"Sources (6)": the button of the sources menu, with the sources ticked and usable (with games, once known).</summary>
+    public string SourcesLabel => Localization.Format(Strings.Reco_Sources, Ticked.Count(source => WithGames?.Contains(source) != false));
+
+    /// <summary>The sources with games in the last computation (a box shown); null before it.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SourcesLabel))]
+    public partial IReadOnlySet<CatalogSource>? WithGames { get; set; }
 
     /// <summary>Its name in "Jeux proposés : …": "Game Pass Ultimate", "catalogue Steam"…</summary>
     public string Label(CatalogSource source) => source switch
@@ -108,6 +138,7 @@ public sealed partial class SourceFilterViewModel : ObservableObject
         CatalogSource.Gog => Strings.Reco_SourceGog,
         CatalogSource.Epic => Strings.Reco_SourceEpic,
         CatalogSource.PlayStationStore => Strings.Reco_SourcePsStore,
+        CatalogSource.MyGames => Strings.Reco_SourceMyGames,
         _ => throw new ArgumentOutOfRangeException(nameof(source), source, null)
     };
 
@@ -120,15 +151,39 @@ public sealed partial class SourceFilterViewModel : ObservableObject
     partial void OnShowGogChanged(bool value) => Remember(value, _saver.Settings.ShowGog, s => s.ShowGog = value);
     partial void OnShowEpicChanged(bool value) => Remember(value, _saver.Settings.ShowEpic, s => s.ShowEpic = value);
 
+    partial void OnShowMyGamesChanged(bool value)
+    {
+        // Set to what is saved (the constructor): no new candidates to compute.
+        if (_saver.Settings.ShowMyGames == value)
+            return;
+        // Ticked by the player: the other sources go (the player may tick one back), their
+        // settings saved with this one and the cards rebuilt once.
+        if (value)
+        {
+            _unticking = true;
+            ShowGamePass = false;
+            ShowPsPlus = false;
+            ShowSteam = false;
+            ShowGog = false;
+            ShowEpic = false;
+            ShowPlayStationStore = false;
+            _unticking = false;
+        }
+        Remember(value, _saver.Settings.ShowMyGames, s => s.ShowMyGames = value);
+        MyGamesChanged?.Invoke();
+    }
+
     // A box set to what is saved (the constructor) saves nothing; the cards follow either way.
     private void Remember(bool value, bool saved, Action<AppSettings> save)
     {
         if (saved != value)
         {
             save(_saver.Settings);
-            SaveRequested?.Invoke();
+            if (!_unticking)
+                SaveRequested?.Invoke();
         }
-        Changed?.Invoke();
+        if (!_unticking)
+            Changed?.Invoke();
     }
 
     partial void OnShowPlayStationStoreChanged(bool value)
@@ -136,9 +191,11 @@ public sealed partial class SourceFilterViewModel : ObservableObject
         if (!_applyingRule && _saver.Settings.ShowPlayStationStore != value)
         {
             _saver.Settings.ShowPlayStationStore = value;
-            SaveRequested?.Invoke();
+            if (!_unticking)
+                SaveRequested?.Invoke();
         }
-        Changed?.Invoke();
+        if (!_unticking)
+            Changed?.Invoke();
         if (value)
             PlayStationStoreTicked?.Invoke();
     }
@@ -157,7 +214,7 @@ public sealed partial class SourceFilterViewModel : ObservableObject
 
     /// <summary>Two-way bound to the "Mon Game Pass" list of the settings.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasGamePassPlan), nameof(GamePassLabel))]
+    [NotifyPropertyChangedFor(nameof(HasGamePassPlan), nameof(GamePassLabel), nameof(SourcesLabel))]
     public partial GamePassPlanOption SelectedGamePassPlan { get; set; }
 
     public GamePassTier GamePassPlan => SelectedGamePassPlan.Plan;
@@ -191,7 +248,7 @@ public sealed partial class SourceFilterViewModel : ObservableObject
 
     /// <summary>Two-way bound to the "Mon PS Plus" list of the settings.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasPsPlusCatalog), nameof(HasAnyPsPlus), nameof(PsPlusLabel))]
+    [NotifyPropertyChangedFor(nameof(HasPsPlusCatalog), nameof(HasAnyPsPlus), nameof(PsPlusLabel), nameof(SourcesLabel))]
     public partial PsPlusPlanOption SelectedPsPlusPlan { get; set; }
 
     public PsPlusTier PsPlusPlan => SelectedPsPlusPlan.Plan;

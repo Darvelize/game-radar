@@ -16,21 +16,26 @@ public sealed class FreeGameCache(CacheStore cache, string key)
     public const string PsPlusKey = "free-games-psplus-v1";
     public const string AmazonKey = "free-games-amazon-v1";
     public const string SteamKey = "free-games-steam-v1";
+    public const string XboxKey = "free-games-xbox-v1";
 
     private static readonly TimeSpan MaxAge = TimeSpan.FromDays(1);
 
-    // An empty list may be the source lagging behind its change of offers (Epic's
-    // CDN right after Thursday 17:00): asked again sooner.
+    // A list with nothing left to show may be the source lagging behind its change
+    // of offers (Epic's CDN right after Thursday 17:00, Xbox's list online, ended,
+    // from Monday to Wednesday): asked again sooner, but not at each visit.
     private static readonly TimeSpan EmptyMaxAge = TimeSpan.FromHours(1);
 
     /// <summary>The last saved list, or null. No network call; never throws: a corrupted cache counts as missing.</summary>
     public FreeGameList? Load() => cache.LoadJson(key, CoreJsonContext.Default.FreeGameList);
 
-    /// <summary>Missing, older than a day (an hour when empty), or with an offer that ended (the next games are out).</summary>
+    /// <summary>
+    /// Missing, with an offer that ended since it was read (the next games are out), or older
+    /// than a day (an hour when nothing is left to show).
+    /// </summary>
     public static bool NeedsDownload(FreeGameList? list, DateTimeOffset now) =>
         list is null
-        || now - list.FetchedAt > (list.Games.Count == 0 ? EmptyMaxAge : MaxAge)
-        || list.Games.Any(g => g.Until <= now);
+        || list.Games.Any(g => g.Until <= now && g.Until > list.FetchedAt)
+        || now - list.FetchedAt > (Current(list, now).Count == 0 ? EmptyMaxAge : MaxAge);
 
     /// <summary>The games still free at <paramref name="now"/> (one without end date stays).</summary>
     public static IReadOnlyList<FreeGame> Current(FreeGameList? list, DateTimeOffset now) =>

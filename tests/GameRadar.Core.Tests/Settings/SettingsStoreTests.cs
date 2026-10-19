@@ -30,6 +30,19 @@ public class SettingsStoreTests : IDisposable
     }
 
     [Fact]
+    public async Task My_games_is_saved_once_ticked_and_copied_by_Clone()
+    {
+        var store = new SettingsStore(_folder.Path);
+        await store.SaveAsync(new AppSettings());
+        // Unticked, the default: not written (the format of before stays).
+        Assert.DoesNotContain("ShowMyGames", File.ReadAllText(SettingsFile));
+
+        await store.SaveAsync(new AppSettings { ShowMyGames = true }.Clone());
+
+        Assert.True(new SettingsStore(_folder.Path).Load().ShowMyGames);
+    }
+
+    [Fact]
     public void Load_GivesDefaultsWhenFileIsCorrupted()
     {
         Directory.CreateDirectory(_folder.Path);

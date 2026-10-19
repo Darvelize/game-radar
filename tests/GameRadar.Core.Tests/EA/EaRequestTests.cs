@@ -76,7 +76,7 @@ public class EaRequestTests
         var ex = await Assert.ThrowsAsync<EaException>(() => client.FetchPlayerIdAsync());
 
         Assert.Equal(CoreStrings.Ea_TokenExpired, ex.Message);
-        Assert.True(ex.IsTokenRefused);
+        Assert.True(ex.RequiresSignIn);
     }
 
     [Theory]

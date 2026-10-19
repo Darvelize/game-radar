@@ -5,71 +5,86 @@
              x:Class="GameRadar.App.Views.FreeGamesView"
              x:DataType="vm:MainWindowViewModel">
 
-    <ScrollViewer>
-        <StackPanel Margin="32,28,32,32" Spacing="24">
+    <ContentPage.Resources>
+        <!-- A card, the same in both tabs -->
+        <DataTemplate x:Key="FreeGameCard" x:DataType="vm:FreeGameRow">
+            <Border Classes="card media" Width="280">
+                <DockPanel>
+                    <!-- Picture: placeholder first, picture fades in once loaded -->
+                    <Border DockPanel.Dock="Top" Classes="cover">
+                        <Panel>
+                            <Path Classes="icon accent" Data="{StaticResource IconGift}"
+                                  HorizontalAlignment="Center" Opacity="0.5" />
+                            <Image Classes="cover" Classes.loaded="{Binding HasImage}"
+                                   Source="{Binding Image}" />
+                        </Panel>
+                    </Border>
 
-            <StackPanel Spacing="4">
-                <TextBlock Classes="display" Text="{x:Static res:Strings.Nav_FreeGames}" />
-                <TextBlock Classes="secondary" Text="{x:Static res:Strings.FreeGames_Intro}" TextWrapping="Wrap" />
+                    <StackPanel Margin="{StaticResource PaddingCardBody}" Spacing="6">
+                        <!-- Played or added already: no need to claim it again -->
+                        <Border Classes="badge accent" HorizontalAlignment="Left" IsVisible="{Binding InHistory}">
+                            <TextBlock Text="{x:Static res:Strings.FreeGames_InHistory}" />
+                        </Border>
+                        <TextBlock Classes="subtitle" Text="{Binding Title}"
+                                   TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Classes="accent" FontSize="{StaticResource FontSizeCaption}"
+                                   Text="{Binding OfferLabel}" TextWrapping="Wrap" />
+                        <TextBlock Classes="caption" Text="{Binding RedeemLabel}" TextWrapping="Wrap"
+                                   IsVisible="{Binding RedeemLabel, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                        <!-- The window's command, reached through the page (the card's DataContext is the row) -->
+                        <Button Content="{x:Static res:Strings.FreeGames_Open}" Margin="0,6,0,0"
+                                Command="{Binding $parent[ContentPage].((vm:MainWindowViewModel)DataContext).OpenPageCommand}"
+                                CommandParameter="{Binding Page}" />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+        </DataTemplate>
+
+        <!-- Cards wrap to the window width, like those of "Pour toi" -->
+        <ItemsPanelTemplate x:Key="FreeGameCards">
+            <WrapPanel ItemSpacing="16" LineSpacing="16" />
+        </ItemsPanelTemplate>
+
+        <!-- A source's block, the same in both tabs (its cards of that tab) -->
+        <DataTemplate x:Key="FreeGameSectionBlock" x:DataType="vm:FreeGameCards">
+            <StackPanel Spacing="12" Margin="0,0,0,32">
+                <TextBlock Classes="title" Text="{Binding Section.Title}" />
+                <!-- Fetching, or why the last download failed (the list it had stays) -->
+                <TextBlock Classes="secondary" Text="{Binding Section.Status}" TextWrapping="Wrap"
+                           IsVisible="{Binding Section.Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                <TextBlock Classes="secondary" Text="{Binding Section.Hint}" TextWrapping="Wrap"
+                           IsVisible="{Binding Section.ShowsHint}" />
+                <TextBlock Classes="secondary" Text="{x:Static res:Strings.FreeGames_None}"
+                           IsVisible="{Binding ShowsNone}" />
+                <ItemsControl ItemsSource="{Binding Games}" ItemsPanel="{StaticResource FreeGameCards}"
+                              ItemTemplate="{StaticResource FreeGameCard}" />
             </StackPanel>
+        </DataTemplate>
+    </ContentPage.Resources>
 
-            <!-- One block per source: Epic Games, PlayStation Plus, Amazon Prime -->
-            <ItemsControl ItemsSource="{Binding FreeGames.Sections}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="vm:FreeGameSection">
-                        <StackPanel Spacing="12" Margin="0,0,0,32">
-                            <TextBlock Classes="title" Text="{Binding Title}" />
-                            <!-- Fetching, or why the last download failed (the list it had stays) -->
-                            <TextBlock Classes="secondary" Text="{Binding Status}" TextWrapping="Wrap"
-                                       IsVisible="{Binding Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-                            <TextBlock Classes="secondary" Text="{x:Static res:Strings.FreeGames_PsPlusHint}" TextWrapping="Wrap"
-                                       IsVisible="{Binding ShowsHint}" />
-                            <TextBlock Classes="secondary" Text="{x:Static res:Strings.FreeGames_None}"
-                                       IsVisible="{Binding ShowsNone}" />
+    <DockPanel>
+        <TextBlock DockPanel.Dock="Top" Margin="32,28,32,0" Classes="display" Text="{x:Static res:Strings.Nav_FreeGames}" />
 
-                            <!-- Cards wrap to the window width, like those of "Pour toi" -->
-                            <ItemsControl ItemsSource="{Binding Games}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <WrapPanel ItemSpacing="16" LineSpacing="16" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:FreeGameRow">
-                                        <Border Classes="card media" Width="280">
-                                            <DockPanel>
-                                                <!-- Picture: placeholder first, picture fades in once loaded -->
-                                                <Border DockPanel.Dock="Top" Classes="cover">
-                                                    <Panel>
-                                                        <Path Classes="icon accent" Data="{StaticResource IconGift}"
-                                                              HorizontalAlignment="Center" Opacity="0.5" />
-                                                        <Image Classes="cover" Classes.loaded="{Binding HasImage}"
-                                                               Source="{Binding Image}" />
-                                                    </Panel>
-                                                </Border>
+        <!-- Two tabs (pills of Themes/Pages.axaml, like the settings): games to keep,
+             games free for a while. Each tab keeps one block per source. -->
+        <TabbedPage Padding="32,20,32,0">
+            <ContentPage Header="{x:Static res:Strings.FreeGames_TabKept}">
+                <ScrollViewer>
+                    <StackPanel Margin="32,20,32,32" Spacing="24">
+                        <TextBlock Classes="secondary" Text="{x:Static res:Strings.FreeGames_IntroKept}" TextWrapping="Wrap" />
+                        <ItemsControl ItemsSource="{Binding FreeGames.KeptSections}" ItemTemplate="{StaticResource FreeGameSectionBlock}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </ContentPage>
 
-                                                <StackPanel Margin="{StaticResource PaddingCardBody}" Spacing="6">
-                                                    <TextBlock Classes="subtitle" Text="{Binding Title}"
-                                                               TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" />
-                                                    <TextBlock Classes="accent" FontSize="{StaticResource FontSizeCaption}"
-                                                               Text="{Binding OfferLabel}" TextWrapping="Wrap" />
-                                                    <TextBlock Classes="caption" Text="{Binding RedeemLabel}" TextWrapping="Wrap"
-                                                               IsVisible="{Binding RedeemLabel, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-                                                    <!-- The window's command, reached through the page (the card's DataContext is the row) -->
-                                                    <Button Content="{x:Static res:Strings.FreeGames_Open}" Margin="0,6,0,0"
-                                                            Command="{Binding $parent[ContentPage].((vm:MainWindowViewModel)DataContext).OpenPageCommand}"
-                                                            CommandParameter="{Binding Page}" />
-                                                </StackPanel>
-                                            </DockPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-
-        </StackPanel>
-    </ScrollViewer>
+            <ContentPage Header="{x:Static res:Strings.FreeGames_TabTimed}">
+                <ScrollViewer>
+                    <StackPanel Margin="32,20,32,32" Spacing="24">
+                        <TextBlock Classes="secondary" Text="{x:Static res:Strings.FreeGames_IntroTimed}" TextWrapping="Wrap" />
+                        <ItemsControl ItemsSource="{Binding FreeGames.TimedSections}" ItemTemplate="{StaticResource FreeGameSectionBlock}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </ContentPage>
+        </TabbedPage>
+    </DockPanel>
 </ContentPage>

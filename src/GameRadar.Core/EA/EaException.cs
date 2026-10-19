@@ -13,9 +13,4 @@ public sealed class EaException : ServiceException
         : base(message, inner)
     {
     }
-
-    /// <summary>EA refused the token (expired, or not a token): it must be pasted again.</summary>
-    public bool IsTokenRefused { get; init; }
-
-    public override bool EndsSession => IsSignInError || IsTokenRefused;
 }

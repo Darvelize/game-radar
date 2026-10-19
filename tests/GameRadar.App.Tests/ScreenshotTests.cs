@@ -165,8 +165,14 @@ public sealed class ScreenshotTests : AppTest
         vm.CurrentPage = AppPage.FreeGames;
         Assert.True(await BecomesTrueAsync(() => vm.FreeGames.Sections.All(s => s.Games.Count > 0), 5000));
         SampleData.PaintFreeGames(vm);
+        // A game the player already has (no history here: set on the card).
+        vm.FreeGames.Sections[0].Games.First().InHistory = true;
 
         Save(window, $"FreeGames-cards-{theme}");
+        // The second tab: the games free for a while.
+        window.GetVisualDescendants().OfType<Views.FreeGamesView>().Single()
+            .GetVisualDescendants().OfType<TabbedPage>().First().SelectedIndex = 1;
+        Save(window, $"FreeGames-timed-{theme}");
         window.Close();
     }
 
@@ -302,6 +308,41 @@ public sealed class ScreenshotTests : AppTest
             vm.CurrentSettingsTab = tab;
             Save(window, $"Settings-{tab}-{theme}");
         }
+        window.Close();
+    }
+
+    [AvaloniaTheory]
+    [InlineData("Light")]
+    [InlineData("Dark")]
+    public void Recommendations_sources_menu_open(string theme)
+    {
+        var vm = SampleData.ViewModel(TempFolder);
+        vm.CurrentPage = AppPage.Recommendations;
+        var window = Open(vm, theme);
+
+        // "Sources (7)": its boxes in a menu, open it, then capture.
+        var sources = window.GetVisualDescendants().OfType<Button>().First(b => b.Flyout is not null && !b.Classes.Contains("badgeLink"));
+        sources.Flyout!.ShowAt(sources);
+        Save(window, $"Recommendations-sources-{theme}");
+
+        Assert.Equal("Sources (7)", vm.SourceFilter.SourcesLabel);
+        // Its boxes are bound to the view model (the Flyout's content is outside the page's tree).
+        var boxes = sources.Flyout is Flyout { Content: Control content }
+            ? content.GetVisualDescendants().OfType<CheckBox>().ToList()
+            : [];
+        Assert.True(boxes.Single(b => Equals(b.Content, "Pas encore terminés")).IsChecked);
+        Assert.Equal("1 375", vm.Recommendations.Counts.Steam.Replace('\u202F', ' ').Replace('\u00A0', ' '));
+
+        // Its footer is a link to the plans: Settings › Accounts, the menu closed.
+        var link = ((Control)((Flyout)sources.Flyout!).Content!).GetVisualDescendants().OfType<HyperlinkButton>().Single();
+        // A click: the Click event first, then the command (Button.OnClick), then the menu closes.
+        var command = link.Command!;
+        link.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
+        command.Execute(link.CommandParameter);
+        Dispatcher.UIThread.RunJobs();
+        Assert.False(sources.Flyout!.IsOpen);
+        Assert.True(vm.IsSettingsPage);
+        Assert.Equal(SettingsTab.Accounts, vm.CurrentSettingsTab);
         window.Close();
     }
 

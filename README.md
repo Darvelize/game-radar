@@ -4,6 +4,9 @@
   <a href="docs/screenshots/for-you.png"><img src="docs/screenshots/for-you.png" width="32%" alt="For you / Pour toi"></a>
   <a href="docs/screenshots/history.png"><img src="docs/screenshots/history.png" width="32%" alt="History / Historique"></a>
   <a href="docs/screenshots/settings.png"><img src="docs/screenshots/settings.png" width="32%" alt="Settings / Réglages"></a>
+  <br>
+  <a href="docs/screenshots/free-game1.png"><img src="docs/screenshots/free-game1.png" width="32%" alt="Free games / Jeux gratuits"></a>
+  <a href="docs/screenshots/free-game2.png"><img src="docs/screenshots/free-game2.png" width="32%" alt="Free games: Amazon Prime / Jeux gratuits : Amazon Prime"></a>
 </p>
 
 **English** · [Français plus bas](#francais)

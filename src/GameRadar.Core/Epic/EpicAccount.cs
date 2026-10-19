@@ -78,7 +78,7 @@ public sealed class EpicAccount
     /// <summary>
     /// A valid access token: from memory, else renewed with the refresh token
     /// (no question asked). Throws <see cref="EpicException"/> with
-    /// <see cref="EpicException.IsTokenRefused"/> when a new code is needed.
+    /// <see cref="EpicException.RequiresSignIn"/> when a new code is needed.
     /// </summary>
     internal Task<string> GetAccessTokenAsync(CancellationToken ct) => _tokens.GetAsync(() => RenewAsync(ct), ct);
 
@@ -98,7 +98,7 @@ public sealed class EpicAccount
                 ["refresh_token"] = saved.RefreshToken,
             }, exchange: false, ct).ConfigureAwait(false);
         }
-        catch (EpicException ex) when (ex.IsTokenRefused)
+        catch (EpicException ex) when (ex.RequiresSignIn)
         {
             // Expired (a year unused) or revoked: drop it, the UI asks for a new code.
             Disconnect();
@@ -131,7 +131,7 @@ public sealed class EpicAccount
         {
             HttpOutcome.Ok => EpicClient.ParseTokens(body, DateTimeOffset.UtcNow),
             HttpOutcome.BadRequest or HttpOutcome.Unauthorized when exchange || EpicClient.IsGrantRefused(body)
-                => throw (exchange ? new EpicException(CoreStrings.Epic_CodeRefused) { IsTokenRefused = true } : EpicException.SessionExpired()),
+                => throw (exchange ? new EpicException(CoreStrings.Epic_CodeRefused) { RequiresSignIn = true } : EpicException.SessionExpired()),
             HttpOutcome.RateLimited => throw EpicException.RateLimited(),
             // Anything else (a firewall, terms to accept on epicgames.com, the
             // launcher's client changed): the kept session is not thrown away.

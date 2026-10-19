@@ -30,6 +30,8 @@ public class GogClientTests
         Assert.Equal(6615, game.PlaytimeMinutes);
         Assert.Equal(new DateTimeOffset(2026, 9, 30, 21, 15, 2, TimeSpan.Zero), game.LastSession);
         Assert.Equal(49, game.AchievementsPercentage);
+        // Its picture at the card's size (as the GOG catalog's), in https.
+        Assert.Equal("https://images.gog-statics.com/x_product_card_v2_mobile_slider_639.jpg", game.ImageUrl);
     }
 
     [Fact]
