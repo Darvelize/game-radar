@@ -147,7 +147,7 @@ public sealed partial class AccountsViewModel : ObservableObject
         }
 
         // Signed in: the history is what the user came for.
-        await RefreshPlatformsAsync([XboxSync]);
+        await RefreshConnectedAsync(XboxSync);
     }
 
     [RelayCommand]
@@ -197,7 +197,7 @@ public sealed partial class AccountsViewModel : ObservableObject
             return;
         }
 
-        await RefreshPlatformsAsync([SteamSync]);
+        await RefreshConnectedAsync(SteamSync);
     }
 
     [RelayCommand]
@@ -255,7 +255,7 @@ public sealed partial class AccountsViewModel : ObservableObject
         }
         UpdatePlayStationAccount();
 
-        await RefreshPlatformsAsync([PlayStationSync]);
+        await RefreshConnectedAsync(PlayStationSync);
     }
 
     [RelayCommand]
@@ -312,7 +312,7 @@ public sealed partial class AccountsViewModel : ObservableObject
         }
         UpdateEpicAccount();
 
-        await RefreshPlatformsAsync([EpicSync]);
+        await RefreshConnectedAsync(EpicSync);
     }
 
     [RelayCommand]
@@ -370,14 +370,8 @@ public sealed partial class AccountsViewModel : ObservableObject
         _pendingGogUser = user;
         try
         {
-            var result = await GogSync.FetchAsync(_notices);
-            // A sync was running under the former name: this one, once it ends.
-            if (result == FetchResult.AlreadyRunning)
-            {
-                await GogSync.WhenFetchedAsync();
-                result = await GogSync.FetchAsync(_notices);
-            }
-            if (result != FetchResult.Done)
+            // A sync running under the former name: this one, once it ends.
+            if (await FetchConnectedAsync(GogSync) != FetchResult.Done)
                 return;
         }
         finally
@@ -459,7 +453,7 @@ public sealed partial class AccountsViewModel : ObservableObject
         }
         UpdateEaAccount();
 
-        await RefreshPlatformsAsync([EaSync]);
+        await RefreshConnectedAsync(EaSync);
     }
 
     /// <summary>A sign-in, a connection or a sync is running: it may write files (erasing must wait).</summary>
@@ -475,19 +469,38 @@ public sealed partial class AccountsViewModel : ObservableObject
 
     // Generates RefreshHistoryCommand. Being async, the command disables itself
     // while running: a double click cannot send the requests twice.
-    [RelayCommand(CanExecute = nameof(HasAccount))]
-    private Task RefreshHistoryAsync() => RefreshPlatformsAsync(SyncedPlatforms.Where(p => p.IsConnected));
-
     /// <summary>
-    /// Fetches these platforms (every connected one, or the one just
-    /// connected), all at once and each on its own: an error on one does not
-    /// stop the others. Then the lists and the recommendations, once.
+    /// Fetches every connected platform, all at once and each on its own: an
+    /// error on one does not stop the others. Then the lists and the
+    /// recommendations, once.
     /// </summary>
-    private async Task RefreshPlatformsAsync(IEnumerable<SyncedPlatform> platforms)
+    [RelayCommand(CanExecute = nameof(HasAccount))]
+    private async Task RefreshHistoryAsync()
     {
-        var fetched = await Task.WhenAll(platforms.Select(p => p.FetchAsync(_notices)));
+        var fetched = await Task.WhenAll(SyncedPlatforms.Where(p => p.IsConnected).Select(p => p.FetchAsync(_notices)));
         if (fetched.Contains(FetchResult.Done))
             await _historyFetched();
+    }
+
+    /// <summary>The account just connected (or its new token): its history, then the lists and the recommendations.</summary>
+    private async Task RefreshConnectedAsync(SyncedPlatform platform)
+    {
+        if (await FetchConnectedAsync(platform) == FetchResult.Done)
+            await _historyFetched();
+    }
+
+    /// <summary>
+    /// Fetches the account just connected. A sync still running under the former one
+    /// (signed out meanwhile, a token replaced) is waited for, then this one runs:
+    /// skipped, the new account's history would never come.
+    /// </summary>
+    private async Task<FetchResult> FetchConnectedAsync(SyncedPlatform platform)
+    {
+        var result = await platform.FetchAsync(_notices);
+        if (result != FetchResult.AlreadyRunning)
+            return result;
+        await platform.WhenFetchedAsync();
+        return await platform.FetchAsync(_notices);
     }
 
     /// <summary>Reads the cached histories, all at once (separate files).</summary>
@@ -585,16 +598,19 @@ public sealed partial class AccountsViewModel : ObservableObject
                 // ~150 requests (5 games each): their count on the status line.
                 Fetch = async platform =>
                 {
+                    string token = _eaToken!;
                     try
                     {
-                        return await _eaSource.RefreshAsync(new EaClient(_http, _eaToken!),
+                        return await _eaSource.RefreshAsync(new EaClient(_http, token),
                             new Progress<(int Done, int Total)>(p =>
                                 platform.Status = Localization.Format(Strings.Status_FetchingEaGames, p.Done, p.Total)));
                     }
                     catch (EaException ex) when (ex.RequiresSignIn)
                     {
-                        // Expired (4 h): forgotten, the card asks for EA's page again.
-                        _eaToken = null;
+                        // Expired (4 h): forgotten, the card asks for EA's page again. Only
+                        // this one: a token pasted meanwhile is the next sync's.
+                        if (_eaToken == token)
+                            _eaToken = null;
                         throw;
                     }
                 },

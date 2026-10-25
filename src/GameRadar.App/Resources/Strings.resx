@@ -321,6 +321,7 @@
   <data name="Account_SteamChecking" xml:space="preserve"><value>Vérification de ta clé et de ton profil Steam…</value></data>
   <data name="Account_SteamSignedOut" xml:space="preserve"><value>Déconnecté. Ton historique Steam reste affiché jusqu'à la prochaine connexion.</value></data>
   <data name="Error_UnexpectedLogged" xml:space="preserve"><value>Une erreur inattendue s'est produite. Elle est notée dans le journal des erreurs (Réglages › À propos).</value></data>
+  <data name="Error_LinkNotOpened" xml:space="preserve"><value>Windows n'a trouvé aucune application pour ouvrir ce lien, ce dossier ou ce fichier. Pour un lien, vérifie qu'un navigateur est choisi par défaut.</value></data>
   <data name="Privacy_Erase_Busy" xml:space="preserve"><value>Une synchronisation est en cours : attends qu'elle se termine pour effacer tes données.</value></data>
   <data name="Privacy_Erase_Failed" xml:space="preserve"><value>Certaines données n'ont pas pu être effacées : {0} Ferme les autres programmes et réessaie.</value></data>
   <data name="News_None" xml:space="preserve"><value>Aucune note de version jusqu'à la {0}, la version de cette copie de GameRadar.</value></data>

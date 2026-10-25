@@ -72,11 +72,15 @@ internal sealed class OfflineNetwork : HttpMessageHandler
 /// </summary>
 internal static class SampleData
 {
+    /// <summary>A 1 x 1 PNG: the smallest picture the cards can decode.</summary>
+    public static readonly byte[] TinyPng = Convert.FromBase64String(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==");
+
     private static readonly DateTimeOffset Now = DateTimeOffset.Now;
 
     /// <summary>First launch: no key, no history.</summary>
-    /// <param name="network">A fake server for the tests that make requests; none by default.</param>
-    /// <param name="imageNetwork">A fake server for the pictures of the cards; the real network by default (no card has a picture then).</param>
+    /// <param name="network">A fake server for the tests that make requests; by default every request is refused (404): never the real network.</param>
+    /// <param name="imageNetwork">A fake server for the pictures of the cards; by default none comes (404).</param>
     public static MainWindowViewModel Empty(string tempFolder, Action<Uri>? openBrowser = null, Action? quit = null, HttpMessageHandler? network = null, HttpMessageHandler? imageNetwork = null)
     {
         // One folder and its guard for every store, as in the app: "Effacer toutes mes
@@ -85,17 +89,19 @@ internal static class SampleData
         var secrets = new SecretStore(data.Root, data.Guard);
         var settings = new SettingsStore(data.Root, data.Guard);
         var cache = new CacheStore(data.Cache, data.Guard);
-        var images = new ImageFileCache(imageNetwork is null ? new HttpClient() : new HttpClient(imageNetwork), data.Images, guard: data.Guard);
+        var images = new ImageFileCache(new HttpClient(imageNetwork ?? new OfflineNetwork()), data.Images, guard: data.Guard);
+        // One client, as in the app.
+        var http = new HttpClient(network ?? new OfflineNetwork());
         var log = new ErrorLog(data.Logs, "test", guard: data.Guard);
         var vm = new MainWindowViewModel(
-            network is null ? new HttpClient() : new HttpClient(network),
+            http,
             settings,
             cache,
             images,
-            new XboxAccount(network is null ? new HttpClient() : new HttpClient(network), secrets),
+            new XboxAccount(http, secrets),
             new SteamAccount(secrets),
             new PlayStationAccount(secrets),
-            new EpicAccount(network is null ? new HttpClient() : new HttpClient(network), secrets),
+            new EpicAccount(http, secrets),
             openBrowser ?? (_ => { }),
             new LocalDataEraser(settings, cache, secrets, images, log, data),
             quit ?? (() => { }),

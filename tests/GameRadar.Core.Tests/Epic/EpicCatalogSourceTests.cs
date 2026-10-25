@@ -65,7 +65,7 @@ public class EpicCatalogSourceTests : IDisposable
         }
     }
 
-    private EpicCatalogSource Source() => new(new CacheStore(_folder.Path));
+    private StoreCatalogSource Source() => EpicCatalogSource.Create(new CacheStore(_folder.Path));
 
     [Fact]
     public async Task RefreshAsync_ReadsTheThreeCollectionsOnceEachGameAndAsTheLauncher()

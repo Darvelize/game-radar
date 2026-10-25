@@ -91,18 +91,8 @@ public sealed class SteamTagClient
         return await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
     }
 
-    private static void ThrowIfRefused(HttpResponseMessage response)
-    {
-        switch (HttpOutcomes.Classify(response))
-        {
-            case HttpOutcome.Ok:
-                break;
-            case HttpOutcome.RateLimited or HttpOutcome.Forbidden:
-                throw new SteamException(CoreStrings.Steam_StoreRateLimitedTags) { IsRateLimited = true };
-            default:
-                throw new SteamException(CoreStrings.Steam_StoreDownTags);
-        }
-    }
+    private static void ThrowIfRefused(HttpResponseMessage response) =>
+        SteamCatalogClient.ThrowIfRefused(response, CoreStrings.Steam_StoreRateLimitedTags, CoreStrings.Steam_StoreDownTags);
 
     /// <summary>
     /// The games whose title matches what the player types, for "Ajouter un

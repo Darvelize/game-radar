@@ -21,7 +21,6 @@ public sealed partial class RecommendationsViewModel : ObservableObject
     private readonly HttpClient _http;
     private readonly ImageFileCache _imageCache;
     private readonly ErrorLog _log;
-    private readonly Action<Uri> _openBrowser;
     private readonly LibraryState _library;
     private readonly AccountsViewModel _accounts;
     private readonly SettingsSaver _saver;
@@ -40,7 +39,6 @@ public sealed partial class RecommendationsViewModel : ObservableObject
         CacheStore cache,
         ImageFileCache imageCache,
         ErrorLog log,
-        Action<Uri> openBrowser,
         LibraryState library,
         AccountsViewModel accounts,
         SettingsSaver saver,
@@ -51,7 +49,6 @@ public sealed partial class RecommendationsViewModel : ObservableObject
         _http = http;
         _imageCache = imageCache;
         _log = log;
-        _openBrowser = openBrowser;
         _library = library;
         _accounts = accounts;
         _saver = saver;
@@ -96,10 +93,6 @@ public sealed partial class RecommendationsViewModel : ObservableObject
     /// <summary>The Epic box only makes sense once Epic store candidates are loaded.</summary>
     [ObservableProperty]
     public partial bool HasEpicCandidates { get; set; }
-
-    /// <summary>A click on a card: the game's page on the Xbox store or on Steam.</summary>
-    [RelayCommand]
-    private void OpenPage(Uri page) => _openBrowser(page);
 
     // Shown on the recommendations page only: no banner.
     private void ReportRecommendationError(string message, Exception ex)
@@ -180,7 +173,7 @@ public sealed partial class RecommendationsViewModel : ObservableObject
                 gamePassGames.Select(g => g.ForPlan(plan)).ToList(), steamGames,
                 psPlusGames.Select(g => g.ForPsPlusPlan(psPlusPlan)).ToList(), gogGames, epicGames, psStoreGames);
             var tagClient = new SteamTagClient(_http);
-            // Tag names in the language of the app, for the explanations (1 request a month at most).
+            // Tag names in the language of the app, for the explanations (1 request a month; after a failure, not again for 5 minutes).
             _tagNames = await _tagSource.GetTagNamesAsync(tagClient, Localization.SteamLanguage, cts.Token);
             // The tags already in the cache, for the history right away (the
             // genre lookups below may take minutes the first time).
@@ -291,7 +284,7 @@ public sealed partial class RecommendationsViewModel : ObservableObject
             // nothing (none missing, or paused after a rate limit): the same tags, no second computation.
             var tagProgress = new Progress<(int Done, int Total)>(p =>
                 Status = Localization.Format(Strings.Reco_Tags, p.Done, p.Total));
-            if (await _tagSource.FetchMissingAsync(playedGames, pool, tagClient, tagProgress, cts.Token))
+            if (await _tagSource.FetchMissingAsync(playedGames, pool, tagClient, CountsInTaste, tagProgress, cts.Token))
             {
                 var found = _tagSource.LoadIndex(pool, _saver.Settings.AddedTags);
                 ShareTags(found);

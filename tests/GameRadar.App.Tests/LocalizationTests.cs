@@ -139,11 +139,8 @@ public sealed class LocalizationTests : AppTest
         vm.Language.SelectedLanguage = vm.Language.LanguageOptions.Single(o => o.Code == other);
 
         Assert.True(vm.Language.NeedsRestart);
-        // The hook saves without waiting (like every setting): wait for the file.
-        var store = new SettingsStore(TempFolder);
-        for (int i = 0; i < 100 && store.Load().Language != other; i++)
-            await Task.Delay(20);
-        Assert.Equal(other, store.Load().Language);
+        // The hook saves without waiting (like every setting): waited for, then read.
+        Assert.Equal(other, (await SavedSettingsAsync(vm)).Language);
     }
 
     [AvaloniaFact]

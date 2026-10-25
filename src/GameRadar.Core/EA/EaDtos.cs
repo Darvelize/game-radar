@@ -59,7 +59,13 @@ internal sealed class GraphQlEnvelope<TData>
 {
     [JsonPropertyName("data")]
     public TData? Data { get; set; }
+
+    // Set when the query failed, even in part.
+    [JsonPropertyName("errors")]
+    public List<GraphQlErrorDto>? Errors { get; set; }
 }
+
+internal sealed class GraphQlErrorDto;
 
 internal sealed class ItemsDto<T>
 {

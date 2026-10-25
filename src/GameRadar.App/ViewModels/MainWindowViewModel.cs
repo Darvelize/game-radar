@@ -70,7 +70,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         Library = new LibraryState(Accounts, _saver, Catalogs);
         Accounts.AccountChanged += RefreshRelativeTimes;
         History = new HistoryViewModel(Accounts, Library, _saver, SourceFilter, OnChoicesChanged);
-        Recommendations = new RecommendationsViewModel(http, cache, imageCache, log, openBrowser, Library, Accounts, _saver, SourceFilter, _work);
+        Recommendations = new RecommendationsViewModel(http, cache, imageCache, log, Library, Accounts, _saver, SourceFilter, _work);
         FreeGames = new FreeGamesViewModel(http, cache, imageCache, Notices, SourceFilter, _work, Library.CombinedHistory);
         SourceFilter.PlanChanged += RebuildAndRecompute;
         // The download is heard once the caches are read (InitializeAsync).
@@ -110,7 +110,12 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     // What the catalogs call: children created after them (see the constructor).
     private void OnCatalogsRebuildHistory() => History.Rebuild();
-    private Task OnCatalogsChangedAsync() => Recommendations.UpdateAsync();
+    // A catalog arrived (any one, not only the Game Pass that rebuilds the history): its age in the sidebar too.
+    private Task OnCatalogsChangedAsync()
+    {
+        RefreshRelativeTimes();
+        return Recommendations.UpdateAsync();
+    }
     private void OnTitlesMoved() => NotInterested.Reload();
 
     /// <summary>The "Game Pass" and "Steam" boxes of "Pour toi", and the player's plan.</summary>
@@ -186,7 +191,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CurrentPageIndex),
-        nameof(IsRecommendationsPage), nameof(IsFreeGamesPage), nameof(IsHistoryPage), nameof(IsSettingsPage), nameof(IsWhatsNewPage),
+        nameof(IsRecommendationsPage), nameof(IsFreeGamesPage), nameof(IsHistoryPage), nameof(IsSettingsPage),
         nameof(IsSidePage))]
     [NotifyCanExecuteChangedFor(nameof(GoBackCommand))]
     public partial AppPage CurrentPage { get; set; }
@@ -212,7 +217,6 @@ public sealed partial class MainWindowViewModel : ObservableObject
     public bool IsFreeGamesPage => CurrentPage == AppPage.FreeGames;
     public bool IsHistoryPage => CurrentPage == AppPage.History;
     public bool IsSettingsPage => CurrentPage == AppPage.Settings;
-    public bool IsWhatsNewPage => CurrentPage == AppPage.WhatsNew;
 
     /// <summary>A page opened from another one ("Nouveautés", legal texts), left with "Retour".</summary>
     public bool IsSidePage => IsSide(CurrentPage);
@@ -267,8 +271,9 @@ public sealed partial class MainWindowViewModel : ObservableObject
         var now = DateTimeOffset.Now;
         foreach (var platform in Accounts.SyncedPlatforms)
             platform.RefreshRelativeTime(now);
-        if (Library.Catalog is not null)
-            CatalogSyncLabel = Localization.Format(Strings.Sync_Catalog, RelativeTime.Format(Library.Catalog.FetchedAt, now));
+        // Any catalog recommends (the Game Pass may have failed): the age of the oldest one wanted.
+        if (Catalogs.ShownLines.Min(l => l.Catalog?.FetchedAt) is { } oldest)
+            CatalogSyncLabel = Localization.Format(Strings.Sync_Catalog, RelativeTime.Format(oldest, now));
     }
 
     // ============ Error banner ============
@@ -302,7 +307,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private void DismissUpdate() => AvailableUpdate = null;
 
-    /// <summary>Opens a game's page (the "Voir l'offre" buttons of "Jeux gratuits").</summary>
+    /// <summary>Opens a game's page: a card of "Pour toi" (its store badges), "Voir l'offre" on "Jeux gratuits".</summary>
     [RelayCommand]
     private void OpenPage(Uri page) => _openBrowser(page);
 
@@ -318,9 +323,31 @@ public sealed partial class MainWindowViewModel : ObservableObject
     /// <summary>
     /// Shows the cached data, then refreshes the catalogs that are missing
     /// or too old. A constructor cannot be async, so the app calls this
-    /// right after creating the view model.
+    /// right after creating the view model, without awaiting it: an error
+    /// halfway is logged and shown in the banner, never lost.
     /// </summary>
     public async Task InitializeAsync()
+    {
+        try
+        {
+            await StartAsync();
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            ReportUnexpectedError("Startup", ex);
+            // Failed before they were listened to: the boxes still download what they are ticked for.
+            SourceFilter.PsPlusPlanChanged -= OnPsPlusPlanChanged;
+            SourceFilter.PsPlusPlanChanged += OnPsPlusPlanChanged;
+            SourceFilter.PlayStationStoreTicked -= OnPlayStationStoreTicked;
+            SourceFilter.PlayStationStoreTicked += OnPlayStationStoreTicked;
+        }
+    }
+
+    private void OnPsPlusPlanChanged() => _work.Track(DownloadPsPlusIfNeededAsync());
+
+    private void OnPlayStationStoreTicked() => _work.Track(OnPlayStationStoreTickedAsync());
+
+    private async Task StartAsync()
     {
         // Started first, awaited last: GitHub answers while the caches are
         // read and the catalogs refreshed, which can take minutes.
@@ -330,7 +357,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         // background threads, all read at once (separate files), so the
         // window stays responsive; each await resumes here, on the UI thread.
         await Task.WhenAll(Accounts.LoadCachedAsync(), Catalogs.LoadCachedAsync());
-        SourceFilter.PsPlusPlanChanged += () => _work.Track(DownloadPsPlusIfNeededAsync());
+        SourceFilter.PsPlusPlanChanged += OnPsPlusPlanChanged;
         // Settings still saved with French titles (refusals, games added by
         // hand), moved to the English ones of the cached catalogs before
         // anything reads them; nothing to read once done.
@@ -346,7 +373,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         // reported as an error, for someone without PS Plus).
         var now = DateTimeOffset.UtcNow;
         var stale = Catalogs.Lines.Where(l => l.IsWanted() && l.NeedsDownload(now)).ToList();
-        SourceFilter.PlayStationStoreTicked += () => _work.Track(OnPlayStationStoreTickedAsync());
+        SourceFilter.PlayStationStoreTicked += OnPlayStationStoreTicked;
         if (stale.Count > 0)
         {
             // A slow download (Game Pass, PlayStation Store): meanwhile the cached

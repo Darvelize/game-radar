@@ -25,17 +25,25 @@ public abstract partial class PictureCard : ObservableObject
 
     /// <summary>
     /// Loads its picture, once: a card kept from one display to the next is not loaded again.
-    /// Never throws: a picture that fails keeps the placeholder.
+    /// Never throws: a picture that fails keeps the placeholder, and is tried again at the
+    /// next display (a "Jeux gratuits" card is kept for the whole offer).
     /// </summary>
     /// <param name="ct">Cancelled when newer cards replace a whole batch.</param>
     internal async Task LoadPictureAsync(ImageFileCache cache, SemaphoreSlim downloads, CancellationToken ct)
     {
         if (ImageUrl is null || _picture is not null)
             return;
-        _picture = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        // Back on the UI thread; null when the card went away meanwhile.
-        if (await CardPicture.LoadAsync(cache, ImageUrl, downloads, _picture.Token) is { } bitmap)
+        var loading = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        _picture = loading;
+        // Back on the UI thread; null when the card went away meanwhile, or the picture failed.
+        if (await CardPicture.LoadAsync(cache, ImageUrl, downloads, loading.Token) is { } bitmap)
             Image = bitmap;
+        else if (!loading.IsCancellationRequested)
+        {
+            // Unregistered from the batch token: a picture tried again gets a new one.
+            _picture = null;
+            loading.Dispose();
+        }
     }
 
     /// <summary>

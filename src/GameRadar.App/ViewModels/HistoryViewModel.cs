@@ -45,6 +45,8 @@ public sealed partial class HistoryViewModel : ObservableObject
         // Tags found by the recommendations: shown on the rows as they are, no rebuild.
         _library.TagsChanged += ShowTags;
         // Before the sort below: choosing it filters the list.
+        PlatformFilter = CreatePlatformFilter();
+        TagsFilter = CreateTagsFilter();
         Filters = CreateFilters();
         SelectedSort = SortOptions[0];
     }
@@ -88,41 +90,50 @@ public sealed partial class HistoryViewModel : ObservableObject
     [ObservableProperty]
     public partial SortOption SelectedSort { get; set; }
 
-    // The picklists, in the order of the page: platform, status, taste.
+    // The picklists, in the order of the page: platform, status, taste, tags.
     public IReadOnlyList<HistoryFilterGroup> Filters { get; }
 
-    /// <summary>The first picklist: its boxes are offered only for the platforms present.</summary>
-    public HistoryFilterGroup PlatformFilter => Filters[0];
+    /// <summary>The platforms picklist: its boxes are offered only for the platforms present.</summary>
+    public HistoryFilterGroup PlatformFilter { get; }
 
-    /// <summary>
-    /// The picklists of the history page. A box per synced platform (a new
-    /// platform gets one by itself), then the games added by hand.
-    /// </summary>
+    private HistoryFilterGroup TagsFilter { get; }
+
+    // "Terminé" on the row: finished, not mastered (a game is in one status box only).
+    private static bool ShowsCompleted(GameGroupRow row) => !row.IsMastered && row.IsStatusHighlighted;
+
+    /// <summary>The picklists of the history page, the platforms and tags ones built first (kept as properties).</summary>
     private IReadOnlyList<HistoryFilterGroup> CreateFilters() =>
     [
-        new HistoryFilterGroup(Strings.History_Filter_Platform,
-            Strings.History_Filter_AllFeminine, Strings.History_Filter_NoneFeminine, OnFilterChanged,
-            [
-                .. _accounts.SyncedPlatforms.Select(p => (p.Platform, (Func<GameGroupRow, bool>)(r => r.HasPlatform(p.Platform)))),
-                (Strings.History_Filter_Manual, r => r.IsManual)
-            ]),
+        PlatformFilter,
         // A game is in exactly one status box: mastered, else finished, else played.
         new HistoryFilterGroup(Strings.History_Filter_Status,
             Strings.History_Filter_All, Strings.History_Filter_None, OnFilterChanged,
             (Strings.Status_Mastered, r => r.IsMastered),
-            (Strings.Status_Completed, r => !r.IsMastered && r.IsStatusHighlighted),
+            (Strings.Status_Completed, ShowsCompleted),
             (Strings.Status_Played, r => !r.IsMastered && !r.IsStatusHighlighted)),
         new HistoryFilterGroup(Strings.History_Filter_Taste,
             Strings.History_Filter_All, Strings.History_Filter_None, OnFilterChanged,
             (Strings.History_Filter_Counting, r => r.CountsInTaste),
             (Strings.History_Filter_Ignored, r => !r.CountsInTaste)),
-        // "Sans tags": the games that weigh in the recommendations without any tag
-        // (those that do not count are not looked up). Every other game is "Avec tags".
-        new HistoryFilterGroup(Strings.History_Filter_Tags,
+        TagsFilter
+    ];
+
+    // A box per synced platform (a new platform gets one by itself), then the games added by hand.
+    private HistoryFilterGroup CreatePlatformFilter() =>
+        new(Strings.History_Filter_Platform,
+            Strings.History_Filter_AllFeminine, Strings.History_Filter_NoneFeminine, OnFilterChanged,
+            [
+                .. _accounts.SyncedPlatforms.Select(p => (p.Platform, (Func<GameGroupRow, bool>)(r => r.HasPlatform(p.Platform)))),
+                (Strings.History_Filter_Manual, r => r.IsManual)
+            ]);
+
+    // "Sans tags": the games that weigh in the recommendations without any tag
+    // (those that do not count are not looked up). Every other game is "Avec tags".
+    private HistoryFilterGroup CreateTagsFilter() =>
+        new(Strings.History_Filter_Tags,
             Strings.History_Filter_All, Strings.History_Filter_None, OnFilterChanged,
             (Strings.History_Filter_WithTags, r => !r.CountsWithoutTags),
-            (Strings.History_Filter_WithoutTags, r => r.CountsWithoutTags))
-    ];
+            (Strings.History_Filter_WithoutTags, r => r.CountsWithoutTags));
 
     /// <summary>Some box unticked: "Tout afficher" is offered.</summary>
     public bool IsFiltered => Filters.Any(g => g.IsFiltered);
@@ -221,6 +232,13 @@ public sealed partial class HistoryViewModel : ObservableObject
             AllRows.Add(BuildRow(group, matcher, now));
         UpdatePlatforms();
         Apply();
+        RowsChanged();
+    }
+
+    // After the rows changed, all of them (Rebuild) or one (RefreshRowOf): the status lines,
+    // and whoever draws figures from them (the PlayStation Store box, the Game Pass line).
+    private void RowsChanged()
+    {
         UpdateStatus();
         HasHistory = _library.HasAnyHistory;
         Rebuilt?.Invoke();
@@ -233,7 +251,8 @@ public sealed partial class HistoryViewModel : ObservableObject
             platform.UpdateStatus();
 
         int mastered = AllRows.Count(r => r.IsMastered);
-        int completed = AllRows.Count(r => r.IsCompleted && r.CanMarkCompleted);
+        // The same rule as the "Terminé" box: a game finished by hand, by its level or on its platform.
+        int completed = AllRows.Count(ShowsCompleted);
         Summary = AllRows.Count == 0 ? Strings.History_NoGames
             : completed > 0 ? Localization.Format(Strings.History_SummaryCompleted, AllRows.Count, mastered, completed)
             : Localization.Format(Strings.History_Summary, AllRows.Count, mastered);
@@ -281,11 +300,13 @@ public sealed partial class HistoryViewModel : ObservableObject
         foreach (var row in AllRows)
             ShowTags(row);
         // Tags found change what the "Tags" boxes let through: refiltered, but a
-        // row shown that the player is tagging stays (no row vanishes under the mouse).
+        // row shown stays unless those boxes now refuse it, and even then if the
+        // player is tagging it. Its heart unticked a moment ago is not a reason:
+        // no row vanishes under the mouse.
         if (IsFiltered)
         {
             var shown = Games.ToHashSet();
-            Apply(keep: r => r.TagEditor.WasEdited && shown.Contains(r));
+            Apply(keep: r => shown.Contains(r) && (r.TagEditor.WasEdited || TagsFilter.Passes(r)));
         }
     }
 
@@ -372,7 +393,6 @@ public sealed partial class HistoryViewModel : ObservableObject
         settings.ExcludedFromTaste.Remove(key);
         settings.IncludedInTaste.Remove(key);
         RefreshRowOf(removed);
-        HasHistory = _library.HasAnyHistory;
         _choicesChanged();
     }
 
@@ -393,15 +413,19 @@ public sealed partial class HistoryViewModel : ObservableObject
 
         // The same game now: the group holding one of the old line's platforms.
         var oldKeys = old.Details.Select(d => d.Key).ToHashSet();
-        var group = HistoryMerger.GroupByGame(_library.CombinedHistory()).FirstOrDefault(g => g.Any(p => oldKeys.Contains(p.Key)));
+        var games = _library.CombinedHistory();
+        GameCount = games.Count;
+        var group = HistoryMerger.GroupByGame(games).FirstOrDefault(g => g.Any(p => oldKeys.Contains(p.Key)));
         var fresh = group is null ? null : BuildRow(group, CurrentMatcher(), DateTimeOffset.UtcNow);
         if (fresh is not null)
             fresh.IsExpanded = old.IsExpanded;
 
         Replace(AllRows, old, fresh);
         Replace(Games, old, fresh);
-        UpdateStatus();
+        // A platform gone with its last game leaves the filter's choices.
+        UpdatePlatforms();
         UpdateFilterStatus();
+        RowsChanged();
     }
 
     private static void Replace(IList<GameGroupRow> rows, GameGroupRow old, GameGroupRow? fresh)

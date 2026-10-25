@@ -108,8 +108,9 @@ public sealed partial class EaClient
         return HttpOutcomes.Classify(response) switch
         {
             HttpOutcome.Ok => await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false),
-            // Measured: an unknown or expired token answers 401, empty.
-            HttpOutcome.Unauthorized or HttpOutcome.Forbidden => throw new EaException(CoreStrings.Ea_TokenExpired) { RequiresSignIn = true },
+            // Measured: an unknown or expired token answers 401, empty. Asked
+            // without the token, a refusal says nothing about it: EA is down.
+            HttpOutcome.Unauthorized or HttpOutcome.Forbidden when withToken => throw new EaException(CoreStrings.Ea_TokenExpired) { RequiresSignIn = true },
             HttpOutcome.RateLimited => throw new EaException(CoreStrings.Ea_RateLimited) { IsRateLimited = true },
             _ => throw new EaException(CoreStrings.Ea_Down)
         };
@@ -192,7 +193,7 @@ public sealed partial class EaClient
     /// <summary>Unlocked and total achievements of a game, or null when it has none.</summary>
     internal static EaAchievements? ParseAchievements(string json)
     {
-        var sets = Data(json, EaJsonContext.Default.GraphQlEnvelopeAchievementsData).Achievements
+        var sets = Data(json, EaJsonContext.Default.GraphQlEnvelopeAchievementsData, whole: true).Achievements
             ?? throw new EaException(CoreStrings.Ea_Format);
         // One set per game in practice; the largest if a game ever has several.
         var achievements = sets.Select(s => s.Achievements ?? []).MaxBy(a => a.Count);
@@ -202,16 +203,25 @@ public sealed partial class EaClient
     }
 
     /// <summary>The data of a GraphQL answer; none (errors, a maintenance page) throws <see cref="EaException"/>.</summary>
-    private static TData Data<TData>(string json, JsonTypeInfo<GraphQlEnvelope<TData>> typeInfo) where TData : class
+    /// <param name="whole">
+    /// Any error refuses the answer, even with partial data (the achievements): a field left
+    /// null by a failing resolver would read as "no achievements" and be kept until the game
+    /// is played again. The lists of games stay read in part, never measured with errors.
+    /// </param>
+    private static TData Data<TData>(string json, JsonTypeInfo<GraphQlEnvelope<TData>> typeInfo, bool whole = false) where TData : class
     {
+        GraphQlEnvelope<TData>? envelope;
         try
         {
-            return JsonSerializer.Deserialize(json, typeInfo)?.Data ?? throw new EaException(CoreStrings.Ea_Format);
+            envelope = JsonSerializer.Deserialize(json, typeInfo);
         }
         catch (JsonException ex)
         {
             throw new EaException(CoreStrings.Ea_Format, ex);
         }
+        return envelope is { Data: { } data } && !(whole && envelope.Errors is { Count: > 0 })
+            ? data
+            : throw new EaException(CoreStrings.Ea_Format);
     }
 }
 

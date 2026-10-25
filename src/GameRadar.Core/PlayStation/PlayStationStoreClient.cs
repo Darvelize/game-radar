@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using GameRadar.Core.Epic;
+using GameRadar.Core.Cache;
 using GameRadar.Core.Models;
 using GameRadar.Core.Resources;
 using GameRadar.Core.Services;
@@ -32,7 +33,7 @@ internal sealed record StoreDetails(IReadOnlyList<string> Genres, double? Rating
 /// (the page then falls back on the PS Plus catalog). A new hash is read from the
 /// requests of store.playstation.com in the browser's developer tools.
 /// </remarks>
-public sealed class PlayStationStoreClient
+public sealed class PlayStationStoreClient : IStoreCatalogClient
 {
     private const string Endpoint = "https://web.np.playstation.com/api/graphql/v1/op";
 

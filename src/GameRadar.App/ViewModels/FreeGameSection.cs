@@ -95,6 +95,9 @@ public sealed partial class FreeGameSection : FetchLine
         _rows = rows;
         Kept.ShowsNone = !ShowsHint && Kept.Games.Count == 0;
         Timed.ShowsNone = !ShowsHint && Timed.Games.Count == 0;
+        // No plan any more: a failure of the plan's list says nothing now, the hint alone.
+        if (ShowsHint)
+            Error = null;
         ShowStatus(string.Empty);
     }
 

@@ -13,6 +13,10 @@ public class GameTitleTests
     [InlineData("Heroes of Might and Magic: Olden Era (Aperçu)", "Heroes of Might and Magic: Olden Era")]
     [InlineData("Assassin's Creed Chronicles : China", "Assassin's Creed Chronicles: China")]
     [InlineData("Half-Life 2", "Half-Life 2")]
+    // The platform after a dash: the dash goes with it.
+    [InlineData("Grounded - PC", "Grounded")]
+    [InlineData("Halo Infinite - Xbox One", "Halo Infinite")]
+    [InlineData("Dead Cells - PS4 & PS5", "Dead Cells")]
     [InlineData("", "")]
     [InlineData("-", "-")]
     // "PlayStation" elsewhere than a final console version stays.

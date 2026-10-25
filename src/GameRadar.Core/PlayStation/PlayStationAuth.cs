@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Headers;
-using System.Text.Json;
 using System.Web;
+using GameRadar.Core.Services;
 
 namespace GameRadar.Core.PlayStation;
 
@@ -140,7 +140,7 @@ internal sealed class PlayStationAuth
         request.Headers.Authorization = new AuthenticationHeaderValue("Basic", ClientCredentials);
 
         using var response = await _http.SendAsync(request, ct).ConfigureAwait(false);
-        var answer = await ReadJsonOrNullAsync(response, ct).ConfigureAwait(false);
+        var answer = await HttpJson.ReadOrNullAsync(response, PlayStationJsonContext.Default.PlayStationTokenResponse, ct).ConfigureAwait(false);
 
         var now = DateTimeOffset.UtcNow;
         if (response.IsSuccessStatusCode && !string.IsNullOrEmpty(answer?.AccessToken))
@@ -172,19 +172,4 @@ internal sealed class PlayStationAuth
     /// PlayStation App identity for GameRadar. A new NPSSO cannot help.
     /// </summary>
     private static bool IsAppBlocked(string? error) => error is "invalid_client" or "unauthorized_client";
-
-    // Error answers are not always JSON (or are empty): null rather than throw,
-    // so the caller can still report the HTTP status.
-    private static async Task<PlayStationTokenResponse?> ReadJsonOrNullAsync(HttpResponseMessage response, CancellationToken ct)
-    {
-        string body = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
-        try
-        {
-            return body.Length == 0 ? null : JsonSerializer.Deserialize(body, PlayStationJsonContext.Default.PlayStationTokenResponse);
-        }
-        catch (JsonException)
-        {
-            return null;
-        }
-    }
 }

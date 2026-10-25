@@ -35,12 +35,15 @@ jobs:
       id-token: write      # sign the attestation
       attestations: write  # store the attestation
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        # The write token of this job stays out of .git/config: the build and the tests run third-party code (NuGet packages).
+        with:
+          persist-credentials: false
 
       # Same SDK as ci.yml (the third-party notices test depends on it).
-      - uses: actions/setup-dotnet@v6
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
         with:
-          dotnet-version: 10.0.401
+          dotnet-version: 10.0.402
 
       # The version to publish is the one of the csproj. A tag must say the same:
       # a numbered release never goes back, so a wrong tag must not publish.
@@ -50,6 +53,9 @@ jobs:
         env:
           EVENT: ${{ github.event_name }}
           REF_NAME: ${{ github.ref_name }}
+          DRY_RUN: ${{ inputs.dry-run }}
+          # Read only: is the commit built on main, and where does an existing tag point.
+          GH_TOKEN: ${{ github.token }}
         run: |
           $csproj = Get-Content src/GameRadar.App/GameRadar.App.csproj -Raw
           if ($csproj -notmatch '<Version>(\d+\.\d+\.\d+)</Version>') { throw 'No <Version> in GameRadar.App.csproj.' }
@@ -57,6 +63,22 @@ jobs:
           if ($env:EVENT -eq 'push' -and $env:REF_NAME -ne "v$version") {
             throw "The tag $($env:REF_NAME) does not match the version $version of GameRadar.App.csproj."
           }
+          # A real release (a tag pushed, or a run by hand without dry run) is of a commit on
+          # main, whose tag, if it exists already, is that commit. Its notes must be dated:
+          # checked by Build-ReleaseNotes.ps1 (-RequireDate), the one reader of the changelogs.
+          $real = $env:EVENT -eq 'push' -or $env:DRY_RUN -eq 'false'
+          if ($real) {
+            $repo = '${{ github.repository }}'
+            # "identical" or "ahead": main is this commit or comes after it.
+            $onMain = gh api "repos/$repo/compare/$($env:GITHUB_SHA)...main" --jq .status
+            if ($LASTEXITCODE -ne 0 -or $onMain -notin 'identical', 'ahead') { throw "The commit $($env:GITHUB_SHA) is not on main: a release is made from main." }
+            # Run by hand: a tag already there must be this commit (a pushed tag is, by definition).
+            if ($env:EVENT -ne 'push') {
+              $tagged = gh api "repos/$repo/git/ref/tags/v$version" --jq .object.sha 2>$null
+              if ($LASTEXITCODE -eq 0 -and $tagged -ne $env:GITHUB_SHA) { throw "The tag v$version exists already on another commit ($tagged): the exe would not be the code it names." }
+            }
+          }
+          "real=$($real.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
           "version=$version" >> $env:GITHUB_OUTPUT
           Write-Host "Version $version"
 
@@ -69,11 +91,13 @@ jobs:
 
       - name: Release notes
         shell: pwsh
+        env:
+          REAL: ${{ steps.version.outputs.real }}
         run: |
-          ./tools/Build-ReleaseNotes.ps1 -Version '${{ steps.version.outputs.version }}' -ExePath publish/GameRadar.exe -OutFile publish/release-notes.md
+          ./tools/Build-ReleaseNotes.ps1 -Version '${{ steps.version.outputs.version }}' -ExePath publish/GameRadar.exe -OutFile publish/release-notes.md -RequireDate:($env:REAL -eq 'true')
           Get-Content publish/release-notes.md -Raw | Out-File -Append -Encoding utf8 $env:GITHUB_STEP_SUMMARY
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: GameRadar-${{ steps.version.outputs.version }}
           path: |
@@ -82,8 +106,8 @@ jobs:
 
       # Only for a real release: a dry run attests nothing.
       - name: Attest the build provenance
-        if: github.event_name == 'push' || inputs.dry-run == false
-        uses: actions/attest-build-provenance@v4
+        if: steps.version.outputs.real == 'true'
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
         with:
           subject-path: publish/GameRadar.exe
 
@@ -92,7 +116,7 @@ jobs:
       # says to upload it by hand.
       # ponytail: direct upload is limited to 32 MB (exe ~22 MB); past that, ask /files/upload_url first.
       - name: Send the exe to VirusTotal
-        if: github.event_name == 'push' || inputs.dry-run == false
+        if: steps.version.outputs.real == 'true'
         shell: pwsh
         env:
           VT_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
@@ -103,7 +127,7 @@ jobs:
           exit 0
 
       - name: Create the release
-        if: github.event_name == 'push' || inputs.dry-run == false
+        if: steps.version.outputs.real == 'true'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
@@ -114,5 +138,6 @@ jobs:
           gh release view "v$env:VERSION" --repo $repo *> $null
           if ($LASTEXITCODE -eq 0) { throw "The release v$env:VERSION already exists in $repo." }
           gh release create "v$env:VERSION" "publish/GameRadar.exe#GameRadar.exe (Windows 64 bits)" `
-            --repo $repo --title "GameRadar $env:VERSION" --notes-file publish/release-notes.md
+            --repo $repo --title "GameRadar $env:VERSION" --notes-file publish/release-notes.md `
+            --target $env:GITHUB_SHA
           if ($LASTEXITCODE -ne 0) { throw 'gh release create failed.' }

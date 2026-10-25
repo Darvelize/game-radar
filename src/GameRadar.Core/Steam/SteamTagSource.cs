@@ -55,6 +55,17 @@ public sealed class SteamTagSource
 
     private bool IsPaused => _time.GetUtcNow().UtcTicks < Interlocked.Read(ref _pausedUntilTicks);
 
+    // After a rate limit, no request to Steam for a while: asked again at once, it would only refuse again.
+    private void PauseIfRateLimited(Exception ex)
+    {
+        if (ex is ServiceException { IsRateLimited: true })
+            Interlocked.Exchange(ref _pausedUntilTicks, (_time.GetUtcNow() + RateLimitPause).UtcTicks);
+    }
+
+    // Set when the tag names could not be read (Steam down, no network): not asked again
+    // before then, or every computation would wait for the same failure again.
+    private long _namesRetryAfterTicks;
+
     /// <param name="time">The clock (tests move their own). Null = the system's.</param>
     public SteamTagSource(CacheStore cache, TimeProvider? time = null)
     {
@@ -76,12 +87,13 @@ public sealed class SteamTagSource
 
     /// <summary>
     /// Games whose tags are still unknown and worth a request: played games
-    /// that count in the taste by default (<see cref="TasteSelection.CountsByDefault"/>)
-    /// and Game Pass candidates.
+    /// that count in the taste (<paramref name="countsInTaste"/>) and Game Pass candidates.
+    /// What a lookup would ask, without asking: for the tests (the app looks up at once).
     /// </summary>
-    public int CountMissing(SteamTagIndex index, IEnumerable<PlayedGame> played, IEnumerable<CatalogGame> candidates, DateTimeOffset now)
+    internal int CountMissing(SteamTagIndex index, IEnumerable<PlayedGame> played, IEnumerable<CatalogGame> candidates, DateTimeOffset now,
+        Func<PlayedGame, bool> countsInTaste)
     {
-        var (appIds, titles, _) = Missing(index, played, candidates, now);
+        var (appIds, titles, _, _) = Missing(index, played, candidates, now, countsInTaste);
         return appIds.Count + titles.Count;
     }
 
@@ -92,11 +104,16 @@ public sealed class SteamTagSource
     /// Returns false when Steam was asked nothing (nothing missing, or the pause after
     /// a rate limit): the tags known are the same.
     /// </summary>
+    /// <param name="countsInTaste">
+    /// The played games looked up: those of the taste, the player's choices included
+    /// (<see cref="TasteSelection.Counts"/>).
+    /// </param>
     /// <param name="progress">Receives (done, total) during the lookups.</param>
     public async Task<bool> FetchMissingAsync(
         IEnumerable<PlayedGame> played,
         IEnumerable<CatalogGame> candidates,
         SteamTagClient client,
+        Func<PlayedGame, bool> countsInTaste,
         IProgress<(int Done, int Total)>? progress = null,
         CancellationToken ct = default)
     {
@@ -110,7 +127,7 @@ public sealed class SteamTagSource
                 return false;
             var now = _time.GetUtcNow();
             // Computed inside the lock: a cancelled run may have found some meanwhile.
-            var (appIds, titles, titleIfNoTags) = Missing(LoadIndex(candidateList), playedList, candidateList, now);
+            var (appIds, titles, titleIfNoTags, wanted) = Missing(LoadIndex(candidateList), playedList, candidateList, now, countsInTaste);
             int total = appIds.Count + titles.Count;
             if (total == 0)
                 return false;
@@ -128,7 +145,7 @@ public sealed class SteamTagSource
                         var tags = found.GetValueOrDefault(appId);
                         Set(AppKey(appId), new TagEntry(tags ?? new Dictionary<int, double>(), now));
                         // No tags (no longer sold): searched by title too, in this pass.
-                        if (tags is null && titleIfNoTags.TryGetValue(appId, out var byTitle) && !titles.Contains(byTitle))
+                        if (tags is null && titleIfNoTags.TryGetValue(appId, out var byTitle) && wanted.Add(byTitle.Key))
                         {
                             titles.Add(byTitle);
                             total++;
@@ -163,8 +180,7 @@ public sealed class SteamTagSource
             {
                 // Rate limit or store down: the rest waits for the next time; after a rate
                 // limit, not before a pause (asked again at once, it would only refuse again).
-                if (ex is ServiceException { IsRateLimited: true })
-                    Interlocked.Exchange(ref _pausedUntilTicks, (_time.GetUtcNow() + RateLimitPause).UtcTicks);
+                PauseIfRateLimited(ex);
             }
             finally
             {
@@ -201,10 +217,11 @@ public sealed class SteamTagSource
             {
             }
         }
-        if (names is not null && DateTimeOffset.UtcNow - cached!.SavedAt < TagNamesMaxAge)
+        var now = _time.GetUtcNow();
+        if (names is not null && now - cached!.SavedAt < TagNamesMaxAge)
             return names;
-        // Paused after a rate limit: the old names (or none), Steam is asked nothing.
-        if (IsPaused)
+        // Paused after a rate limit, or a failure just now: the old names (or none), Steam is asked nothing.
+        if (IsPaused || now.UtcTicks < Interlocked.Read(ref _namesRetryAfterTicks))
             return names ?? new Dictionary<int, string>();
 
         try
@@ -216,6 +233,9 @@ public sealed class SteamTagSource
         // Steam unreachable: the old names (or none). A cancelled computation goes up.
         catch (Exception ex) when (StoreLookup.Failed(ex, ct))
         {
+            // A rate limit pauses the tag lookups too, like FetchMissingAsync's.
+            PauseIfRateLimited(ex);
+            Interlocked.Exchange(ref _namesRetryAfterTicks, (_time.GetUtcNow() + RateLimitPause).UtcTicks);
             return names ?? new Dictionary<int, string>();
         }
     }
@@ -224,8 +244,9 @@ public sealed class SteamTagSource
     /// App ids and (cache key, title) pairs to look up, favorites first, then the
     /// candidates; and the title to search for each app id that gives no tags.
     /// </summary>
-    private static (List<string> AppIds, List<(string Key, string Title)> Titles, Dictionary<string, (string Key, string Title)> TitleIfNoTags) Missing(
-        SteamTagIndex index, IEnumerable<PlayedGame> played, IEnumerable<CatalogGame> candidates, DateTimeOffset now)
+    private static (List<string> AppIds, List<(string Key, string Title)> Titles, Dictionary<string, (string Key, string Title)> TitleIfNoTags, HashSet<string> Seen) Missing(
+        SteamTagIndex index, IEnumerable<PlayedGame> played, IEnumerable<CatalogGame> candidates, DateTimeOffset now,
+        Func<PlayedGame, bool> countsInTaste)
     {
         var appIds = new List<string>();
         var titles = new List<(string Key, string Title)>();
@@ -241,7 +262,7 @@ public sealed class SteamTagSource
         // Every game that counts in the taste (the profile is learned on
         // tags too), the favorites first: they also open the sections.
         foreach (var game in played
-            .Where(TasteSelection.CountsByDefault)
+            .Where(countsInTaste)
             .OrderByDescending(g => TasteProfile.Engagement(g, now) >= SimilarityRecommender.FavoriteEngagement))
         {
             if (index.For(game) is not null)
@@ -274,7 +295,7 @@ public sealed class SteamTagSource
             else if (TitleKey(game.Title) is { } key)
                 Want(key, () => titles.Add((key, game.Title)));
         }
-        return (appIds, titles, titleIfNoTags);
+        return (appIds, titles, titleIfNoTags, seen);
     }
 
     internal static string AppKey(string appId) => "app:" + appId;

@@ -43,11 +43,13 @@ public class ImageFileCacheTests
     public async Task GetAsync_DownloadEndingAfterEraseAll_WritesNothing()
     {
         using var folder = new TempFolder();
-        var cache = new ImageFileCache(new HttpClient(new FakeImageHandler { Delay = TimeSpan.FromMilliseconds(200) }), folder.Path);
+        var answer = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var cache = new ImageFileCache(new HttpClient(new FakeImageHandler { Hold = answer.Task }), folder.Path);
 
-        // "Effacer toutes mes données" while a card picture is on its way.
+        // "Effacer toutes mes données" while a card picture is on its way: it arrives after.
         var download = cache.GetAsync("https://img/a");
         cache.EraseAll();
+        answer.SetResult();
 
         Assert.Null(await download);
         Assert.False(Directory.Exists(folder.Path) && Directory.EnumerateFileSystemEntries(folder.Path).Any());
@@ -185,12 +187,16 @@ public class ImageFileCacheTests
         private int _requests;
         public int Requests => _requests;
         public TimeSpan Delay { get; init; }
+        /// <summary>Set: the answer waits for it (a download still on its way while the test acts).</summary>
+        public Task? Hold { get; init; }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
         {
             // Interlocked: parallel downloads may count at the same time.
             Interlocked.Increment(ref _requests);
             await Task.Delay(Delay, ct);
+            if (Hold is not null)
+                await Hold.WaitAsync(ct);
 
             string url = request.RequestUri!.ToString();
             if (url.EndsWith("/missing"))

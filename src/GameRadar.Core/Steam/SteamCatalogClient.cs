@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
+using GameRadar.Core.Cache;
 using GameRadar.Core.Models;
 using GameRadar.Core.Services;
 
@@ -13,7 +14,7 @@ namespace GameRadar.Core.Steam;
 /// translated into the Microsoft Store genres, the vocabulary of the taste
 /// profile. 3 requests in all: the tag names, then 2 pages of 1,000 games.
 /// </summary>
-public sealed class SteamCatalogClient
+public sealed class SteamCatalogClient : IStoreCatalogClient
 {
     private const string TagListUrl = "https://api.steampowered.com/IStoreService/GetTagList/v1/?language=english";
     private const string QueryUrl = "https://api.steampowered.com/IStoreQueryService/Query/v1/";
@@ -56,24 +57,42 @@ public sealed class SteamCatalogClient
     /// <summary>Fetches the tag names then the best sellers, filtered and translated.</summary>
     public async Task<IReadOnlyList<CatalogGame>> FetchCatalogAsync(CancellationToken ct = default)
     {
-        var tagNames = ParseTagList(await GetStringAsync(_http, TagListUrl, ct).ConfigureAwait(false));
+        var tagNames = ParseTagList(await GetStringAsync(_http, TagListUrl, CoreStrings.Steam_StoreDown, ct).ConfigureAwait(false));
 
         var pages = await TopSellerPagesAsync(_http,
-            new DataRequestDto { IncludeTagCount = 20, IncludeReviews = true, IncludeAssets = true }, PageCount, ct).ConfigureAwait(false);
+            new DataRequestDto { IncludeTagCount = 20, IncludeReviews = true, IncludeAssets = true }, PageCount, CoreStrings.Steam_StoreDown, ct).ConfigureAwait(false);
         // A game may move from one page to the next between the two requests.
         return pages.SelectMany(json => ParseQuery(json, tagNames)).DistinctBy(g => g.ProductId).ToList();
     }
 
     /// <summary>The first <paramref name="pageCount"/> pages of best sellers, asked at once, in their order.</summary>
-    internal static Task<string[]> TopSellerPagesAsync(HttpClient http, DataRequestDto data, int pageCount, CancellationToken ct) =>
-        Task.WhenAll(Enumerable.Range(0, pageCount).Select(page => GetStringAsync(http, TopSellersUrl(page * PageSize, data), ct)));
+    internal static Task<string[]> TopSellerPagesAsync(HttpClient http, DataRequestDto data, int pageCount, string down, CancellationToken ct) =>
+        Task.WhenAll(Enumerable.Range(0, pageCount).Select(page => GetStringAsync(http, TopSellersUrl(page * PageSize, data), down, ct)));
 
-    internal static async Task<string> GetStringAsync(HttpClient http, string url, CancellationToken ct)
+    /// <param name="down">What the page that asked says when the store does not answer (the catalog, the free games).</param>
+    internal static async Task<string> GetStringAsync(HttpClient http, string url, string down, CancellationToken ct)
     {
         using var response = await http.GetAsync(url, ct).ConfigureAwait(false);
-        if (HttpOutcomes.Classify(response) != HttpOutcome.Ok)
-            throw new SteamException(CoreStrings.Steam_StoreDown);
+        ThrowIfRefused(response, CoreStrings.Steam_RateLimited, down);
         return await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// The one rule of the store's refusals (catalog, free games, tags, genres): its 403 is a
+    /// rate limit too (see the folder's notes), anything else not 2xx is the store down.
+    /// Each caller says it in its own words.
+    /// </summary>
+    internal static void ThrowIfRefused(HttpResponseMessage response, string rateLimited, string down)
+    {
+        switch (HttpOutcomes.Classify(response))
+        {
+            case HttpOutcome.Ok:
+                return;
+            case HttpOutcome.RateLimited or HttpOutcome.Forbidden:
+                throw new SteamException(rateLimited) { IsRateLimited = true };
+            default:
+                throw new SteamException(down);
+        }
     }
 
     /// <summary>A page of games, best sellers first.</summary>

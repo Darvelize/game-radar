@@ -96,7 +96,7 @@ public sealed class WhatsNewTests : AppTest
         vm.WhatsNew.OpenCommand.Execute(null);
 
         Assert.False(vm.WhatsNew.HasWhatsNew);
-        Assert.True(vm.IsWhatsNewPage);
+        Assert.Equal(AppPage.WhatsNew, vm.CurrentPage);
     }
 
     [AvaloniaTheory]

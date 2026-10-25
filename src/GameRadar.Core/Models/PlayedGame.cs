@@ -58,8 +58,11 @@ public sealed record PlayedGame(
     /// </summary>
     public string? ImageUrl { get; init; }
 
-    /// <summary>Owned but never launched (Steam library): says nothing about taste.</summary>
-    public bool NeverPlayed => PlaytimeMinutes == 0;
+    /// <summary>
+    /// Owned but never launched (Steam library): says nothing about taste. No minutes
+    /// but achievements is started (played offline, seconds rounded down).
+    /// </summary>
+    public bool NeverPlayed => PlaytimeMinutes == 0 && UnlockedAchievements == 0 && ProgressPercentage == 0;
 
     /// <summary>
     /// True when the game tells something about the player's taste:

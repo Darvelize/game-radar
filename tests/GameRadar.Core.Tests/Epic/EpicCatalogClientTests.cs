@@ -60,6 +60,17 @@ public class EpicCatalogClientTests
         Assert.Equal(rating, EpicCatalogClient.ParseRating(json));
     }
 
+    [Theory]
+    [InlineData("Online Co-op", PlayModes.CoopOnline)]
+    [InlineData("Local Co-op", PlayModes.Local)]
+    // Neither online nor local: a local-only co-op game must not pass for online.
+    [InlineData("Co-op", PlayModes.None)]
+    [InlineData("Multiplayer", PlayModes.None)]
+    public void ModeOf_OnlySaysOnlineWhenEpicDoes(string feature, PlayModes expected)
+    {
+        Assert.Equal(expected, EpicCatalogClient.ModeOf(feature));
+    }
+
     [Fact]
     public void ToCatalogGame_TranslatesTheOffer()
     {

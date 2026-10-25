@@ -58,7 +58,7 @@ public sealed class NavigationTests : AppTest
             .Where(b => b.Classes.Contains("badgeLink") && b.IsVisible).ToList();
 
         Assert.NotEmpty(badges);
-        Assert.All(badges, b => Assert.Same(vm.Recommendations.OpenPageCommand, b.Command));
+        Assert.All(badges, b => Assert.Same(vm.OpenPageCommand, b.Command));
         Assert.All(badges, b => Assert.IsType<Uri>(b.CommandParameter));
         window.Close();
     }

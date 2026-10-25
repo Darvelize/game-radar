@@ -117,6 +117,15 @@ public class EaClientTests
         Assert.Null(EaClient.ParseAchievements("""{"data":{"achievements":[]}}"""));
     }
 
+    [Fact]
+    public void ParseAchievements_PartialDataWithAnError_Throws()
+    {
+        // A failing resolver: read as "no achievements", it would be kept until the game is played again.
+        string json = """{"data":{"achievements":[{"id":"1","achievements":null}]},"errors":[{"message":"Internal error"}]}""";
+
+        Assert.Throws<EaException>(() => EaClient.ParseAchievements(json));
+    }
+
     [Theory]
     [InlineData("""{"errors":[{"message":"Cannot query field"}],"data":null}""")]
     [InlineData("<html>Maintenance</html>")]

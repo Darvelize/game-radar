@@ -22,13 +22,18 @@
 .PARAMETER OutFile
   Where to write the notes (UTF-8, no BOM). Without it, they are printed.
 
+.PARAMETER RequireDate
+  A real release: the sections must be dated ("## X.Y.Z — AAAA-MM-JJ"), the date
+  being written just before it (docs/release.md). A dry run may come before.
+
 .EXAMPLE
   powershell -ExecutionPolicy Bypass -File tools\Build-ReleaseNotes.ps1 -Version 1.3.0 -ExePath publish\GameRadar.exe -OutFile publish\release-notes-1.3.0.md
 #>
 param(
     [Parameter(Mandatory)] [string] $Version,
     [Parameter(Mandatory)] [string] $ExePath,
-    [string] $OutFile
+    [string] $OutFile,
+    [switch] $RequireDate
 )
 $ErrorActionPreference = 'Stop'
 
@@ -42,6 +47,9 @@ function Get-Notes([string] $Path, [string] $Version) {
         if ($lines[$i] -match ('^## ' + [regex]::Escape($Version) + '(\s|$)')) { $start = $i + 1; break }
     }
     if ($start -lt 0) { throw "No '## $Version' section in $(Split-Path -Leaf $Path)." }
+    if ($RequireDate -and $lines[$start - 1] -notmatch ('^## ' + [regex]::Escape($Version) + ' [—–-] \d{4}-\d{2}-\d{2}')) {
+        throw "The '## $Version' section of $(Split-Path -Leaf $Path) has no date (## $Version — YYYY-MM-DD)."
+    }
 
     $body = @()
     for ($i = $start; $i -lt $lines.Count -and $lines[$i] -notmatch '^## '; $i++) { $body += $lines[$i] }

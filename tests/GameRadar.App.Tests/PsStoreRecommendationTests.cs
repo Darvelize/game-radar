@@ -73,6 +73,21 @@ public sealed class PsStoreRecommendationTests : AppTest
     }
 
     [AvaloniaFact]
+    public async Task A_game_added_by_hand_moved_to_PlayStation_ticks_the_box()
+    {
+        await PrepareAsync(ManualPlatform.Switch);
+        var network = new PsStoreNetwork();
+        var vm = SampleData.Empty(TempFolder, network: network);
+        await vm.InitializeAsync();
+        var editor = vm.History.AllRows.SelectMany(r => r.Details).Select(d => d.Manual).OfType<ManualGameEditor>().Single();
+
+        editor.SelectedPlatform = ManualGameOptions.Of(ManualPlatform.PlayStation);
+
+        Assert.True(vm.SourceFilter.ShowPlayStationStore);
+        Assert.True(await BecomesTrueAsync(() => Cards(vm).Contains("Fresh Ps Rpg"), 5000));
+    }
+
+    [AvaloniaFact]
     public async Task Ticking_the_box_downloads_the_catalog_and_remembers_the_choice()
     {
         await PrepareAsync(ManualPlatform.Switch);

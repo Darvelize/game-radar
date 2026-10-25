@@ -112,8 +112,10 @@ public sealed partial class AddGameViewModel : ObservableObject
     /// <summary>
     /// The Game Pass catalog (already loaded, instant), then Steam's search
     /// (1 request, no key). Steam unreachable: the catalog's games still come.
+    /// A new search while one waits for the stores runs too (Enter, the button):
+    /// the numbering below leaves the older answer unused.
     /// </summary>
-    [RelayCommand]
+    [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task SearchAsync()
     {
         string typed = Text.Trim();

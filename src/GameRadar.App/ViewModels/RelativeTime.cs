@@ -13,8 +13,9 @@ public static class RelativeTime
         if (elapsed < TimeSpan.FromHours(24))
             return Localization.Format(Strings.Time_HoursAgo, (int)elapsed.TotalHours);
 
-        // Calendar days, not 24 h blocks: something done at 23:00 is "hier" at 08:00.
-        int days = (now.ToLocalTime().Date - moment.ToLocalTime().Date).Days;
+        // Calendar days, not 24 h blocks: something done at 23:00 is "hier" at 08:00. At
+        // least one: 24 h may fit in one calendar day, the one of 25 h when the clocks go back.
+        int days = Math.Max(1, (now.ToLocalTime().Date - moment.ToLocalTime().Date).Days);
         return days switch
         {
             1 => Strings.Time_Yesterday,

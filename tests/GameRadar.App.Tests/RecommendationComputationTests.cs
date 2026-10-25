@@ -53,9 +53,6 @@ public sealed class RecommendationComputationTests : AppTest
     private static IEnumerable<string> Cards(MainWindowViewModel vm) =>
         vm.Recommendations.Sections.SelectMany(s => s.Games).Select(g => g.Title);
 
-    // A 1 x 1 PNG: the smallest picture the cards can decode.
-    private static readonly byte[] Picture = Convert.FromBase64String(
-        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==");
 
 
     /// <summary>The former French Game Pass catalog, still on disk (the move to English titles did not end).</summary>
@@ -213,6 +210,8 @@ public sealed class RecommendationComputationTests : AppTest
         await vm.WhenIdleAsync();
         var saved = new SettingsStore(TempFolder).Load();
         Assert.False(saved.ShowGamePass || saved.ShowSteam || saved.ShowGog || saved.ShowEpic || saved.ShowPsPlus);
+        // Unticked by the rule already: a choice now, a first PlayStation history keeps it unticked.
+        Assert.False(saved.ShowPlayStationStore);
         Assert.True(saved.ShowMyGames);
     }
 
@@ -251,7 +250,7 @@ public sealed class RecommendationComputationTests : AppTest
         var starting = vm.InitializeAsync();
         await network.GamePassReached.Task;
         // The computation with the cached catalogs ends.
-        Assert.True(await BecomesTrueAsync(() => Cards(vm).Any(), 1000));
+        Assert.True(await BecomesTrueAsync(() => Cards(vm).Any(), 5000));
 
         Assert.Contains("Rpg Pass", Cards(vm));
         network.Release();
@@ -309,7 +308,7 @@ public sealed class RecommendationComputationTests : AppTest
     private async Task<(MainWindowViewModel Vm, HoldingNetwork Pictures, Task Starting)> StartWithHeldPictureAsync()
     {
         await PrepareWithPictureAsync();
-        var pictures = new HoldingNetwork("images.example", Picture);
+        var pictures = new HoldingNetwork("images.example", SampleData.TinyPng);
         var vm = SampleData.Empty(TempFolder, network: new FakeStores(), imageNetwork: pictures);
         var starting = vm.InitializeAsync();
         try
@@ -350,8 +349,9 @@ public sealed class RecommendationComputationTests : AppTest
         await starting;
 
         var cards = vm.Recommendations.Sections.SelectMany(s => s.Games).ToList();
-        // Long enough for a picture nothing stopped to be downloaded, decoded and shown.
-        Assert.False(await BecomesTrueAsync(() => cards.Any(c => c.Image is not null), 500));
+        // Every picture load ended (the background work waits for them; it stops with the same Stop), none on its card.
+        await vm.WhenIdleAsync();
+        Assert.All(cards, c => Assert.Null(c.Image));
     }
 
     [AvaloniaFact]

@@ -234,6 +234,54 @@ public sealed class FreeGamesTests : AppTest
     }
 
     [AvaloniaFact]
+    public async Task Leaving_the_plan_takes_its_former_error_away()
+    {
+        // Xbox down, then the player says "Aucun" Game Pass: the hint alone, not the old error above it.
+        var vm = SampleData.Empty(TempFolder, network: new OfflineNetwork());
+        await vm.FreeGames.OpenAsync();
+        Assert.NotEqual("", Section(vm, "Xbox").Status);
+
+        vm.SourceFilter.SelectedGamePassPlan = vm.SourceFilter.GamePassPlans.Single(p => p.Plan == GamePassTier.None);
+        await vm.FreeGames.OpenAsync();
+
+        Assert.True(Section(vm, "Xbox").ShowsHint);
+        Assert.Equal("", Section(vm, "Xbox").Status);
+    }
+
+    [AvaloniaFact]
+    public async Task A_picture_that_failed_is_tried_again_at_the_next_visit()
+    {
+        // The card is kept for the whole offer: a picture missed once (no network yet) must come back.
+        await new FreeGameCache(Cache, FreeGameCache.EpicKey).SaveAsync(
+            [new FreeGame("Cached Gift", "https://store.epicgames.com/p/cached", Now.AddDays(2), ImageUrl: "https://images.example/gift.png")]);
+        var pictures = new FlakyPictures();
+        var vm = SampleData.Empty(TempFolder, network: new FreeGamesNetwork(), imageNetwork: pictures);
+        await vm.FreeGames.OpenAsync();
+        var card = Assert.Single(Section(vm, "Epic Games").Games);
+        Assert.Null(card.Image);
+
+        pictures.Answers = true;
+        await vm.FreeGames.OpenAsync();
+
+        Assert.NotNull(card.Image);
+    }
+
+    /// <summary>Refuses every picture until <see cref="Answers"/>, then sends a 1 x 1 PNG.</summary>
+    private sealed class FlakyPictures : HttpMessageHandler
+    {
+        public bool Answers { get; set; }
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
+        {
+            if (!Answers)
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.ServiceUnavailable));
+            var png = new ByteArrayContent(SampleData.TinyPng);
+            png.Headers.ContentType = new("image/png");
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = png });
+        }
+    }
+
+    [AvaloniaFact]
     public async Task A_list_whose_offer_ended_is_asked_again()
     {
         // Epic changed its games of the week: the ended one is never shown, the new one is asked

@@ -1,6 +1,6 @@
 using System.Net.Http.Json;
-using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
+using GameRadar.Core.Services;
 
 namespace GameRadar.Core.Xbox;
 
@@ -100,7 +100,7 @@ internal sealed class XboxLiveAuth
             Content = new FormUrlEncodedContent(form)
         };
         using var response = await _http.SendAsync(request, ct).ConfigureAwait(false);
-        var answer = await ReadJsonOrNullAsync(response, XboxJsonContext.Default.MicrosoftTokenResponse, ct).ConfigureAwait(false);
+        var answer = await HttpJson.ReadOrNullAsync(response, XboxJsonContext.Default.MicrosoftTokenResponse, ct).ConfigureAwait(false);
 
         if (response.IsSuccessStatusCode && !string.IsNullOrEmpty(answer?.AccessToken))
             return new MicrosoftTokens(answer.AccessToken, answer.RefreshToken);
@@ -127,7 +127,7 @@ internal sealed class XboxLiveAuth
         userRequest.Properties.RpsTicket = "d=" + microsoftAccessToken;
 
         using var userResponse = await PostXboxAsync(UserTokenEndpoint, userRequest, XboxJsonContext.Default.XboxUserTokenRequest, ct).ConfigureAwait(false);
-        var user = await ReadJsonOrNullAsync(userResponse, XboxJsonContext.Default.XboxTokenResponse, ct).ConfigureAwait(false);
+        var user = await HttpJson.ReadOrNullAsync(userResponse, XboxJsonContext.Default.XboxTokenResponse, ct).ConfigureAwait(false);
         if (!userResponse.IsSuccessStatusCode || string.IsNullOrEmpty(user?.Token))
             throw new XboxLiveException(CoreText.Format(CoreStrings.Xbox_UserAuthRefused, (int)userResponse.StatusCode));
 
@@ -137,11 +137,11 @@ internal sealed class XboxLiveAuth
         using var xstsResponse = await PostXboxAsync(XstsEndpoint, xstsRequest, XboxJsonContext.Default.XstsTokenRequest, ct).ConfigureAwait(false);
         if (!xstsResponse.IsSuccessStatusCode)
         {
-            var refusal = await ReadJsonOrNullAsync(xstsResponse, XboxJsonContext.Default.XstsErrorResponse, ct).ConfigureAwait(false);
+            var refusal = await HttpJson.ReadOrNullAsync(xstsResponse, XboxJsonContext.Default.XstsErrorResponse, ct).ConfigureAwait(false);
             throw new XboxLiveException(XstsRefusalMessage(refusal?.XErr, (int)xstsResponse.StatusCode));
         }
 
-        var xsts = await ReadJsonOrNullAsync(xstsResponse, XboxJsonContext.Default.XboxTokenResponse, ct).ConfigureAwait(false);
+        var xsts = await HttpJson.ReadOrNullAsync(xstsResponse, XboxJsonContext.Default.XboxTokenResponse, ct).ConfigureAwait(false);
         var claims = xsts?.DisplayClaims?.Xui?.FirstOrDefault();
         if (string.IsNullOrEmpty(xsts?.Token) || string.IsNullOrEmpty(claims?.UserHash) || string.IsNullOrEmpty(claims.Xuid))
             throw new XboxLiveException(CoreStrings.Xbox_Format);
@@ -161,21 +161,6 @@ internal sealed class XboxLiveAuth
         request.Headers.Add("x-xbl-contract-version", "1");
         request.Headers.Add("Accept", "application/json");
         return await _http.SendAsync(request, ct).ConfigureAwait(false);
-    }
-
-    // Error answers are not always JSON (or are empty): null rather than throw,
-    // so the caller can still report the HTTP status.
-    private static async Task<T?> ReadJsonOrNullAsync<T>(HttpResponseMessage response, JsonTypeInfo<T> typeInfo, CancellationToken ct) where T : class
-    {
-        string body = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
-        try
-        {
-            return body.Length == 0 ? null : JsonSerializer.Deserialize(body, typeInfo);
-        }
-        catch (JsonException)
-        {
-            return null;
-        }
     }
 
     // Documented XSTS refusal codes ("XErr"), turned into actionable messages.

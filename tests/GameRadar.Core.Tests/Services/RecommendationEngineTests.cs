@@ -133,6 +133,19 @@ public class RecommendationEngineTests
     }
 
     [Fact]
+    public void Recommend_ExcludesGameWithNoMinutesButAchievements()
+    {
+        // EA and Epic round seconds down: 0 minutes, yet 30 of 50 achievements.
+        var played = Catalog("P1", title: "Offline Game", genres: ["Shooter"]);
+        var started = Played("10", progress: 60, name: "Offline Game", platform: "Epic")
+            with { PlaytimeMinutes = 0, UnlockedAchievements = 30, TotalAchievements = 50 };
+
+        var result = Recommend([played], started);
+
+        Assert.Empty(result);
+    }
+
+    [Fact]
     public void Recommend_ExcludesGamePlayedOnSteam()
     {
         var played = Catalog("P1", title: "Steam Hit", genres: ["Shooter"]);

@@ -83,10 +83,26 @@ public sealed class XboxLiveClient
     /// wrapped in "content"). Throws <see cref="JsonException"/> if the text
     /// is not valid JSON.
     /// </summary>
-    public static IReadOnlyList<PlayedGame> ParseJson(string json)
+    public static IReadOnlyList<PlayedGame> ParseJson(string json) => ParseTitles(Payload(json));
+
+    // The answer itself, or the one an OpenXBL cache wrapped in "content".
+    private static TitleHistoryResponse? Payload(string json)
     {
         var root = JsonSerializer.Deserialize(json, XboxJsonContext.Default.TitleHistoryResponse);
-        return ParseTitles(root?.Content ?? root);
+        return root?.Content ?? root;
+    }
+
+    /// <summary>
+    /// <see cref="ParseJson"/> for an answer just fetched: one without a list of titles
+    /// (an error page with a 200) throws <see cref="XboxLiveException"/>, it must never
+    /// replace a valid cache with an empty history.
+    /// </summary>
+    internal static IReadOnlyList<PlayedGame> ParseFetchedJson(string json)
+    {
+        var payload = Payload(json);
+        if (payload?.Titles is null)
+            throw new XboxLiveException(CoreStrings.Xbox_Format);
+        return ParseTitles(payload);
     }
 
     /// <summary>

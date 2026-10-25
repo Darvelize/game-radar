@@ -34,8 +34,9 @@ public static partial class GameTitle
         // Only a spaced dash separates an edition; "Half-Life" keeps its hyphen.
         // Any dash: "-", "–", or "—" ("The Witcher 3: Wild Hunt — Remastered").
         // Searched from the 2nd character: a title never starts with its edition.
+        // A final dash too: "Grounded - PC" is "Grounded -" once the platform is gone.
         int dash = text.Length > 1 ? text.IndexOfAny(Dashes, 1) : -1;
-        while (dash > 0 && !(text[dash - 1] == ' ' && dash + 1 < text.Length && text[dash + 1] == ' '))
+        while (dash > 0 && !(text[dash - 1] == ' ' && (dash + 1 == text.Length || text[dash + 1] == ' ')))
             dash = text.IndexOfAny(Dashes, dash + 1);
         if (dash > 0)
             text = text[..dash];

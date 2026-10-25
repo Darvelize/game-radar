@@ -65,7 +65,7 @@ public class PlayStationStoreCatalogSourceTests : IDisposable
         }
     }
 
-    private PlayStationStoreCatalogSource Source() => new(new CacheStore(_folder.Path));
+    private StoreCatalogSource Source() => PlayStationStoreCatalogSource.Create(new CacheStore(_folder.Path));
 
     private static PlayStationStoreClient Client(FakeStore store) => new(new HttpClient(store));
 

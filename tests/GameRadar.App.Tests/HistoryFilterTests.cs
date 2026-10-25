@@ -1,5 +1,6 @@
 using Avalonia.Headless.XUnit;
 using GameRadar.App.ViewModels;
+using GameRadar.Core.Cache;
 using GameRadar.Core.Manual;
 using GameRadar.Core.Settings;
 
@@ -61,6 +62,47 @@ public sealed class HistoryFilterTests : AppTest
         Assert.False(single.HasDetails);
         Assert.False(single.IsExpanded);
         Assert.True(manual.IsExpanded);
+    }
+
+    [AvaloniaFact]
+    public async Task Unticking_a_heart_with_Ignored_hidden_keeps_the_row_after_the_recomputation()
+    {
+        // The documented choice: no row vanishes under the mouse; the recomputation the
+        // click starts shares the tags, which refiltered the list. A catalog, so that it runs.
+        await CachedCatalogs.SaveGamePassAndSteamAsync(new CacheStore(Path.Combine(TempFolder, "cache")));
+        var vm = await ViewModelAsync();
+        Box(Group(vm, "Goûts :"), "Ignorés").IsChecked = false;
+        var row = vm.History.Games.First(r => r.CountsInTaste);
+
+        row.CountsInTaste = false;
+        await vm.Recommendations.UpdateAsync();
+
+        Assert.Contains(row, vm.History.Games);
+    }
+
+    [AvaloniaFact]
+    public async Task The_summary_counts_as_finished_the_games_the_Finished_box_shows()
+    {
+        // Zelda, added by hand at "Terminé": one finished, as the box says.
+        var vm = await ViewModelAsync();
+
+        Box(Group(vm, "Statut :"), "Platiné").IsChecked = false;
+        Box(Group(vm, "Statut :"), "Joué").IsChecked = false;
+
+        Assert.Equal(["Zelda"], Names(vm));
+        Assert.Equal("4 jeux, dont 1 platinés, 1 terminés.", vm.History.Summary);
+    }
+
+    [AvaloniaFact]
+    public async Task Removing_the_last_game_added_by_hand_takes_its_box_away()
+    {
+        var vm = await ViewModelAsync();
+
+        foreach (var editor in vm.History.AllRows.SelectMany(r => r.Details).Select(d => d.Manual).OfType<ManualGameEditor>().ToList())
+            editor.RemoveCommand.Execute(null);
+
+        Assert.False(Box(vm.History.PlatformFilter, "Ajoutés à la main").IsOffered);
+        Assert.True(Box(vm.History.PlatformFilter, "PlayStation").IsOffered);
     }
 
     [AvaloniaFact]

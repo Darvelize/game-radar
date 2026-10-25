@@ -74,6 +74,23 @@ public class PsPlusCatalogSourceTests
     }
 
     [Fact]
+    public async Task RefreshAsync_AcceptsALostPlanOnceTheSavedCatalogIsOld()
+    {
+        // Every refresh refused for weeks: the plan really went (Sony merged it), the old
+        // catalog no longer stands in the way of the new one.
+        using var folder = new TempFolder();
+        var cache = new CacheStore(folder.Path);
+        var source = new PsPlusCatalogSource(cache);
+        var saved = await source.RefreshAsync(ClientWith(Block((1, "Extra Game")), Block((2, "Old Classic"))));
+        await cache.SaveAsync(source.CacheKey, TestJson.Serialize(
+            saved with { FetchedAt = DateTimeOffset.UtcNow - CompactCatalogCache.RefusalMaxAge - TimeSpan.FromDays(1) }));
+
+        var catalog = await source.RefreshAsync(ClientWith(Block((1, "Extra Game")), "[]"));
+
+        Assert.Single(catalog.Games);
+    }
+
+    [Fact]
     public async Task RefreshAsync_AcceptsAFirstCatalogWithoutClassics()
     {
         using var folder = new TempFolder();

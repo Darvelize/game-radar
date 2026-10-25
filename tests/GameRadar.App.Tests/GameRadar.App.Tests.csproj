@@ -31,6 +31,11 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <!-- The .NET runtime the SDK puts in a self-contained exe: the third-party notices name this version. -->
+  <ItemGroup>
+    <AssemblyMetadata Include="BundledRuntimeVersion" Value="$(BundledNETCoreAppPackageVersion)" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\GameRadar.App\GameRadar.App.csproj" />
   </ItemGroup>

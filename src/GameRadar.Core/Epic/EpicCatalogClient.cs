@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
+using GameRadar.Core.Cache;
 using GameRadar.Core.Models;
 using GameRadar.Core.Services;
 using GameRadar.Core.Steam;
@@ -13,7 +14,7 @@ namespace GameRadar.Core.Epic;
 /// account: only the launcher's identity, without which it answers 403). Genre tags are
 /// translated into the Microsoft Store genres, the vocabulary of the taste profile.
 /// </summary>
-public sealed class EpicCatalogClient
+public sealed class EpicCatalogClient : IStoreCatalogClient
 {
     /// <summary>The players' rating out of 5: below 3, not recommended (user's choice, wider than the 70 % of Steam and GOG).</summary>
     public const double MinRating = 3.0;
@@ -161,12 +162,13 @@ public sealed class EpicCatalogClient
             EpicStoreLink: StorePage + Uri.EscapeDataString(offer.PageSlug));
     }
 
-    // Epic's feature tags (measured names); vague like Steam's: "Co-op" says neither online nor local.
-    private static PlayModes ModeOf(string feature) => feature switch
+    // Epic's feature tags (measured names); vague like Steam's: "Co-op" and "Multiplayer"
+    // say neither online nor local, so no mode (Steam's "Co-op" category neither).
+    internal static PlayModes ModeOf(string feature) => feature switch
     {
         "Single Player" => PlayModes.Solo,
-        "Co-op" or "Online Co-op" => PlayModes.CoopOnline,
-        "Online Multiplayer" or "Multiplayer" or "MMO" or "Competitive" => PlayModes.MultiOnline,
+        "Online Co-op" => PlayModes.CoopOnline,
+        "Online Multiplayer" or "MMO" or "Competitive" => PlayModes.MultiOnline,
         "Local Multiplayer" or "Local Co-op" or "Split Screen" => PlayModes.Local,
         _ => PlayModes.None
     };

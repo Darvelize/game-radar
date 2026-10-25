@@ -68,19 +68,27 @@ public static class OwnedGames
         if (owned.Count == 0)
             return pool;
 
-        // A catalog entry may have another title than the history: its Steam app id tells too.
+        // A catalog entry may have another title than the history: its Steam app id tells
+        // too, and its Xbox title id (as WithoutGamePassLeftovers keeps the game by it).
         var byAppId = new Dictionary<string, string>();
+        var byTitleId = new Dictionary<string, string>();
         foreach (var (key, lines) in owned)
+        {
             foreach (string appId in lines.Select(g => g.SteamAppId).OfType<string>())
                 byAppId.TryAdd(appId, key);
+            foreach (var xbox in lines.Where(g => g.Platform == XboxLiveClient.PlatformName))
+                byTitleId.TryAdd(xbox.PlatformId, key);
+        }
 
         var result = new List<CatalogGame>(pool.Count + owned.Count);
         var marked = new HashSet<string>();
         foreach (var game in pool)
         {
             string key = GameTitle.Key(game.Title);
-            if (!owned.ContainsKey(key) && game.SteamAppId is { } entryAppId && byAppId.TryGetValue(entryAppId, out var ownedKey))
-                key = ownedKey;
+            if (!owned.ContainsKey(key))
+                key = (game.SteamAppId is { } appId ? byAppId.GetValueOrDefault(appId) : null)
+                    ?? (game.XboxTitleId is { } titleId ? byTitleId.GetValueOrDefault(titleId) : null)
+                    ?? key;
             if (owned.TryGetValue(key, out var lines))
             {
                 result.Add(game with { Owned = Summary(lines) });
@@ -126,7 +134,6 @@ public static class OwnedGames
             lines.Select(g => g.Platform).Distinct().ToList(),
             playtimes.Count == 0 ? null : playtimes.Sum(),
             progress.Count == 0 ? null : progress.Max(),
-            // No minutes but achievements (played offline): started.
-            NeverPlayed: lines.All(g => g.NeverPlayed && g.UnlockedAchievements == 0 && g.ProgressPercentage == 0));
+            NeverPlayed: lines.All(g => g.NeverPlayed));
     }
 }

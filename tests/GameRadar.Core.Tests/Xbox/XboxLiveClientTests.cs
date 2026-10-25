@@ -132,6 +132,14 @@ public class XboxLiveClientTests
     }
 
     [Fact]
+    public void ParseFetchedJson_AnAnswerWithoutTitles_Throws()
+    {
+        // Saved, it would replace the cached history with an empty one, without a word.
+        Assert.Throws<XboxLiveException>(() => XboxLiveClient.ParseFetchedJson("""{ "code": 200 }"""));
+        Assert.Empty(XboxLiveClient.ParseFetchedJson("""{ "titles": [] }"""));
+    }
+
+    [Fact]
     public void ParseJson_ThrowsOnInvalidJson()
     {
         Assert.ThrowsAny<JsonException>(() => XboxLiveClient.ParseJson("{ not json"));

@@ -167,6 +167,9 @@ public sealed partial class SourceFilterViewModel : ObservableObject
             ShowGog = false;
             ShowEpic = false;
             ShowPlayStationStore = false;
+            // Unticked by the rule already (no PlayStation game): saved as a choice too,
+            // or a first PlayStation history would tick it back next to "Mes jeux".
+            _saver.Settings.ShowPlayStationStore = false;
             _unticking = false;
         }
         Remember(value, _saver.Settings.ShowMyGames, s => s.ShowMyGames = value);

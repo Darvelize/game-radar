@@ -1,5 +1,8 @@
 using Avalonia.Headless.XUnit;
 using Avalonia.Platform.Storage;
+using GameRadar.App.Resources;
+using GameRadar.App.ViewModels;
+using GameRadar.Core.Logging;
 
 namespace GameRadar.App.Tests;
 
@@ -39,16 +42,30 @@ public sealed class LinkLauncherTests : AppTest
         Assert.Equal("notes.txt", file.Name);
     }
 
+    [AvaloniaFact]
+    public async Task A_link_nothing_opens_is_said_in_the_banner_and_the_log()
+    {
+        // No default browser, or a policy that blocks it: the click must not do nothing silently.
+        var notices = new NoticeCenter(new ErrorLog(Path.Combine(TempFolder, "logs"), "test"));
+
+        await LinkLauncher.OpenOrReportAsync(new FakeLauncher { Opens = false }, new Uri("https://store.steampowered.com/app/620"), notices);
+
+        Assert.Equal(Strings.Error_LinkNotOpened, notices.Message);
+        Assert.Contains("https://store.steampowered.com/app/620",
+            File.ReadAllText(Assert.Single(Directory.GetFiles(Path.Combine(TempFolder, "logs"), "*.log"))));
+    }
+
     /// <summary>Records what it is asked to open instead of opening it.</summary>
     private sealed class FakeLauncher : ILauncher
     {
         public Uri? Uri { get; private set; }
         public IStorageItem? Item { get; private set; }
+        public bool Opens { get; init; } = true;
 
         public Task<bool> LaunchUriAsync(Uri uri)
         {
             Uri = uri;
-            return Task.FromResult(true);
+            return Task.FromResult(Opens);
         }
 
         public Task<bool> LaunchFileAsync(IStorageItem storageItem)

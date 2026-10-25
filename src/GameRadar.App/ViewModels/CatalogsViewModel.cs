@@ -52,11 +52,11 @@ public sealed partial class CatalogsViewModel : ObservableObject
         _titlesMoved = titlesMoved;
 
         var gamePass = new GamePassCatalogSource(cache);
-        var steam = new SteamCatalogSource(cache);
-        var gog = new GogCatalogSource(cache);
-        var epic = new EpicCatalogSource(cache);
+        var steam = SteamCatalogSource.Create(cache);
+        var gog = GogCatalogSource.Create(cache);
+        var epic = EpicCatalogSource.Create(cache);
         var psPlus = new PsPlusCatalogSource(cache);
-        var psStore = new PlayStationStoreCatalogSource(cache);
+        var psStore = PlayStationStoreCatalogSource.Create(cache);
         GamePass = new CatalogLine
         {
             Title = Strings.Common_GamePassCatalog,
@@ -66,6 +66,8 @@ public sealed partial class CatalogsViewModel : ObservableObject
             Refresh = () => gamePass.RefreshAsync(new GamePassClient(_http)),
             // ~47 MB.
             SlowDownload = true,
+            // The history's "Game Pass" badges come from it.
+            RebuildsHistory = true,
             ErrorMessage = ex => NoticeCenter.ServiceErrorMessage(
                 ex, Strings.Error_CatalogUnreachable, Strings.Error_CatalogSlow, Strings.Error_CatalogFormat)
             // No Describe: UpdateGamePassStatus writes its line once the history is built.
@@ -82,9 +84,7 @@ public sealed partial class CatalogsViewModel : ObservableObject
                 ex, Strings.Error_PsPlusUnreachable, Strings.Error_PsPlusSlow, Strings.Error_PsPlusFormat),
             Describe = c => Localization.Format(Strings.Status_PsPlusCatalog, c.Games.Count, c.FetchedAt.ToLocalTime()),
             // Nothing is asked of playstation.com (nor reported as an error) for someone without PS Plus.
-            IsWanted = () => _filter.HasPsPlusCatalog,
-            // Its games carry no history badge.
-            RebuildsHistory = false
+            IsWanted = () => _filter.HasPsPlusCatalog
         };
         Steam = new CatalogLine
         {
@@ -135,8 +135,6 @@ public sealed partial class CatalogsViewModel : ObservableObject
             Describe = c => Localization.Format(Strings.Status_PsStoreCatalog, c.Games.Count, c.FetchedAt.ToLocalTime()),
             // Nothing is asked of the store while its box is unticked.
             IsWanted = () => _filter.ShowPlayStationStore,
-            // Its games carry no history badge.
-            RebuildsHistory = false,
             // One request per game: ~26 s.
             SlowDownload = true
         };

@@ -14,6 +14,15 @@ public sealed class CompactCatalogCache(CacheStore cache, string key)
     /// <summary>Catalogs and best sellers move slowly: older than this, refresh.</summary>
     private static readonly TimeSpan MaxAge = TimeSpan.FromDays(7);
 
+    /// <summary>
+    /// A saved catalog older than this no longer refuses a new one (<c>refuseAgainst</c>):
+    /// a plan that really went (merged, renamed) would otherwise freeze the catalog for good.
+    /// </summary>
+    // shortcut: measured on the saved catalog's age, not on how long refusals last: a broken
+    // answer right after 4 weeks away is saved (until the next weekly refresh), and a plan
+    // really gone costs a refused download at each start for 3 weeks; record the first refusal if either shows up.
+    internal static readonly TimeSpan RefusalMaxAge = TimeSpan.FromDays(28);
+
     /// <summary>The key of the cache (see <see cref="CacheCleanup"/>).</summary>
     public string Key { get; } = key;
 
@@ -29,8 +38,9 @@ public sealed class CompactCatalogCache(CacheStore cache, string key)
     /// </summary>
     /// <param name="whenEmpty">The connector's error for an empty catalog (the format changed).</param>
     /// <param name="refuseAgainst">
-    /// Checked after the emptiness, against the saved catalog (if any): the error
-    /// for an answer that lost part of it (a plan with no game left), or null.
+    /// Checked after the emptiness, against the saved catalog (if any, and younger than
+    /// <see cref="RefusalMaxAge"/>): the error for an answer that lost part of it (a plan
+    /// with no game left), or null.
     /// </param>
     public async Task<GameCatalog> SaveAsync(
         IReadOnlyList<CatalogGame> games,
@@ -40,10 +50,12 @@ public sealed class CompactCatalogCache(CacheStore cache, string key)
     {
         if (games.Count == 0)
             throw whenEmpty();
-        if (refuseAgainst is not null && Load() is { } previous && refuseAgainst(previous) is { } refused)
+        var now = DateTimeOffset.UtcNow;
+        if (refuseAgainst is not null && Load() is { } previous && now - previous.FetchedAt < RefusalMaxAge
+            && refuseAgainst(previous) is { } refused)
             throw refused;
 
-        var catalog = new GameCatalog(games, DateTimeOffset.UtcNow);
+        var catalog = new GameCatalog(games, now);
         await cache.SaveAsync(Key, JsonSerializer.Serialize(catalog, CoreJsonContext.Default.GameCatalog), ct).ConfigureAwait(false);
         return catalog;
     }

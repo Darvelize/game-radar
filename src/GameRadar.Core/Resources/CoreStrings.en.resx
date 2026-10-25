@@ -26,6 +26,7 @@
   <data name="Steam_RateLimited" xml:space="preserve"><value>Steam is limiting requests right now. Try again in a few minutes.</value></data>
   <data name="Steam_HttpError" xml:space="preserve"><value>Steam answered with an error ({0} {1}).</value></data>
   <data name="Steam_StoreDown" xml:space="preserve"><value>The Steam catalog is not answering right now. Recommendations stick to the Game Pass.</value></data>
+  <data name="Steam_FreeGamesDown" xml:space="preserve"><value>Steam is not answering right now. Its free games will be looked for again in a few minutes.</value></data>
   <data name="Steam_EmptyTagList" xml:space="preserve"><value>The Steam tag list received is empty (its format may have changed).</value></data>
   <data name="Steam_StoreFormat" xml:space="preserve"><value>The Steam catalog answered in an unexpected format (its API may have changed).</value></data>
   <data name="Steam_EmptyCatalog" xml:space="preserve"><value>The Steam catalog received is empty (its format may have changed).</value></data>

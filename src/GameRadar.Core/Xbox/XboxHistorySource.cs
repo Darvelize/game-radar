@@ -50,7 +50,7 @@ public sealed class XboxHistorySource
 
         // Parse BEFORE saving: an unexpected answer throws here and the
         // previous, valid cache is kept instead of being overwritten.
-        var games = XboxLiveClient.ParseJson(json);
+        var games = XboxLiveClient.ParseFetchedJson(json);
         await _cache.SaveAsync(CacheKey, json, ct).ConfigureAwait(false);
 
         return new GameHistory(games, DateTimeOffset.UtcNow);

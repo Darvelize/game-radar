@@ -32,7 +32,7 @@ public abstract partial class FetchLine : ObservableObject
     public partial string Status { get; set; } = string.Empty;
 
     /// <summary>Why the last download failed; kept on the line until the next one.</summary>
-    public string? Error { get; private set; }
+    public string? Error { get; protected set; }
 
     // The download running, if any.
     private Task<FetchResult>? _running;
@@ -79,6 +79,7 @@ public abstract partial class FetchLine : ObservableObject
         // No ConfigureAwait(false): back on the UI thread to update the line.
         async Task<FetchResult> RunAsync()
         {
+            string? former = Error;
             Error = null;
             Status = FetchingStatus;
             try
@@ -86,6 +87,9 @@ public abstract partial class FetchLine : ObservableObject
                 await download();
                 // An error kept meanwhile (KeepError) is older than this success.
                 Error = null;
+                // So is the former failure of this line, still in the banner (a token expired, then pasted again).
+                if (notices.Message == former)
+                    notices.Dismiss();
                 return FetchResult.Done;
             }
             catch (Exception ex)

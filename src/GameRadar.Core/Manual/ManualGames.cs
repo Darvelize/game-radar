@@ -22,7 +22,10 @@ public static class ManualGames
     public static IReadOnlyDictionary<string, IReadOnlyList<string>> PlatformGenres(IEnumerable<ManualGame> games) =>
         games
             .Where(g => g.Genres is { Count: > 0 })
-            .ToDictionary(g => ToPlayed(g).Key, g => g.Genres!);
+            // Two games may share a key once the title rule changes (an edition name
+            // now stripped): the first one's genres, rather than an exception.
+            .GroupBy(g => ToPlayed(g).Key)
+            .ToDictionary(g => g.Key, g => g.First().Genres!);
 
     /// <summary>
     /// The level becomes what a synced game would have: its status and

@@ -85,11 +85,11 @@ public partial class App : Application
                 new SteamAccount(secrets),
                 new PlayStationAccount(secrets),
                 new EpicAccount(Http, secrets),
-                // The window's launcher: web page, folder or file (LinkLauncher).
+                // The window's launcher: web page, folder or file (LinkLauncher), a failure in the banner.
                 uri =>
                 {
-                    if (desktop.MainWindow is { } window)
-                        _ = LinkLauncher.OpenAsync(window.Launcher, uri);
+                    if (desktop.MainWindow is { DataContext: MainWindowViewModel shown } window)
+                        _ = LinkLauncher.OpenOrReportAsync(window.Launcher, uri, shown.Notices);
                 },
                 new LocalDataEraser(settings, cache, secrets, images, log, data),
                 () => desktop.Shutdown(),

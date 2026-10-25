@@ -3,6 +3,27 @@
 English translation of `CHANGELOG.md` (the French file comes first): same versions, same dates, same parts (`### Improvements` for `### Évolutions`, `### Fixes` for `### Corrections`), as many lines (checked by the tests).
 Shown by the app when it runs in English, and used for the English part of the GitHub release notes.
 
+## 1.7.2 — 2026-10-25
+
+### Fixes
+
+- Accounts: connecting another account while the platform syncs now does fetch the new account's history, once the running sync ends (before, you had to start it again by hand).
+- "For you": a game started without any recorded play time but with achievements (played offline, on EA or Epic) is no longer recommended like a game never launched.
+- Game Pass and PS Plus catalogs: when a plan really goes away or is merged into another, the catalog no longer stays stuck on its old version: it is accepted after four weeks of refusals.
+- "Add a game": a new search works even while the previous one still waits for Steam; its results no longer show under the new text.
+- History: changing the platform of a game added by hand (to PlayStation, for instance), or removing it, at once updates the "PlayStation Store" box and the count of your games on the Game Pass.
+- EA: a refusal from EA on the public list of games no longer forgets the token you just pasted, and a game whose achievements EA could not give is asked again at the next sync instead of staying without achievements.
+- Titles such as "Grounded - PC" or "Halo Infinite - Xbox One" no longer keep a dash at the end.
+- "My games": an Xbox game sold on the Game Pass under another name ("Sea of Thieves 2024 Edition") no longer has two cards; ticked alone, the "My games" source stays alone after a first PlayStation sync.
+- Your taste: Steam tags are looked up for the games you ticked "Counts in my taste", and no longer for the ones you unticked.
+- Epic catalog: a game only labelled "Co-op" is no longer taken for an online co-op game (it may be local only).
+- Banner: a sync or a catalog that works again removes its own former error from it; a link or folder Windows cannot open says so instead of doing nothing; an unexpected error at startup is written to the log and reported.
+- Xbox history: an incomplete answer from Xbox Live no longer erases your Xbox history (it was replaced by an empty list until the next sync).
+- History: the row whose heart or "Story finished" you just unticked no longer vanishes while a filter is on, and the Steam, GOG or Epic catalogs arriving no longer fold the row you unfolded.
+- History: the summary counts as finished the same games as the "Finished" filter (games added by hand at "Finished", games finished according to PlayStation).
+- "Free games": a picture that could not load is tried again at the next visit; Steam's error is about its free games; a source without a plan no longer shows its former error next to the hint.
+- "For you": when Steam does not answer, the computation no longer waits for the list of tag names at each click; the "Catalog" label of the sidebar follows all your catalogs, not only the Game Pass; "yesterday" instead of "0 days ago" on the day the clocks go back.
+
 ## 1.7.1 — 2026-10-19
 
 ### Improvements

@@ -230,7 +230,7 @@
                                                                 <TextBlock Text="{x:Static res:Strings.Card_MyGames}" />
                                                             </Border>
                                                             <Button Classes="badgeLink" IsVisible="{Binding InGamePass}"
-                                                                    Command="{Binding $parent[ContentPage].((vm:MainWindowViewModel)DataContext).Recommendations.OpenPageCommand}"
+                                                                    Command="{Binding $parent[ContentPage].((vm:MainWindowViewModel)DataContext).OpenPageCommand}"
                                                                     CommandParameter="{Binding XboxStorePage}"
                                                                     ToolTip.Tip="{x:Static res:Strings.Card_OpenXbox_Tip}"
                                                                     AutomationProperties.Name="{x:Static res:Strings.Card_OpenXbox_Tip}">
@@ -239,7 +239,7 @@
                                                                 </Border>
                                                             </Button>
                                                             <Button Classes="badgeLink" IsVisible="{Binding InPsPlus}"
-                                                                    Command="{Binding $parent[ContentPage].((vm:MainWindowViewModel)DataContext).Recommendations.OpenPageCommand}"
+                                                                    Command="{Binding $parent[ContentPage].((vm:MainWindowViewModel)DataContext).OpenPageCommand}"
                                                                     CommandParameter="{Binding PsPlusPage}"
                                                                     ToolTip.Tip="{x:Static res:Strings.Card_OpenPlayStation_Tip}"
                                                                     AutomationProperties.Name="{x:Static res:Strings.Card_OpenPlayStation_Tip}">
@@ -251,7 +251,7 @@
                                                                 <TextBlock Text="{x:Static res:Strings.Card_LeavingSoon}" />
                                                             </Border>
                                                             <Button Classes="badgeLink" IsVisible="{Binding IsOnSteam}"
-                                                                    Command="{Binding $parent[ContentPage].((vm:MainWindowViewModel)DataContext).Recommendations.OpenPageCommand}"
+                                                                    Command="{Binding $parent[ContentPage].((vm:MainWindowViewModel)DataContext).OpenPageCommand}"
                                                                     CommandParameter="{Binding SteamPage}"
                                                                     ToolTip.Tip="{x:Static res:Strings.Card_OpenSteam_Tip}"
                                                                     AutomationProperties.Name="{x:Static res:Strings.Card_OpenSteam_Tip}">
@@ -260,7 +260,7 @@
                                                                 </Border>
                                                             </Button>
                                                             <Button Classes="badgeLink" IsVisible="{Binding IsOnGog}"
-                                                                    Command="{Binding $parent[ContentPage].((vm:MainWindowViewModel)DataContext).Recommendations.OpenPageCommand}"
+                                                                    Command="{Binding $parent[ContentPage].((vm:MainWindowViewModel)DataContext).OpenPageCommand}"
                                                                     CommandParameter="{Binding GogPage}"
                                                                     ToolTip.Tip="{x:Static res:Strings.Card_OpenGog_Tip}"
                                                                     AutomationProperties.Name="{x:Static res:Strings.Card_OpenGog_Tip}">
@@ -269,7 +269,7 @@
                                                                 </Border>
                                                             </Button>
                                                             <Button Classes="badgeLink" IsVisible="{Binding IsOnEpic}"
-                                                                    Command="{Binding $parent[ContentPage].((vm:MainWindowViewModel)DataContext).Recommendations.OpenPageCommand}"
+                                                                    Command="{Binding $parent[ContentPage].((vm:MainWindowViewModel)DataContext).OpenPageCommand}"
                                                                     CommandParameter="{Binding EpicPage}"
                                                                     ToolTip.Tip="{x:Static res:Strings.Card_OpenEpic_Tip}"
                                                                     AutomationProperties.Name="{x:Static res:Strings.Card_OpenEpic_Tip}">
@@ -278,7 +278,7 @@
                                                                 </Border>
                                                             </Button>
                                                             <Button Classes="badgeLink" IsVisible="{Binding IsOnPsStore}"
-                                                                    Command="{Binding $parent[ContentPage].((vm:MainWindowViewModel)DataContext).Recommendations.OpenPageCommand}"
+                                                                    Command="{Binding $parent[ContentPage].((vm:MainWindowViewModel)DataContext).OpenPageCommand}"
                                                                     CommandParameter="{Binding PsStorePage}"
                                                                     ToolTip.Tip="{x:Static res:Strings.Card_OpenPlayStation_Tip}"
                                                                     AutomationProperties.Name="{x:Static res:Strings.Card_OpenPlayStation_Tip}">

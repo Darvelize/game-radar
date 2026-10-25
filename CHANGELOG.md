@@ -4,6 +4,27 @@ Source unique des notes de version : l'appli affiche ce fichier (page « Nouveau
 Format lu par `Changelog.Parse` : `## <version>` (suivi de ` — <AAAA-MM-JJ>` une fois publiée), puis les parties `### Évolutions` et `### Corrections` (depuis la 1.2.0), chacune avec une ligne `- ` par nouveauté, en français, écrite pour les joueurs.
 Traduction anglaise : `CHANGELOG.en.md` (`### Improvements`, `### Fixes`), mêmes versions, mêmes dates, mêmes parties, autant de lignes (vérifié par les tests).
 
+## 1.7.2 — 2026-10-25
+
+### Corrections
+
+- Comptes : connecter un autre compte pendant que la plateforme se synchronise récupère bien l'historique du nouveau compte, une fois la synchronisation en cours terminée (avant, il fallait la relancer à la main).
+- « Pour toi » : un jeu commencé sans temps de jeu enregistré, mais avec des succès (joué hors ligne, sur EA ou Epic), n'est plus recommandé comme un jeu jamais lancé.
+- Catalogues Game Pass et PS Plus : quand un abonnement disparaît vraiment ou est fusionné avec un autre, le catalogue n'est plus bloqué à son ancienne version : il est accepté après quatre semaines de refus.
+- « Ajouter un jeu » : une nouvelle recherche fonctionne même quand la précédente attend encore Steam ; ses résultats ne s'affichent plus sous le nouveau texte.
+- Historique : changer la plateforme d'un jeu ajouté à la main (par exemple vers PlayStation), ou le retirer, met aussitôt à jour la case « PlayStation Store » et le nombre de tes jeux au Game Pass.
+- EA : un refus d'EA sur la liste publique des jeux ne fait plus oublier le jeton que tu viens de coller, et un jeu dont EA n'a pas pu donner les succès est redemandé à la synchronisation suivante au lieu de rester sans succès.
+- Les titres comme « Grounded - PC » ou « Halo Infinite - Xbox One » ne gardent plus un tiret à la fin.
+- « Mes jeux » : un jeu Xbox vendu au Game Pass sous un autre nom (« Sea of Thieves 2024 Edition ») n'a plus deux cartes ; cochée seule, la source « Mes jeux » le reste après une première synchronisation PlayStation.
+- Tes goûts : les tags Steam sont cherchés pour les jeux que tu as cochés « Compte dans mes goûts », et plus pour ceux que tu as décochés.
+- Catalogue Epic : un jeu marqué seulement « Co-op » n'est plus pris pour un jeu de coopération en ligne (il peut n'être qu'en local).
+- Bandeau : une synchronisation ou un catalogue qui réussit à nouveau en retire sa propre erreur précédente ; un lien ou un dossier que Windows n'arrive pas à ouvrir le dit au lieu de ne rien faire ; une erreur inattendue au démarrage est notée dans le journal et signalée.
+- Historique Xbox : une réponse incomplète de Xbox Live n'efface plus ton historique Xbox (il était remplacé par une liste vide jusqu'à la synchronisation suivante).
+- Historique : la ligne dont tu viens de décocher le cœur ou « Histoire finie » ne disparaît plus quand un filtre est actif, et l'arrivée des catalogues Steam, GOG ou Epic ne replie plus la ligne dépliée.
+- Historique : le résumé compte comme terminés les mêmes jeux que le filtre « Terminé » (jeux ajoutés à la main au niveau « Terminé », jeux terminés selon PlayStation).
+- « Jeux gratuits » : une jaquette qui n'a pas pu se charger est retentée à la visite suivante ; l'erreur de Steam parle de ses jeux gratuits ; une source sans abonnement n'affiche plus son ancienne erreur à côté de la phrase d'aide.
+- « Pour toi » : quand Steam ne répond pas, le calcul n'attend plus la liste des noms de tags à chaque clic ; le libellé « Catalogue » de la barre latérale suit tous tes catalogues, plus seulement le Game Pass ; « hier » au lieu de « il y a 0 jours » le jour du passage à l'heure d'hiver.
+
 ## 1.7.1 — 2026-10-19
 
 ### Évolutions

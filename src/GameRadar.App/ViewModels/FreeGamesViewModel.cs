@@ -123,14 +123,15 @@ public sealed class FreeGamesViewModel
             var inHistory = InHistory();
             foreach (var section in Sections)
                 section.Show(now, inHistory);
-            var pictures = LoadPicturesAsync();
+            var pictures = LoadPicturesAsync(Sections.SelectMany(s => s.Games));
 
             await Task.WhenAll(Sections.Where(s => s.NeedsDownload(now)).Select(async section =>
             {
                 if (await section.FetchAsync(_notices, now) != FetchResult.Done)
                     return;
                 section.Show(DateTimeOffset.UtcNow, InHistory());
-                await LoadPicturesAsync();
+                // Its own cards only: a picture that failed is not asked again for each section downloaded.
+                await LoadPicturesAsync(section.Games);
             }));
             await pictures;
         }
@@ -144,8 +145,8 @@ public sealed class FreeGamesViewModel
     private HashSet<string> InHistory() => _history().Select(g => GameTitle.Key(g.Name)).ToHashSet();
 
     // A card is never replaced as a batch (each one stops its own load when it goes away).
-    private Task LoadPicturesAsync() =>
-        CardPicture.LoadAllAsync(_imageCache, Sections.SelectMany(s => s.Games), CancellationToken.None);
+    private Task LoadPicturesAsync(IEnumerable<FreeGameRow> cards) =>
+        CardPicture.LoadAllAsync(_imageCache, cards, CancellationToken.None);
 
     private static string UntilLabel(string format, FreeGame game) =>
         game.Until is { } until ? Localization.Format(format, until.ToLocalTime()) : string.Empty;

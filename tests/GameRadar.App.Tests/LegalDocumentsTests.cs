@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.Json;
 using Avalonia;
 using Avalonia.Controls;
@@ -160,7 +161,10 @@ public sealed class LegalDocumentsTests : AppTest
         Assert.DoesNotContain(shipped, p => p.Contains(".Linux ", StringComparison.Ordinal));
         Assert.True(missing.Count == 0,
             "Missing from legal/THIRD-PARTY-NOTICES.txt (run tools/Update-ThirdPartyNotices.ps1): " + string.Join(", ", missing));
-        Assert.Contains("Microsoft.NETCore.App.Runtime.win-x64 ", notices);
+        // The runtime is in no package of the deps file: its version is the SDK's (a raised SDK, the notices regenerated).
+        string runtime = typeof(LegalDocumentsTests).Assembly.GetCustomAttributes<AssemblyMetadataAttribute>()
+            .Single(a => a.Key == "BundledRuntimeVersion").Value!;
+        Assert.Contains("Microsoft.NETCore.App.Runtime.win-x64 " + runtime + Environment.NewLine, notices.ReplaceLineEndings());
     }
 
     private static LicensesView Page(Window window) =>

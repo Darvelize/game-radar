@@ -27,6 +27,23 @@ public sealed class AddGameTests : AppTest
         """);
 
     [AvaloniaFact]
+    public async Task A_new_search_runs_while_a_slow_one_waits()
+    {
+        // Steam slow on "halo": the player types "doom" and presses Enter, which checks CanExecute.
+        var network = new HoldingNetwork("api.steampowered.com");
+        var vm = SampleData.Empty(TempFolder, network: network);
+        vm.AddGame.Text = "halo";
+        var slow = vm.AddGame.SearchCommand.ExecuteAsync(null);
+        await network.Reached.Task;
+
+        vm.AddGame.Text = "doom";
+
+        Assert.True(vm.AddGame.SearchCommand.CanExecute(null));
+        network.Release();
+        await slow;
+    }
+
+    [AvaloniaFact]
     public async Task The_search_offers_the_games_found_and_never_a_dlc()
     {
         var vm = SampleData.Empty(TempFolder, network: Steam);

@@ -34,8 +34,8 @@ public sealed class CatalogLine : FetchLine
     /// <summary>Downloaded at startup and by the button (PS Plus: only for a player who has a plan).</summary>
     public Func<bool> IsWanted { get; init; } = () => true;
 
-    /// <summary>A new catalog changes the history badges ("Game Pass", store links): rebuilt after it.</summary>
-    public bool RebuildsHistory { get; init; } = true;
+    /// <summary>A new catalog changes the history's "Game Pass" badges: rebuilt after it (the Game Pass alone).</summary>
+    public bool RebuildsHistory { get; init; }
 
     /// <summary>Its download takes minutes or tens of seconds: at startup, the cached catalogs recommend meanwhile.</summary>
     public bool SlowDownload { get; init; }

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using GameRadar.Core.Cache;
 using GameRadar.Core.Models;
 using GameRadar.Core.Services;
 using GameRadar.Core.Steam;
@@ -12,7 +13,7 @@ namespace GameRadar.Core.GOG;
 /// Genres and tags are translated into the Microsoft Store genres, the
 /// vocabulary of the taste profile.
 /// </summary>
-public sealed class GogCatalogClient
+public sealed class GogCatalogClient : IStoreCatalogClient
 {
     // English titles, as every source; prices of the French store (not shown).
     private const string CatalogUrl = "https://catalog.gog.com/v1/catalog?limit=100&order=desc:bestselling&productType=in:game&countryCode=FR&locale=en-US&currencyCode=EUR&page=";

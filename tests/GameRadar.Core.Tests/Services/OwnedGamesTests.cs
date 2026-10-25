@@ -100,6 +100,18 @@ public class OwnedGamesTests
     }
 
     [Fact]
+    public void AddTo_MarksTheCatalogsEntryWithTheSameXboxTitleId()
+    {
+        // The Game Pass sells "Sea of Thieves 2024 Edition" under the title id of the game played: one card.
+        var entry = Catalog("9P1", "Sea of Thieves 2024 Edition", xboxTitleId: "1234");
+
+        var game = Assert.Single(AddTo([entry], CountsNone, Played("1234", 12, name: "Sea of Thieves")));
+
+        Assert.Equal("9P1", game.ProductId);
+        Assert.NotNull(game.Owned);
+    }
+
+    [Fact]
     public void AddTo_AGameWithAchievementsButNoPlayTime_IsStarted()
     {
         // Played offline: Steam counted no minutes, the achievements tell.

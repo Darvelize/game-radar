@@ -52,6 +52,14 @@ public class PsPlusCatalogClientTests
     }
 
     [Fact]
+    public void ParseJson_AnEmptyEnglishTitle_GivesWayToTheName()
+    {
+        string json = """[{ "games": [{ "conceptId": 1, "name": "Un jeu", "nameEn": "" }] }]""";
+
+        Assert.Equal("Un jeu", Assert.Single(PsPlusCatalogClient.ParseJson(json, PsPlusTier.Extra)).Title);
+    }
+
+    [Fact]
     public void ParseJson_MapsGenresToTheStoreVocabularyWithoutRepeats()
     {
         var games = PsPlusCatalogClient.ParseJson(GamesJson, PsPlusTier.Extra);

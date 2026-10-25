@@ -128,7 +128,7 @@ public sealed class RecommendationFilterTests : AppTest
             OnPc: false, OnConsole: false, LeavingSoon: false, SteamAppId: "397540");
         var row = new RecommendationRow(new SimilarGame(new Recommendation(game, 0.5, []), 0.9, ["Shooter"], PlayModes.None));
 
-        vm.Recommendations.OpenPageCommand.Execute(row.SteamPage);
+        vm.OpenPageCommand.Execute(row.SteamPage);
 
         Assert.Equal(new Uri("https://store.steampowered.com/app/397540/?l=french"), opened);
     }

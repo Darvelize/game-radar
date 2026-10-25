@@ -39,18 +39,10 @@ public sealed class SteamStoreClient
         using var response = await _http.GetAsync(
             $"{AppDetailsUrl}?appids={Uri.EscapeDataString(appId)}&l=english&filters=genres,categories", ct).ConfigureAwait(false);
 
-        switch (HttpOutcomes.Classify(response))
-        {
-            case HttpOutcome.Ok:
-                break;
-            case HttpOutcome.RateLimited or HttpOutcome.Forbidden:
-                throw new SteamException(CoreStrings.Steam_StoreRateLimitedGenres);
-            case HttpOutcome.NotFound:
-                return null;
-            default:
-                // Steam down: not "no page", which would be remembered for 30 days.
-                throw new SteamException(CoreStrings.Steam_StoreDownGenres);
-        }
+        if (HttpOutcomes.Classify(response) == HttpOutcome.NotFound)
+            return null;
+        // Steam down: not "no page", which would be remembered for 30 days.
+        SteamCatalogClient.ThrowIfRefused(response, CoreStrings.Steam_StoreRateLimitedGenres, CoreStrings.Steam_StoreDownGenres);
 
         return ParseFeatures(await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false), appId);
     }

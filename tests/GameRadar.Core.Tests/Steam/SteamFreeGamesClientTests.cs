@@ -1,3 +1,4 @@
+using GameRadar.Core.Resources;
 using GameRadar.Core.Steam;
 
 namespace GameRadar.Core.Tests.Steam;
@@ -128,21 +129,39 @@ public class SteamFreeGamesClientTests
     {
         using var http = new HttpClient(new TestData.JsonHandler(_ => "", System.Net.HttpStatusCode.ServiceUnavailable));
 
-        await Assert.ThrowsAsync<SteamException>(() => new SteamFreeGamesClient(http).FetchAsync(Now));
+        var ex = await Assert.ThrowsAsync<SteamException>(() => new SteamFreeGamesClient(http).FetchAsync(Now));
+
+        // Said about the free games, not about the recommendations.
+        Assert.Equal(CoreStrings.Steam_FreeGamesDown, ex.Message);
+    }
+
+    [Theory]
+    [InlineData(System.Net.HttpStatusCode.TooManyRequests)]
+    [InlineData(System.Net.HttpStatusCode.Forbidden)]
+    public async Task FetchAsync_TheStoreLimitingRequests_IsARateLimit(System.Net.HttpStatusCode status)
+    {
+        using var http = new HttpClient(new TestData.JsonHandler(_ => "", status));
+
+        var ex = await Assert.ThrowsAsync<SteamException>(() => new SteamFreeGamesClient(http).FetchAsync(Now));
+
+        Assert.True(ex.IsRateLimited);
     }
 
     [Fact]
-    public void ParseFreeWeekends_ReadsTheWeekendsStartedAndNotEnded()
+    public async Task FetchAsync_ReadsTheWeekendsStartedAndNotEnded()
     {
         var end = Now.AddDays(3);
-        string json = Query(
+        string page = Query(
             Item(1, "Battlefield 6", weekend: Weekend(Now.AddDays(-1), end)),
             Item(2, "Next week", weekend: Weekend(Now.AddDays(6), Now.AddDays(9))),
             Item(3, "Last week", weekend: Weekend(Now.AddDays(-8), Now.AddDays(-4))),
             Item(4, "No weekend"),
             Item(5, "Adult", weekend: Weekend(Now.AddDays(-1), end), descriptors: "[4]"));
+        // Nothing given away, no pictures: the weekends alone.
+        using var http = new HttpClient(new TestData.JsonHandler(uri => uri.AbsolutePath.Contains("GetItems") ? "{}"
+            : Uri.UnescapeDataString(uri.Query).Contains("min_discount_percent") ? Query() : page));
 
-        var game = Assert.Single(SteamFreeGamesClient.ParseFreeWeekends(json, Now));
+        var game = Assert.Single(await new SteamFreeGamesClient(http).FetchAsync(Now));
 
         Assert.Equal("Battlefield 6", game.Title);
         Assert.Equal(end, game.Until);

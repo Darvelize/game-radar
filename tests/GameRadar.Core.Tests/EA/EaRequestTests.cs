@@ -80,6 +80,20 @@ public class EaRequestTests
     }
 
     [Theory]
+    [InlineData(HttpStatusCode.Unauthorized)]
+    [InlineData(HttpStatusCode.Forbidden)]
+    public async Task ARefusalOfThePublicList_KeepsTheToken(HttpStatusCode status)
+    {
+        // The list of every game is asked without the token: its refusal is EA's, not the token's.
+        var client = new EaClient(new HttpClient(new CapturingHandler("", status)), Token);
+
+        var ex = await Assert.ThrowsAsync<EaException>(() => client.FetchGameSlugsAsync());
+
+        Assert.Equal(CoreStrings.Ea_Down, ex.Message);
+        Assert.False(ex.RequiresSignIn);
+    }
+
+    [Theory]
     [InlineData(HttpStatusCode.TooManyRequests, "Ea_RateLimited")]
     [InlineData(HttpStatusCode.ServiceUnavailable, "Ea_Down")]
     public async Task OtherRefusals_AreExplained(HttpStatusCode status, string message)

@@ -64,4 +64,17 @@ public class ManualGameGenresTests
         Assert.Equal(ManualGames.ToPlayed(astro).Key, entry.Key);
         Assert.Equal(["Platformer"], entry.Value);
     }
+
+    [Fact]
+    public void Two_games_sharing_a_key_give_the_genres_of_the_first()
+    {
+        // Saved apart before the title rule learned to strip "Anniversary Edition".
+        var first = new ManualGame("Titan Quest", ManualPlatform.PlayStation, ManualLevel.Completed, Genres: ["Action"]);
+        var second = new ManualGame("Titan Quest Anniversary Edition", ManualPlatform.PlayStation, ManualLevel.PlayedALot, Genres: ["RPG"]);
+        Assert.Equal(first.Id, second.Id);
+
+        var entry = Assert.Single(ManualGames.PlatformGenres([first, second]));
+
+        Assert.Equal(["Action"], entry.Value);
+    }
 }

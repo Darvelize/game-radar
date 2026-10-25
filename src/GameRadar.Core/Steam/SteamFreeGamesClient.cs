@@ -44,10 +44,12 @@ public sealed class SteamFreeGamesClient
     {
         // A whole page: games on sale at 99 % come back too (filtered out after),
         // they must not crowd out a game given away. Usually a handful (measured).
-        var givenAway = GetStringAsync(_http, TopSellersUrl(0, Pictures, GivenAway), ct);
+        var givenAway = GetStringAsync(_http, TopSellersUrl(0, Pictures, GivenAway), CoreStrings.Steam_FreeGamesDown, ct);
         // Without pictures: ~0.8 MB a page instead of ~1.8 (measured); those of the few
         // weekends found are asked after, in one small request (~5 KB).
-        var pages = TopSellerPagesAsync(_http, NoData, WeekendPages, ct);
+        var pages = TopSellerPagesAsync(_http, NoData, WeekendPages, CoreStrings.Steam_FreeGamesDown, ct);
+        // Both awaited before either is read: a failure of one never leaves the other unobserved.
+        await Task.WhenAll(givenAway, pages).ConfigureAwait(false);
         var toKeep = ParseFreeToKeep(await givenAway.ConfigureAwait(false), now);
         // A game also given away keeps its card "to keep"; a game moving from one page
         // to the next between the two requests is there once.
@@ -75,7 +77,7 @@ public sealed class SteamFreeGamesClient
             Ids = games.Select(g => new AppIdDto { AppId = g.AppId!.Value }).ToList(),
             DataRequest = Pictures
         }, SteamJsonContext.Default.GetItemsRequest);
-        string json = await GetStringAsync(_http, url, ct).ConfigureAwait(false);
+        string json = await GetStringAsync(_http, url, CoreStrings.Steam_FreeGamesDown, ct).ConfigureAwait(false);
         var assets = Items(json).GroupBy(i => i.AppId!.Value).ToDictionary(g => g.Key, g => g.First().Assets);
         foreach (var game in games)
             game.Assets = assets.GetValueOrDefault(game.AppId!.Value);
@@ -97,11 +99,7 @@ public sealed class SteamFreeGamesClient
         return games;
     }
 
-    /// <summary>The games free to play this weekend (started, not ended), not to keep.</summary>
-    /// <exception cref="SteamException">The answer has no response.</exception>
-    internal static IReadOnlyList<FreeGame> ParseFreeWeekends(string json, DateTimeOffset now) =>
-        WeekendItems(json, now).Select(ToWeekendGame).ToList();
-
+    // The items of a page on a free weekend now (started, not ended); an answer without response throws.
     private static IEnumerable<StoreItemDto> WeekendItems(string json, DateTimeOffset now) =>
         Items(json).Where(item => item.FreeWeekend is { StartTime: long start, EndTime: long end }
             && FromUnix(start) <= now && now < FromUnix(end));

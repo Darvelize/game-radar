@@ -70,7 +70,7 @@ public sealed class PsPlusCatalogClient
             .Select(g => new CatalogGame(
                 // Like "steam:<appid>" for a Steam game: unique among the candidates.
                 ProductId: $"psplus:{g.ConceptId}",
-                Title: (g.NameEn ?? g.Name)!.Trim(),
+                Title: g.Title!.Trim(),
                 XboxTitleId: null,
                 PackageFamilyName: null,
                 Genres: (g.Genre ?? []).Select(PlayStationClient.GenreOf).OfType<string>().Distinct()
@@ -99,7 +99,7 @@ public sealed class PsPlusCatalogClient
             .GroupBy(g => g.ConceptId)
             .Select(concept => concept.OrderBy(g => g.ReleaseDate ?? DateTimeOffset.MaxValue).First())
             .Select(g => new FreeGame(
-                GameTitle.Clean((g.NameEn ?? g.Name)!),
+                GameTitle.Clean(g.Title!),
                 // Without language: the page adds the app's, like the cards of "Pour toi".
                 $"https://store.playstation.com/concept/{g.ConceptId}",
                 ImageUrl: g.ImageUrl))
@@ -121,7 +121,7 @@ public sealed class PsPlusCatalogClient
         if (blocks is null)
             throw new PlayStationException(CoreStrings.PlayStation_Format);
 
-        return blocks.SelectMany(b => b.Games ?? []).Where(g => g.ConceptId is not null && !string.IsNullOrWhiteSpace(g.NameEn ?? g.Name));
+        return blocks.SelectMany(b => b.Games ?? []).Where(g => g.ConceptId is not null && !string.IsNullOrWhiteSpace(g.Title));
     }
 
     private async Task<string> GetStringAsync(string list, CancellationToken ct)

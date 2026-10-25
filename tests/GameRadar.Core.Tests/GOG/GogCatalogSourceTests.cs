@@ -60,7 +60,7 @@ public class GogCatalogSourceTests
     public async Task RefreshAsync_SavesTheCatalogAndLoadCachedReadsItBack()
     {
         using var folder = new TempFolder();
-        var source = new GogCatalogSource(new CacheStore(folder.Path));
+        var source = GogCatalogSource.Create(new CacheStore(folder.Path));
         Assert.Null(source.LoadCached());
 
         await source.RefreshAsync(ClientAnswering(Page(Product("1", "Disco Elysium"))));
@@ -75,7 +75,7 @@ public class GogCatalogSourceTests
     public async Task RefreshAsync_KeepsTheOldCatalogWhenTheNewOneIsEmpty()
     {
         using var folder = new TempFolder();
-        var source = new GogCatalogSource(new CacheStore(folder.Path));
+        var source = GogCatalogSource.Create(new CacheStore(folder.Path));
         await source.RefreshAsync(ClientAnswering(Page(Product("1", "Disco Elysium"))));
 
         await Assert.ThrowsAsync<GogException>(() => source.RefreshAsync(ClientAnswering(Page())));

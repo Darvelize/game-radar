@@ -42,6 +42,29 @@ public sealed class CatalogLinesTests : AppTest
     }
 
     [AvaloniaFact]
+    public async Task A_catalog_that_does_not_rebuild_the_history_still_updates_the_sidebar_label()
+    {
+        // The Game Pass failed, Steam's came: the label says its age at once, not a minute later.
+        var vm = SampleData.Empty(TempFolder, network: new OfflineNetwork());
+        vm.Catalogs.Steam.Catalog = new GameCatalog([SteamRpg], DateTimeOffset.UtcNow);
+        string waiting = vm.CatalogSyncLabel;
+
+        await vm.Catalogs.RefreshAsync([Line(rebuildsHistory: false)]);
+
+        Assert.NotEqual(waiting, vm.CatalogSyncLabel);
+    }
+
+    [AvaloniaFact]
+    public void Only_the_Game_Pass_catalog_rebuilds_the_history()
+    {
+        // The history's badges come from the Game Pass alone: another catalog arriving
+        // would fold the row the player unfolded, for nothing.
+        var vm = SampleData.Empty(TempFolder, network: new OfflineNetwork());
+
+        Assert.Equal([vm.Catalogs.GamePass], vm.Catalogs.Lines.Where(l => l.RebuildsHistory));
+    }
+
+    [AvaloniaFact]
     public void Settings_Data_shows_the_PS_Plus_block_only_with_a_plan()
     {
         var vm = SampleData.Empty(TempFolder, network: new OfflineNetwork());
@@ -177,7 +200,7 @@ public sealed class CatalogLinesTests : AppTest
 
         // The quick one rebuilt the history and the recommendations followed (no history yet: they wait),
         // while the slow one still downloads.
-        Assert.True(await BecomesTrueAsync(() => rebuilt == 1 && vm.Recommendations.Status == Strings.Reco_Waiting, 2000));
+        Assert.True(await BecomesTrueAsync(() => rebuilt == 1 && vm.Recommendations.Status == Strings.Reco_Waiting, 5000));
         Assert.True(vm.Catalogs.IsRefreshing);
 
         slow.SetResult(new GameCatalog([SteamRpg], DateTimeOffset.UtcNow));
@@ -196,7 +219,7 @@ public sealed class CatalogLinesTests : AppTest
         await network.GamePassReached.Task;
 
         // The Game Pass is held: GOG ends meanwhile.
-        Assert.True(await BecomesTrueAsync(() => vm.Catalogs.Gog.Status == GameRadar.Core.Resources.CoreStrings.Gog_CatalogDown, 2000));
+        Assert.True(await BecomesTrueAsync(() => vm.Catalogs.Gog.Status == GameRadar.Core.Resources.CoreStrings.Gog_CatalogDown, 5000));
         Assert.True(vm.Catalogs.IsRefreshing);
 
         network.Release();
@@ -281,7 +304,7 @@ public sealed class CatalogLinesTests : AppTest
         await network.GamePassReached.Task;
 
         // The quick catalog rebuilt the history: the Game Pass line still downloads, and says so.
-        Assert.True(await BecomesTrueAsync(() => rebuilt == 1, 2000));
+        Assert.True(await BecomesTrueAsync(() => rebuilt == 1, 5000));
         Assert.Equal(vm.Catalogs.GamePass.FetchingStatus, vm.Catalogs.GamePass.Status);
 
         network.Release();

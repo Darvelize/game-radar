@@ -26,6 +26,10 @@ internal sealed class PsPlusGameDto
     [JsonPropertyName("nameEn")]
     public string? NameEn { get; set; }
 
+    // The English title, else the local one (an empty English title too).
+    [JsonIgnore]
+    public string? Title => string.IsNullOrWhiteSpace(NameEn) ? Name : NameEn;
+
     // A game's PS Plus starter pack, in the monthly list, came out after the game.
     [JsonPropertyName("releaseDate")]
     public DateTimeOffset? ReleaseDate { get; set; }

@@ -39,17 +39,11 @@ public sealed class TasteProfile
         _strongTagGames = strongTagGames;
     }
 
-    /// <summary>Genre -> affinity, for display or debugging.</summary>
-    public IReadOnlyDictionary<string, double> Affinities => _affinities;
-
     /// <summary>0 for a genre never played: no opinion.</summary>
     public double AffinityOf(string genre) => _affinities.GetValueOrDefault(genre);
 
     /// <summary>Games of this genre the player went far in (engagement ≥ 1.5), to explain a recommendation.</summary>
     public int StrongGamesIn(string genre) => _strongGames.GetValueOrDefault(genre);
-
-    /// <summary>Steam tag id -> affinity, for display or debugging.</summary>
-    public IReadOnlyDictionary<int, double> TagAffinities => _tagAffinities;
 
     /// <summary>True once some played games have Steam tags: candidates can be scored on tags.</summary>
     public bool HasTags => _tagAffinities.Count > 0;
